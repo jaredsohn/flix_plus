@@ -27,7 +27,7 @@ The source code uses a couple of frameworks:
 
 
 ###Licensing
-   The input files for the extension are licensed GPL.  Each userscript has its own license (the ones produced by Lifehacker are cross-licensed GPL and MIT).
+   The configuration files in this repository (except for some images) are licensed GPL.  Each userscript has its own license (the ones produced by Lifehacker are cross-licensed GPL and MIT).
 
 ### Questions?
    Ask.  The source code is being published hastily and should get cleaned up over time.
