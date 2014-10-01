@@ -1,0 +1,104 @@
+/*imdb-style*/
+.star-box-giga-star {
+  background-position: -180px -71px;
+  width: 66px;
+  height: 66px;
+  line-height: 66px;
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 15px;
+  font-weight: bold;
+  color: black;
+  font-family: tahoma;
+}
+
+.imdb-icon {
+  background-image: url('../img/imdbSprite.png');
+  display: inline-block;
+  vertical-align: middle;
+  margin-bottom: 15px;
+  margin-left: 2px;
+  margin-right: -17px;
+  margin-top: 5px;
+}
+
+.queue-icon {
+  margin-left: -10px;
+}
+
+/*tomato-style*/
+.rt-icon {
+  display: inline-block;
+  vertical-align: text-bottom;
+  background: transparent url('../img/tomatoSprite.png') no-repeat -312px -160px;
+}
+
+.search-rt-icon {
+  margin-left: 12px !important;
+}
+
+.dvd-rt-icon {
+  margin-left: 10px !important;
+}
+
+.tomato-icon.med.rotten {
+  background-position: -96px -129px;
+}
+
+.tomato-icon.med.fresh {
+  background-position: -64px -129px;
+}
+
+.audience-icon.med.rotten {
+  background-position: -127px -129px;
+}
+
+.audience-icon.med.fresh {
+  background-position: -31px -129px;
+}
+
+.rt-icon.med {
+  margin-left:-2px;
+  width: 32px;
+  height: 32px;
+}
+
+.rt-score {
+  font-size: .9em;
+  vertical-align: 7px;
+}
+
+.tomato-wrapper {
+  padding-left:11px;
+}
+
+/*netflix-style*/
+.label {
+    margin-bottom: 15px !important;
+}
+
+.rating-link {
+  text-decoration:none !important;
+  color:black !important;
+  padding:5px;
+  padding-left: 0px;
+}
+
+.dvd-popup {
+  margin-bottom: -15px;
+  margin-top: -29px;
+  margin-left: 45px;
+}
+
+.dvd-search-page {
+  margin-bottom: 10px;
+  margin-top: -6px;
+  margin-left: 0px;
+}
+
+.wi-search-page {
+  margin-bottom: -4px;
+  margin-top: -30px;
+  margin-left: 13px;
+}

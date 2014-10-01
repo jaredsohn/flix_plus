@@ -1,0 +1,14 @@
+netflix-64: http://www.iconspedia.com/icon/netflix-icon-37863.html
+
+
+hide:
+<div>Icon made by <a href="http://www.freepik.com" alt="Freepik.com" title="Freepik.com">Freepik</a> from <a href="http://www.flaticon.com/free-icon/hide-interface-symbol_38488" title="Flaticon">www.flaticon.com</a></div>
+
+show:
+<div>Icon made by <a href="http://www.freepik.com" alt="Freepik.com" title="Freepik.com">Freepik</a> from <a href="http://www.flaticon.com/free-icon/eye-shape-variant-interface-view-symbol_44741" title="Flaticon">www.flaticon.com</a></div>
+
+right arrow:
+<div>Icon made by <a href="http://www.freepik.com" alt="Freepik.com" title="Freepik.com">Freepik</a> from <a href="http://www.flaticon.com/free-icon/media-play-symbol_31128" title="Flaticon">www.flaticon.com</a></div>
+
+down arrow:
+<div>Icon made by <a href="http://www.freepik.com" alt="Freepik.com" title="Freepik.com">Freepik</a> from <a href="http://www.flaticon.com/free-icon/arrow-point-to-down_32209" title="Flaticon">www.flaticon.com</a></div>
