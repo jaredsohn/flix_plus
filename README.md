@@ -7,23 +7,24 @@ Flix Plus is a Chrome extension built by Jared Sohn for Lifehacker that helps yo
 
 The source code uses a couple of frameworks:
 
-* While this extension only works in Chrome, OpenForge would make it easier to also build it for other browsers.  (More work would be needed to make this happen.)
+* It uses [OpenForge](https://github.com/trigger-corp/browser-extensions) to make it easier to build cross-browser extensions.  However, at this time it only works for Chrome and more work would be necessary to support other browsers.
 
-* The openforge-greasemonkey-multi-script-compiler is a new framework that helps build browser extensions from userscripts.  (Since this framework has only been used once, a little more work would be needed to use it for creating other extensions.)
+* It uses [openforge-greasemonkey-multi-script-compiler](https://www.github.com/jaredsohn/openforge-greasemonkey-multi-script-compiler), which is a new framework built for this extension to make it easier to build browser extensions from userscripts.  (Since this framework has only been used once, more work would be needed to adapt it to other extensions.)
 
 
 ###Setup
 
-1. Check out OpenForge as your flix_plus folder (See https://github.com/trigger-corp/browser-extensions.git) and follow the instructions for setting it up.
+1. Check out [OpenForge](https://github.com/trigger-corp/browser-extensions) as your flix_plus folder and follow OpenForge's setup instructions.
 
-2. Clone this project as openforge-greasemonkey-multi-script/_inputs/flix_plus
+2. Clone the openforge-greasemonkey-multi-script-compiler folder as your openforge-greasemonkey-multi-script folder and follow the instructions for setting it up.
 
-3. Clone the openforge-greasemonkey-multi-script-compiler folder as your openforge-greasemonkey-multi-script folder and follow the instructions for setting it up.
+3. Clone this project as openforge-greasemonkey-multi-script/_inputs/flix_plus and continue following the compiler instructions.
+
 
 
 ###Building
-   You can build an extension by running ./z from the flix_plus folder.  You can point Chrome to look at flix_plus/development/chrome to run the extension.
-   
+   See the openforge-greasemonkey-multi-script compiler documentation for build instructions.
+
 
 ###Licensing
    The input files for the extension are licensed GPL.  Each userscript has its own license (the ones produced by Lifehacker are cross-licensed GPL and MIT).
