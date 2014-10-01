@@ -16,9 +16,9 @@ The source code uses a couple of frameworks:
 
 1. Check out [OpenForge](https://github.com/trigger-corp/browser-extensions) as your flix_plus folder and follow OpenForge's setup instructions.
 
-2. Clone the openforge-greasemonkey-multi-script-compiler folder as your openforge-greasemonkey-multi-script folder and follow the instructions for setting it up.
+2. Clone the openforge-greasemonkey-multi-script-compiler folder as your openforge-greasemonkey-multi-script-compiler folder and follow the instructions for setting it up.
 
-3. Clone this project as openforge-greasemonkey-multi-script/_inputs/flix_plus and continue following the compiler instructions.
+3. Clone this project as openforge-greasemonkey-multi-script-compiler/_inputs/flix_plus and continue following the compiler instructions.
 
 
 
