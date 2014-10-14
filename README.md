@@ -3,7 +3,7 @@ flixplus
 
 ###About
 
-Flix Plus is a Chrome extension built by Jared Sohn for Lifehacker that helps you customize Netflix.  Read more here: http://lifehacker.com/preview/flixc-plus-customizes-netflix-to-your-hearts-desire-1640968001
+Flix Plus is a Chrome extension built by Jared Sohn for Lifehacker that helps you customize Netflix.  Read more [here](http://lifehacker.com/flix-plus-customizes-netflix-to-your-hearts-desire-1640968001)
 
 The source code uses a couple of frameworks:
 
