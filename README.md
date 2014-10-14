@@ -3,7 +3,7 @@ flixplus
 
 ###About
 
-Flix Plus is a Chrome extension built by Jared Sohn for Lifehacker that helps you customize Netflix.  Read more here: http://lifehacker.com/preview/flix-plus-customizes-netflix-to-your-hearts-desire-1640968001
+Flix Plus is a Chrome extension built by Jared Sohn for Lifehacker that helps you customize Netflix.  Read more here: http://lifehacker.com/preview/flixc-plus-customizes-netflix-to-your-hearts-desire-1640968001
 
 The source code uses a couple of frameworks:
 
@@ -14,7 +14,7 @@ The source code uses a couple of frameworks:
 
 ###Setup
 
-1. Check out [OpenForge](https://github.com/trigger-corp/browser-extensions) as your flix_plus folder and follow OpenForge's setup instructions.
+1. Clone [OpenForge](https://github.com/trigger-corp/browser-extensions) as your flix_plus folder and follow OpenForge's setup instructions.
 
 2. Clone the openforge-greasemonkey-multi-script-compiler folder as your openforge-greasemonkey-multi-script-compiler folder and follow the instructions for setting it up.
 
