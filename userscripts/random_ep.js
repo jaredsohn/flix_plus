@@ -18,6 +18,11 @@ jQuery(function($) {
             'insert': function() {
                 var elem = $('<span class="mltBtn" style="float:right"><a class="svf-button svfb-silver evo-btn svf-button-inq"><span class="inr">Random Episode</span></a></span>');
                 elem.on('click', function() {
+
+                    // Added by jaredsohn-lifehacker: choose random season.  Note that this "Random episode" is weighted toward episodes in shorter seasons (i.e. isn't truly random).
+                    var season = randomIdx($('#seasonsNav .seasonItem').length);
+                    $($('#seasonsNav .seasonItem')[season]).trigger('click');
+
                     var idx = randomIdx($('.episodeList li').length);
                     $('#e' + idx).trigger('click');
                 });

@@ -28,8 +28,8 @@ if (location.pathname.indexOf("/Kids") === 0) //hacky
   collapse_height = 242;
 
 // How this css works: is four statements; first two make it show everything instead of scrolling; next two remove arrows and dividers
-var expand_template   = "#MROWID .slider { height: auto !important; overflow: visible !important; } #MROWID .slider .agMovieSetSlider { position: relative !important; width: auto !important;   } #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton, #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton { display: none !important; }  #MROWID .boxShotDivider { display: none  !important; }"
-var collapse_template = "#MROWID .slider { height: " + collapse_height + "px !important; overflow: hidden !important; } #MROWID .slider .agMovieSetSlider { position: absolute !important; width: 2000px !important; } #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton, #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton { display: block !important; } #MROWID .boxShotDivider { display: block !important; }"
+var expand_template   = "#MROWID .slider { height: auto !important; overflow: visible !important; } #MROWID .slider .agMovieSetSlider { position: relative !important; width: auto !important;   } #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton, #MROWID .boxShotDivider { display: none !important; }"
+var collapse_template = "#MROWID .slider { height: " + collapse_height + "px !important; overflow: hidden !important; } #MROWID .slider .agMovieSetSlider { position: absolute !important; width: 2000px !important; } #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton, #MROWID .boxShotDivider { display: block !important; }"
 
 var _scrolls_active_image_html = "<img class='flix_plus_scrolls_shown_button' src='" + chrome.extension.getURL("src/img/right.png") + "' width=24 title='Scrollbars shown; click to remove'>";
 var _all_image_html = "<img class='flix_plus_all_shown_button' src='" + chrome.extension.getURL("src/img/down.png") + "' width=24 title='Scrollbars removed; click to add back'>";
@@ -73,6 +73,8 @@ fplib.syncGet(KEY_NAME, function(items)
     {
       extlib.addGlobalStyle(showall_css_code);
       scrollshowall_text = _all_image_html;
+      extlib.simulateEvent(document.getElementById(id), "mouseover");
+      console.log('simulating mouseover');
     }
     // Add a button
     var scrollshowall_node = document.createElement("a");
@@ -91,6 +93,9 @@ fplib.syncGet(KEY_NAME, function(items)
         var should_expand = (document.getElementById(_id + "_scrollshowall").innerHTML.indexOf("Scrollbars shown") !== -1);
         extlib.addGlobalStyle(should_expand ? _expandCssCode : _collapseCssCode);
         document.getElementById(_id + "_scrollshowall").innerHTML = should_expand ? _all_image_html : _scrolls_active_image_html;
+
+        if (should_expand)
+          extlib.simulateEvent(document.getElementById(_id), "mouseover");
 
         fplib.syncGet(KEY_NAME, function(items)
         {
@@ -143,7 +148,8 @@ fplib.syncGet(KEY_NAME, function(items)
   createAddAllButton("scrollall", "flix_plus_all_shown_button", "Add back all scrollbars");
 */
 
-  $(window).scroll(function(e){
-    fplib.mouseoverVisiblePosters();
-  });
+//  $(window).scroll(function(e){
+//    fplib.mouseoverVisiblePosters();
+//  });
+//  fplib.mouseoverVisiblePosters();
 });

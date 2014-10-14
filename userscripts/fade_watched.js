@@ -6,23 +6,18 @@ var key_prefix = "flix_plus " + fplib.getProfileName() + " ";
 
 var get_history = function(start_time, page_no, authUrl, results_json, callback)
 {
+	console.log("get_history " + start_time + " " + page_no + " " + authUrl + " " + results_json);
 	var past_start_time = false;
 
 	$.ajax({
-		url: "http://www.netflix.com/MoviesYouveSeen",
+		url: "https://www.netflix.com/MoviesYouveSeen",
 		cache: false,
 		success: function(html)
 		{
-			console.log("api base and build identifier");
 			var api_base_url =  fplib.parseEmbeddedJson(html, "API_BASE_URL");
-			console.log(api_base_url);
 			var build_identifier =  fplib.parseEmbeddedJson(html, "BUILD_IDENTIFIER");
-			console.log(build_identifier);
-			//	var url = "https://www.netflix.com/api/shakti/ad49089d/viewingactivity?pg=" + page_no + "&authURL=" + authUrl + "&_retry=0";
-			// was: /shakti/ad49089d/
 			url2 = "https://www.netflix.com/api" + api_base_url + "/" + build_identifier + "/viewingactivity?pg=" + page_no + "&authURL=" + authUrl + "&_retry=0";
 
-			console.log("url2:");
 			console.log(url2);
 
 			$.ajax({
@@ -31,9 +26,6 @@ var get_history = function(start_time, page_no, authUrl, results_json, callback)
 			  	success: function(json){
 			  		try
 			  		{
-				  		console.log("ajax json output");
-					  	console.log(json);
-
 				  		if (results_json === null)
 				  			results_json = json;
 				  		else
@@ -98,11 +90,10 @@ var update_history = function(keyname, results, callback)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extlib.addGlobalStyle(".fp_watched { -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
-
 var keyname = "flix_plus " + fplib.getProfileName() + " viewingactivity";
 extlib.checkForNewData(keyname, 
 	5 * 60, // five minutes
-	28 * 60 * 60, // 28 hours	
+	28 * 60 * 60, // 28 hours
 	function(history_last_checked, callback)
 	{
 		get_history(history_last_checked, 0, fplib.getAuthUrl(), null, function(results)
@@ -111,41 +102,8 @@ extlib.checkForNewData(keyname,
 		});
 	}, function(data)
 	{
-		fplib.applyClassnameToPosters(data.split(","), "fp_watched");
-
-		var selectors = fplib.getSelectorsForPath();
-
-		document.arrive(selectors["elements"], function()
-		{
-			console.log("updating fading for dynamic data");
-			fplib.applyClassnameToPosters(data.split(","), "fp_watched");
-		});		
+		var ids_array = data.split(",");
+		fplib.applyClassnameToPosters(ids_array, "fp_watched");
+		fplib.applyClassnameToPostersOnArrive(ids_array, "fp_watched");
 	}
 );
-
-/*
-// Build 'all' buttons at top of page
-var createClearButton = function(id, key_name, friendly_name)
-{
-	var button = document.createElement("a");
-	button.id = id;
-	button.innerHTML = "Update " + friendly_name;
-	button.className = "extlib_button";
-	document.getElementsByClassName("mrows")[0].insertBefore(button, document.getElementById("mrow_id_0")); 
-	document.getElementById(id).addEventListener('click', function() {
-	    return function() 
-	 	{
-	      	delete localStorage[key_name];
-	      	delete localStorage[key_name + "_last_full_check"];
-	      	delete localStorage[key_name + "_last_checked"];
-	      	alert("Resetted " + friendly_name + ".  Will reload page now.");
-	      	location.reload();
-	    }
-	}(), false);
-}
-fplib.idMrows();
-extlib.initButtonCss();
-
-createClearButton("clear_watched_button", keyname, "fading for watched");
-*/
-

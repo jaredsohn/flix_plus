@@ -18,6 +18,9 @@ var css = "* { color: #999999 !important; \n }\n \n* { border-color: #333333 !im
 css += "#displaypage-overview #displaypage-overview-details { margin-left: 25px;}"; // added by jaredsohn-lifehacker
 // jaredsohn-lifehacker: image locations changed to ../img (and files copies over)
 
+if (location.pathname.indexOf("/WiPlayer") === 0) // Fix the subtitles; added by jaredsohn-lifehacker
+	return;
+
 if (typeof GM_addStyle != "undefined") {
 	GM_addStyle(css);
 } else if (typeof PRO_addStyle != "undefined") {

@@ -11,6 +11,8 @@ var _fplib = function()
 {
 	var _made_visible_dict = {};
 	var self = this;
+	var _run_before = {};
+	var _profile_name = "";
 
 	this.getMovieIdFromField = function(attr_str)
 	{
@@ -65,7 +67,7 @@ var _fplib = function()
 	    results["elementsList"] = null;
 	    results["movieInfoSelector"] = ".boxShot";
 	    results["movieIdAttribute"] = "id";
-	    results["borderedElement"] = null; // this class is applied to what currently has keyboard focus
+	    results["borderedElement"] = ".boxShot"; // This selects the part of the DOM that gets the keyboard focus CSS
         results["posterImageIdPrefix"] = "dbs";
 
 //	    consolelog("location.pathname = " + location.pathname);
@@ -105,7 +107,7 @@ var _fplib = function()
 	    } else if (location.pathname.indexOf("/Kids") === 0)
 	    {
 	        results["elementsList"] = ".mrow";
-
+		    results["borderedElement"] = ".boxShot";	       
 	    } else if (location.pathname.indexOf("/WiSearch") === 0)
 	    {
 	        results["elements"] = ".mresult";
@@ -138,6 +140,7 @@ var _fplib = function()
 	        results["ratingMouseOver"] = ".stbrIl";
 	        results["movieInfoSelector"] = null;
 	        results["movieIdAttribute"] = "data-mid";
+		    results["borderedElement"] = null;       
 
 	    } else if (location.pathname.indexOf("/RateMovies") === 0)
 	    {
@@ -145,17 +148,22 @@ var _fplib = function()
 	        results["ratingMouseOver"] = ".stbrOl";
 	//        results["movieInfoSelector"] = ".title a";
 	//        results["movieIdAttribute"] = "href";
+			results["borderedElement"] = null;
 
 	    } else if (location.pathname.indexOf("/WiViewingActivity") === 0)
 	    {
 	        results["elements"] = ".retable li";
 	        results["movieInfoSelector"] = null;
 	        results["movieIdAttribute"] = "data-movieid";
+		    results["borderedElement"] = null;
+
 	    } else if (location.pathname.indexOf("/MoviesYouveSeen") === 0)
 	    {
 	        results["elements"] = ".retable li";
 	        results["movieInfoSelector"] = null;
 	        results["movieIdAttribute"] = "data-movieid";
+		    results["borderedElement"] = null;
+
 	    } else if (location.pathname.indexOf("/WiPlayer") === 0)
 	    {
 	    	// do nothing
@@ -169,6 +177,9 @@ var _fplib = function()
 
 	this.idMrows = function()
 	{
+		this.idMrows = function() {}; // run only once
+
+		consolelog("idMrows");
 	    mrows = document.getElementsByClassName("mrow");
 	    for (i = 0; i < mrows.length; i++)
 	    {
@@ -183,6 +194,9 @@ var _fplib = function()
 	// Posters don't line up if video annotations are not consistent.
 	this.addEmptyVideoAnnotations = function()
 	{
+		this.addEmptyVideoAnnotations = function() {}; // run only once
+		consolelog("addEmptyVideoAnnotations");
+
 		// TODO: not using getSelectorsForPath here.  Change this?
 	    var elements = [];
 	    if (location.pathname.indexOf("/WiGenre") === 0)
@@ -204,22 +218,82 @@ var _fplib = function()
 	    }
 	}
 
-	// Ensure visible images are loaded
-	this.mouseoverVisiblePosters = function()
+	// Iterate over movies that are not a member of a class in ignore_classes_list. Ensure we have loaded at least n images per row.
+	//
+	// Requires that idMrows() is called beforehand
+	// TODO: have this work with class names properly; .agMovie might not always be right (check on other urls, too)
+	this.rolloverVisibleImages = function(ignore_classes_list)
 	{
+		var start = new Date();
+		var num_across = _getNumAcross();
+		consolelog("num across = " + num_across);
 		$(".mrow").each(function() { 
-		    if ((typeof(_made_visible_dict[this.id]) === "undefined") && ($(this).visible(true)))
-		    {
-		    	if (!$(this).hasClass("fb"))
-		    	{
-			    	consolelog("mouseoverVisiblePosters!");
-			    	//consolelog(this);
-		            _made_visible_dict[this.id] = true;
-			        extlib.simulateEvent(this, "mouseover");
-			    }
-		    }
+            var posters = $("#" + this.id + " .agMovie");
+            var count = 0;
+
+        	for (i = 0; i < posters.length; i++)
+        	{
+        		var ignore = false;
+        		var ignore_len = ignore_classes_list.length;
+        		for (j = 0; j < ignore_len; j++)
+        		{
+        			if (extlib.hasClass(posters[i], ignore_classes_list[j]))
+        			{
+        				ignore = true;
+        				break;
+        			}
+        		}
+
+        		if (!ignore)
+        		{
+        			count++;
+
+					var imgs = (posters[i].getElementsByTagName("img"));
+					if ((typeof(imgs) !== "undefined") && (imgs.length > 0))
+					{
+	            		if ((imgs[0].src === "") && (imgs[0].getAttribute("hsrc") !== null))
+	            		{
+		            		imgs[0].src = imgs[0].getAttribute("hsrc");
+	            		}            			
+	            	}
+        		}
+
+        		if (count >= num_across)
+        			break;
+        	}
 		});		
+		consolelog("rolloverVisibleImages took " + Math.abs(new Date() - start) + " ms");
 	}	
+
+
+	// Calculate how many posters are shown across.
+	// Since this can vary per row, just make sure that
+	// we are overestimating.  We use row 1 as an example row.
+	var _getNumAcross = function()
+	{
+		var num_across = 100;
+
+		var movies = $("#mrow_id_1 .agMovie");
+
+		var first_offset = -1;
+		var len = movies.length;
+		for (i = 0; i < len; i++)
+		{
+			var temp = extlib.cumulativeOffset(movies[i].getElementsByTagName("img")[0]).left;
+      			 if (temp !== 0)
+      			 {
+				if (first_offset === -1)
+					first_offset = temp;
+				else
+				{
+					num_across = Math.ceil(window.innerWidth /  Math.abs(first_offset - temp));
+					break;
+				}
+			}
+		}
+		return num_across;
+	}
+
 
 	// Call this from a page that has a signout button (basically any)
 	this.getAuthUrl = function()
@@ -235,28 +309,32 @@ var _fplib = function()
 	//
 	// This will actually reload the webpage if the profile name is different than before (in case some userscripts ran before they could detect the current profile name)
 	this.getProfileName = function()
-	{
+	{		
+		if ((self._profile_name !== "") && (typeof(self._profile_name) !== "undefined"))
+			return self._profile_name;
+
 		var stored_profile_name = localStorage["flix_plus profilename"];
+
 		var elems = document.getElementsByClassName("acct-menu-dropdown-trigger");
 		if (elems.length)
+		{
 			profile_name = elems[0].innerText
+			self._profile_name = profile_name;			
+		}
 		else
 			profile_name = "_unknown";
 
+
 		if (profile_name !== "_unknown")
 		{
-			if (profile_name !== stored_profile_name)
+			localStorage["flix_plus profilename"] = profile_name;
+			chrome.storage.local.set({"flix_plus profilename" : profile_name }, function() 
 			{
-				consolelog("profilename loaded: ");
-				consolelog(profile_name);
-				localStorage["flix_plus profilename"] = profile_name;
-				chrome.storage.local.set({"flix_plus profilename" : profile_name }, function() 
-				{
-					consolelog("written to storage.local");
+				consolelog("written to storage.local");
 
+				if (profile_name !== stored_profile_name)
 					location.reload();
-				});				
-			}
+			});				
 		}
 		else
 			profile_name = stored_profile_name;
@@ -277,9 +355,9 @@ var _fplib = function()
 		//consolelog(elem_prefix);
 
 		var count = 0;
-		consolelog("applyClassnameToPosters");
+		consolelog("applyClassnameToPosters(" + class_name + "):");
 		consolelog(ids_array);
-		consolelog(class_name);	
+
 		for (i = 0; i < ids_array.length; i++)
 		{
 			var instance = 0;
@@ -302,8 +380,29 @@ var _fplib = function()
 				instance += 1;
 			}
 		}
-		consolelog("applyclassname_to_posters count = " + count);
+		consolelog("applyClassnameToPosters count = " + count);
 	}
+
+	this.applyClassnameToPostersOnArrive = function(ids_array, class_name) {
+		var data_dict = {};
+		var len = ids_array.length;
+		for (i = 0; i < len; i++)
+			data_dict[ids_array[i]] = true;
+
+		var selectors = fplib.getSelectorsForPath();		
+		document.arrive(selectors["borderedElement"], function()
+		{
+			console.log("arrive");
+			var movie_id = fplib.getMovieIdFromField(this.id);
+			if (typeof(data_dict[movie_id]) !== "undefined")
+			{
+				console.log(this);
+				var imgs = this.getElementsByTagName("img");
+				console.log("marking as " + class_name + " - " + movie_id);
+				imgs[0].className += " " + class_name;
+			}
+		});
+	}	
 
 	this.syncSet = function(varname, val, callback)
 	{

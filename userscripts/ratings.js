@@ -471,6 +471,7 @@ function escapeHTML(str) {
 
 ///////// INIT /////////////
 $(document).ready(function() {
+    
     //common select objects
     var dvdSelObj = selectObj('.bobMovieRatings', 'append', 800, 'dvd-popup', 'dvd-rt-icon');
     var WiObj = selectObj('.midBob', 'append', 800);
@@ -497,4 +498,5 @@ $(document).ready(function() {
     $.each(HOVER_SEL, function(selector, parser){ //add listeners for each hover selector
         $(document).on('mouseenter', selector, parser, eventHandler);
     });
+
 });

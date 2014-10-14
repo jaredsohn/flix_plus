@@ -33,6 +33,8 @@ Element.prototype.documentOffsetTop = function () {
 // jaredsohn-lifehacker Adapted from http://stackoverflow.com/questions/8922107/javascript-scrollintoview-middle-alignment.  Using instead of just scrollIntoView
 function scrollMiddle(elem)
 {
+    if (elem === null)
+        return;
     elem.scrollIntoView(true);
     var pos = elem.documentOffsetTop() - (window.innerHeight / 2 );
     window.scrollTo( 0, pos );
@@ -198,10 +200,6 @@ function RateMovie(rating)
     else
         elemContainer = document.getElementById(selectors["elemContainerId"]);
 
-    //console.log("elemRatingContainer = ");
-    //console.log(elemRatingContainer);
-    //console.log(selectors);
-
     if (elemContainer !== null)
     {        
         if (selectors["ratingMouseOver"] !== null)
@@ -211,8 +209,6 @@ function RateMovie(rating)
         }
 
         var rating_class = fplib.getRatingClass(rating);
-        //console.log("ratingclass = ");
-        //console.log(rating_class);
         var elemRating = elemContainer.getElementsByClassName(rating_class);
         if (elemRating && (elemRating.length > 0)) {
             extlib.simulateClick(elemRating[0]);
@@ -233,6 +229,15 @@ var UpdateKeyboardSelection = function(elem, selected)
     if (selectors["borderedElement"] !== null)
         border_elem = $(selectors["borderedElement"], elem)[0];
 
+/*
+    if (selected)
+        extLib.addClass(border_elem, "fp_keyboard_selected");
+    else
+        extLib.removeClass(border_elem, "fp_keyboard_selected");
+
+// TODO: use code below to define what the fp_keyboard_selected class looks like (and load it only once)
+*/
+
     if (location.pathname.indexOf("/MyList") === 0) // separated out because width is different
     {
         if (selected)
@@ -240,26 +245,21 @@ var UpdateKeyboardSelection = function(elem, selected)
         else
             border_elem.setAttribute('style', 'border-style: none;');
     }
-    else if ((location.pathname.indexOf("/WiHome") === 0) || ((location.pathname.indexOf("/WiRecentAdditions") === 0) || (location.pathname.indexOf("/NewReleases") === 0))) // separated out because width is different
-    {
-        if (selected)
-            border_elem.setAttribute('style', 'border-style: solid !important; border-color: #b9090b !important; top: -10px !important; border-width: 10px !important');
-        else
-            border_elem.setAttribute('style', 'border-style: none !important; border-color: #b9090b !important; top: 0px !important; border-width: 0px !important');
-    }
     else if (
-            (location.pathname.indexOf("/Search") === 0) || (location.pathname.indexOf("/WiAltGenre") === 0) || (location.pathname.indexOf("/WiSearch") === 0) || 
-            (location.pathname.indexOf("/WiGenre") === 0) || (location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/Kids") === 0) ||
-            (location.pathname.indexOf("/WiAltGenre") === 0) || (location.pathname.indexOf("/WiSimilarsByViewType") === 0) || (location.pathname.indexOf("/WiAgain") === 0) 
+            (location.pathname.indexOf("/Search") === 0) || (location.pathname.indexOf("/WiSearch") === 0)
         ) 
     {
         if (selected)
             border_elem.setAttribute('style', 'border-style: solid !important; border-color: #b9090b !important; top: 10px !important; border-width: 10px !important')
         else
-            border_elem.setAttribute('style', 'border-style: none !important; border-color: #b9090b !important; top: 0px !important; border-width: 0px !important')                
-    } else
-    {
-        border_elem.style.backgroundColor = selected ? "rgb(185,9,11)" : ""; // netflix red
+            border_elem.setAttribute('style', 'border-style: none !important; top: 0px !important; border-width: 0px !important')                
+    }    
+    else
+    {        
+        if (selected)
+            border_elem.setAttribute('style', 'outline: 10px solid #b9090b !important; outline-offset: 0px !important;');
+        else
+            border_elem.setAttribute('style', 'outline: 0px !important');            
     }
 }
 
@@ -319,7 +319,7 @@ function NextPreviousListContainer(direction)
             break;
         }
 
-        if (elemsListContainers[currListContainer].style.display !== "none")
+        if (!extlib.isHidden(elemsListContainers[currListContainer]))
             break;
     }
 
@@ -378,7 +378,7 @@ function NextPreviousListItem(direction)
             break;
         }
 
-        if (elemsNPList[currListItem].style.display !== "none")
+        if (!extlib.isHidden(elemsNPList[currListItem]))
             break;
     }
 
@@ -392,7 +392,7 @@ function NextPreviousListItem(direction)
         currElem = elemsNPList[currListItem];
 
         try {
-            if ((typeof(elemsListContainers) === 'undefined') || (elemsListContainers.length === 0) || ($("#" + elemsListContainers[currListContainer].id + " .bd").css("display") !== "none"))
+            if ((typeof(elemsListContainers) === 'undefined') || (elemsListContainers.length === 0) || !(extlib.isHidden($("#" + elemsListContainers[currListContainer].id + " .bd"))))
             {
                 extlib.simulateEvent(currElem, "mouseover");
                 scrollMiddle(currElem);
@@ -430,7 +430,7 @@ function ListHasItems(list)
     if (list) {
         for (i = 0; i < list.length; i++)
         {
-            if (list[i].style.display !== "none") // Updated jaredsohn-Lifehacker to ignore hidden elements
+            if (!extlib.isHidden(list[i])) // Updated jaredsohn-Lifehacker to ignore hidden elements
                 return true;
         }
     }
@@ -441,22 +441,88 @@ function ListHasItems(list)
 // Initiate keyboard commands
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-function handleKeyUp(e)
+function handleKeyDown(e)
 {
-    if (e.keyCode == 27) // ESC
+    if (e.keyCode === 37) // left arrow    
+    {
+        NextPreviousListItem(-1);
+        e.preventDefault();
+    }
+    else if (e.keyCode === 39) // right arrow
+    {
+        NextPreviousListItem(1);
+        e.preventDefault();
+    }
+    else if (e.keyCode === 38) // up arrow
+    {
+        NextPreviousListContainer(-1);
+        e.preventDefault();
+    }
+    else if (e.keyCode === 40) // down arrow
+    {
+        NextPreviousListContainer(1);
+        e.preventDefault();
+    }
+    else if ((e.keyCode === 36) && ((e.ctrlKey) || (e.shiftKey))) // ctrl-home (and shift-home)
+    {
+        UpdateKeyboardSelection(elemsNPList[currListItem], false);
+
+        currListContainer = -1;
+        NextPreviousListContainer(1);
+
+        UpdateKeyboardSelection(elemsNPList[currListItem], false);
+
+        currListItem = -1;
+        NextPreviousListItem(1);
+
+        e.preventDefault();
+    }
+    else if ((e.keyCode === 35) && ((e.ctrlKey) || (e.shiftKey))) // ctrl-end (and shift-end)
+    {
+        UpdateKeyboardSelection(elemsNPList[currListItem], false);
+
+        currListContainer = elemsListContainers.length - 1;
+        NextPreviousListContainer(-1);
+
+        UpdateKeyboardSelection(elemsNPList[currListItem], false);
+
+        currListItem = elemsNPList.length;
+        NextPreviousListItem(-1);
+
+        e.preventDefault();
+    }    
+    else if (e.keyCode === 36) // home
+    {
+        UpdateKeyboardSelection(elemsNPList[currListItem], false);
+        currListItem = -1;
+        NextPreviousListItem(1);
+        e.preventDefault();
+    } else if (e.keyCode === 35) // end
+    {
+        UpdateKeyboardSelection(elemsNPList[currListItem], false);
+        currListItem = elemsNPList.length;
+        NextPreviousListItem(-1);
+        e.preventDefault();
+    }
+    else if (e.keyCode === 27) // ESC
     {
         _keyboard_commands_shown = true;
         toggle_keyboard_commands();
         $.each($("#layerModalPanes .close"), function(index, value) { this.click()  })
     }
+//    else if (e.keyCode === 33) // page up
+//        NextPreviousListContainer(-2);
+//    else if (e.keyCode === 34) // page down
+//        NextPreviousListContainer(2);
 }
+
 
 var getKeyboardCommandsHtml = function()
 {
     var html = "<div style='{ background-color: rgba(1, 1, 1, 0.7); bottom: 0; left: 0; position: fixed; right: 0; top: 0; }'>"; // capture mouse clicks
     html += "<h1 style='text-align: center;'>Flix Plus keyboard commands</h2><br><br>";
     html += "<div style='font-size: 125%'; }>";
-    html += "Cursor and section is highlighted by a red border.<br><br>Move around items: j, k<BR>&nbsp;&nbsp;&nbsp;Play: p<BR>&nbsp;&nbsp;&nbsp;To My List: +<BR>&nbsp;&nbsp;&nbsp;Remove from My List: -<BR>&nbsp;&nbsp;&nbsp;Zoom into details: z<BR>&nbsp;&nbsp;&nbsp;Rate: ` to clear, 0-5, 6=1.5, 7=2.5, 8=3.5, 9=4.5<BR>&nbsp;&nbsp;&nbsp;Open link: o<br><br>Move around sections: shift-j,  shift-k<BR>&nbsp;&nbsp;&nbsp;Open section link: shift-o<br>&nbsp;&nbsp;&nbsp;Toggle scrollbars: s<br>&nbsp;&nbsp;&nbsp;Toggle hiding: h<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;open link: o<br>&nbsp;&nbsp;&nbsp;Home: i <BR>&nbsp;&nbsp;&nbsp;My List : q(ueue) <BR>&nbsp;&nbsp;&nbsp;New arrivals: r<br>&nbsp;&nbsp;&nbsp;Kids: d<BR>&nbsp;&nbsp;&nbsp;Viewing activity: a<br>&nbsp;&nbsp;&nbsp;Your Ratings: t<BR><br>Search: /<BR>Your Account: y<BR>Help: ?<BR>";
+    html += "Cursor and section are highlighted by borders.  Press '?' for list of commands or see below.<br><br>Move around items: right, left (or j, k), home, end<BR>&nbsp;&nbsp;&nbsp;Play: (space)<BR>&nbsp;&nbsp;&nbsp;To My List: +<BR>&nbsp;&nbsp;&nbsp;Remove from My List: -<BR>&nbsp;&nbsp;&nbsp;Zoom into details: z<BR>&nbsp;&nbsp;&nbsp;Rate: ` to clear, 0-5, 6=1.5, 7=2.5, 8=3.5, 9=4.5<BR>&nbsp;&nbsp;&nbsp;Open link: o<br><br>Move around sections: down, up (or shift-j,  shift-k), ctrl-home, ctrl-end<BR>&nbsp;&nbsp;&nbsp;Open section link: shift-o<br>&nbsp;&nbsp;&nbsp;Toggle scrollbars: s<br>&nbsp;&nbsp;&nbsp;Toggle hiding: h<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;open link: o<br>&nbsp;&nbsp;&nbsp;Home: i <BR>&nbsp;&nbsp;&nbsp;My List : q(ueue) <BR>&nbsp;&nbsp;&nbsp;New arrivals: r<br>&nbsp;&nbsp;&nbsp;Kids: d<BR>&nbsp;&nbsp;&nbsp;Viewing activity: a<br>&nbsp;&nbsp;&nbsp;Your Ratings: t<BR><br>Search: /<BR>Your Account: y<BR>Help: ?<BR>";
     html += "</div>";
 
     return html;
@@ -529,11 +595,11 @@ function handleKeyPress(e)
             case "a": window.location = "http://www.netflix.com/WiViewingActivity"; break;
             case "h": document.getElementById(elemsListContainers[currListContainer].id + "_showhide").click(); break; // for integration with hidesection in Flix Plus
             case "i": window.location = "http://www.netflix.com/WiHome"; break;
-            case "j": NextPreviousListItem(-1); break;
-            case "Shift+j": NextPreviousListContainer(-1); break;
+            case "k": NextPreviousListItem(-1); break;
+            case "Shift+k": NextPreviousListContainer(-1); break;
             case "d": window.location = "http://www.netflix.com/Kids"; break;
-            case "k": NextPreviousListItem(1); break;
-            case "Shift+k": NextPreviousListContainer(1); break;
+            case "j": NextPreviousListItem(1); break;
+            case "Shift+j": NextPreviousListContainer(1); break;
             case "o": OpenCurrentLink(); break;
             case "q": window.location = "http://www.netflix.com/MyList"; break;
             case "r": window.location = "http://www.netflix.com/WiRecentAdditions"; break;
@@ -575,7 +641,6 @@ if (selectors["elementsList"] === ".mrow")
         elemsListContainers = newList;  // now an array instead of htmlcollection
     }
 
-    console.log(elemsListContainers);
     if ($(".emptyYourListRow").length)
     {
         NextPreviousListContainer(1);
@@ -593,7 +658,7 @@ if (selectors["elementsList"] === ".mrow")
 } else
 {
     elemsNPList = $(selectors["elements"]).get();
-    console.log(elemsNPList);
+    //console.log(elemsNPList);
 
     document.body.arrive(selectors["elements"], function()
     {
@@ -620,4 +685,4 @@ if (location.pathname.indexOf("/WiSearch") === 0)
 }
 
 document.addEventListener('keypress', handleKeyPress, false);
-document.addEventListener('keyup', handleKeyUp, false);
+document.addEventListener('keydown', handleKeyDown, false);
