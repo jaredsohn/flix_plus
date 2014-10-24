@@ -3848,6 +3848,13 @@
     };
 
     QueueManager.prototype.init = function () {
+
+        if (!fplib.isOldMyList())
+        {
+            console.log("Script disabled since it requires old MyList.")
+            return;
+        }
+
         // Init config options first, so that isDebug is set.
         this.initConfigOptions();
         if (this.isDebug) {

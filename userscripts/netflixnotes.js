@@ -292,5 +292,11 @@ function insertNotesInElem(elem)
     }
 }
 
-// this is executed when this script loads:
-initialize();
+if (!fplib.isOldMyList())
+{
+  console.log("Script disabled since it requires old MyList.")
+} else
+{
+    // this is executed when this script loads:
+    initialize();
+}

@@ -13,7 +13,9 @@ createA.className = "extlib_button";
 createA.style = "align:right;"
 
 var header = document.getElementsByClassName("account-header")[0];
-header.appendChild(document.createElement("br"));
+if ($(".account-header br").length === 0)
+    header.appendChild(document.createElement("br"));
+
 header.appendChild(createA);
 
 extlib.initButtonCss();
@@ -27,7 +29,7 @@ document.body.arrive(" .fp_export_ratings_cmd", function() {
             export_ratings();
     } else
     {
-            export_ratings();        
+        export_ratings();        
     }
 });    
 
@@ -50,7 +52,7 @@ var export_ratings = function()
     }
     console.log(rated_data.append);
 
-    // from stackoverflow
+ // from stackoverflow
     var saveData = (function () {
         var a = document.createElement("a");
         document.body.appendChild(a);

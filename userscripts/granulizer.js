@@ -11,6 +11,7 @@
 // -- patches stars in many more places (Netflix pages tend to not have consistent HTML)
 // -- now requires arrive.js
 
+
 var unsafeWindow = this['unsafeWindow'] || window;
 var document = unsafeWindow.document;
 
@@ -51,15 +52,12 @@ function patchAnchors(elem, offset, wrap_in_li)
         rating_widths = ratingWidthsLarge;
     else
         rating_widths = ratingWidthsNormal;
-
     if (anchors.length < 9)
     {
         var hrefRegex = new RegExp('value=.');
-
         for (var j=4; j > 0; j--)
         {
             var rating = (5-j)+0.5;
-
             var oldAnchor = anchors[j];
 
             var newAnchor = document.createElement('a');
@@ -69,10 +67,8 @@ function patchAnchors(elem, offset, wrap_in_li)
             newAnchor.innerHTML = 'Rate '+rating+' stars';
             newAnchor.setAttribute('style', 'width:'+(rating_widths[rating]+offset)+'px');
             newAnchor.setAttribute('class', 'rv'+rating);   /* some netflix javascript parses this class name */
-
             if (wrap_in_li)
             {
-                console.log("wrapping in li");
                 var newli = document.createElement("li");
                 newli.appendChild(newAnchor);
                 newAnchor = newli;
@@ -106,7 +102,6 @@ var patch_all_arrive = function(selector_str, classname, wrap_in_li)
 }
 
 // TODO: convert this to use fplib
-
 if (location.pathname.indexOf("/WiHome") === 0)
 {
     patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
@@ -142,15 +137,17 @@ else if (location.pathname.indexOf("/WiAltGenre") === 0)
 {
     patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
 }
-
-
-
 else if (location.pathname.indexOf("/WiMovie") === 0)
 {
     patch_all(document.body, "strbrContainer", false);
 } else if (location.pathname.indexOf("/MyList") === 0)
 { 
-    patch_all(document.body, "stbrIl", false);
+    if (fplib.isOldMyList())
+        patch_all(document.body, "stbrIl", false);
+    else
+    {
+        patch_all_arrive("#BobMovie-content", "strbrContainer", false)
+    }
 }
 else if (location.pathname.indexOf("/Search") === 0) // Search when DVDs are enabled
 {

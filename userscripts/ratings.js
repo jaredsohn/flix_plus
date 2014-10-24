@@ -1,5 +1,10 @@
 //jaredsohn/lifehacker source: https://github.com/joshblum/netflix-rate-chrome-ext/blob/master/js/ratings.js
 
+if (fplib.isOldMyList())
+{
+    console.log("Script disabled since it does not work on old MyList.")
+    return;
+}
 
 document.arrive(".bobMovieContent", function()
 {
@@ -9,6 +14,11 @@ document.arrive(".bobMovieContent", function()
     $(".bobMovieHeader").width(329);   // Match the width
 });
 
+if (window.location.protocol === "https:")
+{
+    consolelog(-1,"Rotten Tomatoes/IMDB ratings not supported for https; load this page using http for ratings.")
+    return;
+}
 
 var key_prefix = "flix_plus " + fplib.getProfileName();
 

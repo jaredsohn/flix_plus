@@ -17,9 +17,11 @@ var _fplib = function()
 	this.getMovieIdFromField = function(attr_str)
 	{
 	    var parts = attr_str.split("_");
-	    return parts[0].replace(/\D/g,'');
+	    var temp = parts[0].replace(/\D/g,'');
+	    return parseInt(temp, 10).toString();
 	}
 
+	// the rating string here matches the keyboard code used by Flix Plus
 	this.getRatingClass = function(rating)
 	{
 	    var rating_class = "";
@@ -27,25 +29,29 @@ var _fplib = function()
 	    {
 	        switch (rating)
 	        {
-	            case "`": rating_class = "cta-clear"; break;
-	            case "0": rating_class = "cta-not-interested"; break;
-	            case "1": rating_class = "one"; break;
-	            case "2": rating_class = "two"; break;
-	            case "3": rating_class = "three"; break;
-	            case "4": rating_class = "four"; break;
-	            case "5": rating_class = "five"; break;                
+	            case "rate_clear": rating_class = "cta-clear"; break;
+	            case "rate_0": rating_class = "cta-not-interested"; break;
+	            case "rate_1": rating_class = "one"; break;
+	            case "rate_2": rating_class = "two"; break;
+	            case "rate_3": rating_class = "three"; break;
+	            case "rate_4": rating_class = "four"; break;
+	            case "rate_5": rating_class = "five"; break;                
 	        }
 	    } else
 	    {
 	        switch (rating) {
-	            case "`": rating_class = "clear"; break;
-	            case "0": rating_class = "rvnorec"; break;
-	            case "6": rating_class = "rv1.5"; break;
-	            case "7": rating_class = "rv2.5"; break;
-	            case "8": rating_class = "rv3.5"; break;
-	            case "9": rating_class = "rv4.5"; break;
-	            default:
-	                rating_class = "rv" + rating.toString();
+	            case "rate_0": rating_class = "rv0"; break;
+	            case "rate_1": rating_class = "rv1"; break;
+	            case "rate_2": rating_class = "rv2"; break;
+	            case "rate_3": rating_class = "rv3"; break;
+	            case "rate_4": rating_class = "rv4"; break;
+	            case "rate_5": rating_class = "rv5"; break;                
+	            case "rate_clear": rating_class = "clear"; break;
+	            case "rate_0": rating_class = "rvnorec"; break;
+	            case "rate_1_5": rating_class = "rv1.5"; break;
+	            case "rate_2_5": rating_class = "rv2.5"; break;
+	            case "rate_3_5": rating_class = "rv3.5"; break;
+	            case "rate_4_5": rating_class = "rv4.5"; break;
 	        }        
 	    }
 
@@ -58,7 +64,7 @@ var _fplib = function()
 	this.getSelectorsForPath = function()
 	{
 	    var results = {};
-	    results["elemContainerId"] = "[selected]"; // This field is not a jquery selector and can be [selected] or [document]
+	    results["elemContainerId"] = "[selected]"; // This field is not a jquery selector and can also be [selected] or [document]
 	    results["queueMouseOver"] = null;
 	    results["queueRemove"] = ".inr";
 	    results["queueAdd"] = ".inr";
@@ -125,22 +131,38 @@ var _fplib = function()
 	        results["posterImageIdPrefix"] = "ag";
 	    } else if (location.pathname.indexOf("/WiMovie") === 0)
 	    {
-	        results["elements"] = null;        
-	        results["queueMouseOver"] = ".btnWrap";
-	        results["elemContainerId"] = "displaypage-overview";
-	        results["movieInfoSelector"] = ".displayPagePlayable";
-	        results["movieIdAttribute"] = "data-movieid";
+			results["elements"] = null;        
+			results["movieIdAttribute"] = "data-movieid";
+			results["queueMouseOver"] = ".btnWrap";
+			results["elemContainerId"] = "displaypage-overview";
+			results["movieInfoSelector"] = ".displayPagePlayable";
 
+	        // for navigating episodes; not working yet
+/*	        results["elements"] = ".episodeList li";
+	        results["elementsList"] = "#seasonsNav li";
+	        results["movieIdAttribute"] = "data-movieid";
+			results["borderedElement"] = null;
+	        results["elemContainerId"] = null;			*/
 	    } else if (location.pathname.indexOf("/MyList") === 0)
 	    {
-	        results["elements"] = "#queue tr";
-	        results["elemContainerId"] = "[selected]";
-	        results["queueAdd"] = null;
-	        results["queueRemove"] = ".delbtn";
-	        results["ratingMouseOver"] = ".stbrIl";
-	        results["movieInfoSelector"] = null;
-	        results["movieIdAttribute"] = "data-mid";
-		    results["borderedElement"] = null;       
+	    	if (self.isOldMyList())
+	    	{
+		        results["elements"] = "#queue tr";
+		        results["elemContainerId"] = "[selected]";
+		        results["queueAdd"] = null;
+		        results["queueRemove"] = ".delbtn";
+		        results["ratingMouseOver"] = ".stbrIl";
+		        results["movieInfoSelector"] = null;
+		        results["movieIdAttribute"] = "data-mid";
+			    results["borderedElement"] = null;
+			} else
+			{
+		    	results["elementsList"] = ".list-items";
+		        results["elemContainerId"] = "BobMovie";
+		        results["queueMouseOver"] = ".btnWrap";
+		        results["ratingMouseOver"] = ".stbrOl";
+			    results["borderedElement"] = ".boxShot";
+			}
 
 	    } else if (location.pathname.indexOf("/RateMovies") === 0)
 	    {
@@ -363,6 +385,9 @@ var _fplib = function()
 			var instance = 0;
 			while (true)
 			{
+				if (ids_array[i] === "")
+					break;
+
 				var elem = document.getElementById(elem_prefix + ids_array[i] + "_" + instance);
 				//consolelog("looking for " + elem_prefix + ids_array[i] + "_" + instance);
 				if ((typeof(elem) !== "undefined") && (elem !== null))
@@ -414,6 +439,30 @@ var _fplib = function()
 	this.syncGet = function(varname, callback)
 	{
 		chrome.storage.sync.get(varname, callback);
+	}
+
+	this.isOldMyList = function()
+	{
+		try
+		{
+			val = ((location.pathname.indexOf("/MyList") === 0) && ($("#queue-page-content").length > 0));
+		} catch (ex)
+		{
+			console.log(ex);
+		}
+		return val;
+	}
+
+	this.isNewMyList = function()
+	{
+		try
+		{
+			val = ((location.pathname.indexOf("/MyList") === 0) && ($("#queue-page-content").length === 0));
+		} catch (ex)
+		{
+			console.log(ex);
+		}
+		return val;
 	}
 
 	// Use this to parse JSON embedded in the page at wiViewingActivity and MoviesYouveSeen

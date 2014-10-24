@@ -1,6 +1,12 @@
 // from https://github.com/michaelschade/netflix-trailers
 // jaredsohn-lifehacker: removed insertion of jquery, analytics
 
+if (fplib.isOldMyList())
+{
+    console.log("Script disabled since it does not work on old MyList.")
+    return;
+}
+
 function main() {
   MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
@@ -9,7 +15,7 @@ function main() {
     return 'https://youtube.com/results?search_query=' + encodeURIComponent(movieName + ' trailer');
   }
 
-    // jQuery link element with tracking
+    // jQuery link element
     function trailerLink(movieName, id) {
       return $('<a>', {
         href: trailerURL(movieName),
@@ -17,7 +23,7 @@ function main() {
         target: '_blank',
         id: id
       }).click(function() {
-        _gaq.push(['_trackEvent', $(this).attr('id'), 'clicked']);
+//        _gaq.push(['_trackEvent', $(this).attr('id'), 'clicked']);
       });
     }
 

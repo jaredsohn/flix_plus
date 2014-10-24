@@ -15,12 +15,13 @@
 //
 // Now requires jquery, arrive.js, extlib.js, fplib.js
 
-var elemsListContainers;
-var currListContainer = -1;
-var elemsNPList;
-var currListItem = -1;
-var currElem = null;
+var _elemsListContainers;
+var _currListContainer = -1;
+var _elemsNPList;
+var _currListItem = -1;
+var _currElem = null;
 var _keyboard_commands_shown = false;
+var _already_has_shift_chars = [ "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Scrolling to element with keyboard focus
@@ -44,9 +45,9 @@ function scrollMiddle(elem)
 // Open a link based on selection
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-function WatchOrZoomMovie(action)
+function WatchOrZoomMovie(command)
 {
-    if (currElem === null)
+    if (_currElem === null)
         return;
 
     var selectors = fplib.getSelectorsForPath();
@@ -56,20 +57,20 @@ function WatchOrZoomMovie(action)
     var attr_elem = null;
     if (selectors["movieInfoSelector"] !== null)
     {
-        attr_elem = $(selectors["movieInfoSelector"], currElem);
+        attr_elem = $(selectors["movieInfoSelector"], _currElem);
     } else
     {
-        attr_elem = $(currElem);
+        attr_elem = $(_currElem);
     }
 
     var full_str = attr_elem.attr(selectors["movieIdAttribute"]);
     var movie_id = fplib.getMovieIdFromField(full_str);
 
-    switch (action) {
-        case "p":
+    switch (command) {
+        case "play":
             this.location = "http://www.netflix.com/WiPlayer?movieid=" + movie_id;
             break;
-        case "z":
+        case "zoom_into_details":
             this.location = "http://www.netflix.com/WiMovie/" + movie_id;
             break;
     }
@@ -78,11 +79,11 @@ function WatchOrZoomMovie(action)
 function OpenSectionLink()
 {
     console.log("OpenSectionLink");
-    console.log(elemsListContainers);
-    console.log(currListContainer);
-    console.log(elemsListContainers[currListContainer]);
+    console.log(_elemsListContainers);
+    console.log(_currListContainer);
+    console.log(_elemsListContainers[_currListContainer]);
 
-    var container = $("h3 a", elemsListContainers[currListContainer]);
+    var container = $("h3 a", _elemsListContainers[_currListContainer]);
     console.log(container[container.length - 1]);
     var url = container[container.length - 1].href;
     console.log(url);
@@ -94,11 +95,11 @@ function OpenSectionLink()
 
 function OpenCurrentLink()
 {
-    if (!ListHasItems(elemsNPList)) {
+    if (!ListHasItems(_elemsNPList)) {
         return;
     }
     
-    var elemsLinks = elemsNPList[currListItem].getElementsByTagName("a");
+    var elemsLinks = _elemsNPList[_currListItem].getElementsByTagName("a");
     if (elemsLinks.length > 0) {
         for (var i = 0; i < elemsLinks.length; i++) {
         var link = elemsLinks[i];
@@ -120,7 +121,7 @@ function RemoveFromQueue()
     var selectors = fplib.getSelectorsForPath();
 
     if (selectors["elemContainerId"] === "[selected]")
-        elemContainer = elemsNPList[currListItem];
+        elemContainer = _elemsNPList[_currListItem];
     else if (selectors["elemContainerId"] === "[document")
         elemContainer = document;
     else
@@ -143,8 +144,8 @@ function RemoveFromQueue()
                 if ((elemButton[0].innerText.indexOf("Remove") !== -1) || (selectors["queueRemove"] === ".delbtn"))
                 {
                     extlib.simulateClick(elemButton[0]);
-                    if ((typeof(elemsNPList) !== "undefined") && (elemsNPList !== null) && (elemsNPList.length > currListItem))    
-                        UpdateKeyboardSelection(elemsNPList[currListItem], true);
+                    if ((typeof(_elemsNPList) !== "undefined") && (_elemsNPList !== null) && (_elemsNPList.length > _currListItem))    
+                        UpdateKeyboardSelection(_elemsNPList[_currListItem], true);
                 }
             }
         }
@@ -157,7 +158,7 @@ function AddToQueue()
     var selectors = fplib.getSelectorsForPath();
 
     if (selectors["elemContainerId"] === "[selected]")
-        elemContainer = elemsNPList[currListItem];
+        elemContainer = _elemsNPList[_currListItem];
     else if (selectors["elemContainerId"] === "[document")
         elemContainer = document;
     else
@@ -194,7 +195,7 @@ function RateMovie(rating)
     var selectors = fplib.getSelectorsForPath();
 
     if (selectors["elemContainerId"] === "[selected]")
-        elemContainer = elemsNPList[currListItem];
+        elemContainer = _elemsNPList[_currListItem];
     else if (selectors["elemContainerId"] === "[document")
         elemContainer = document;
     else
@@ -238,7 +239,7 @@ var UpdateKeyboardSelection = function(elem, selected)
 // TODO: use code below to define what the fp_keyboard_selected class looks like (and load it only once)
 */
 
-    if (location.pathname.indexOf("/MyList") === 0) // separated out because width is different
+    if (fplib.isOldMyList()) // separated out because width is different
     {
         if (selected)
             border_elem.setAttribute('style', 'border-style: solid !important; border-color: #b9090b !important; border-width: 5px !important');
@@ -286,18 +287,18 @@ function NextPreviousListPage(direction)
 
 function NextPreviousListContainer(direction)
 {
-    if (!ListHasItems(elemsListContainers)) {
+    if (!ListHasItems(_elemsListContainers)) {
         NextPreviousListPage(direction);
         return;
     }
 
     try
     {
-        if (((typeof(elemsListContainers) !== "undefined")) && (elemsListContainers != null))
+        if (((typeof(_elemsListContainers) !== "undefined")) && (_elemsListContainers != null))
         {
-            if ((elemsListContainers.length - 1 >= currListContainer) && (currListContainer !== -1))
+            if ((_elemsListContainers.length - 1 >= _currListContainer) && (_currListContainer !== -1))
             {
-                elemsListContainers[currListContainer].style["border-style"] = "none";   
+                _elemsListContainers[_currListContainer].style["border-style"] = "none";   
             }
         }
     } catch (ex)
@@ -311,32 +312,32 @@ function NextPreviousListContainer(direction)
 
     while (true)
     {
-        currListContainer += direction;
-        if (currListContainer < 0) {
-            currListContainer = 0;
-        } else if (currListContainer >= elemsListContainers.length - 1) {
-            currListContainer = elemsListContainers.length - 1;
+        _currListContainer += direction;
+        if (_currListContainer < 0) {
+            _currListContainer = 0;
+        } else if (_currListContainer >= _elemsListContainers.length - 1) {
+            _currListContainer = _elemsListContainers.length - 1;
             break;
         }
 
-        if (!extlib.isHidden(elemsListContainers[currListContainer]))
+        if (!extlib.isHidden(_elemsListContainers[_currListContainer]))
             break;
     }
 
     NextPreviousListItem(0);
-    currElem = elemsListContainers[currListContainer];
-    scrollMiddle(currElem);
-    elemsNPList = currElem.getElementsByClassName("agMovie"); // TODO: should use fplib to find selector for active page
-    currListItem = -1;
+    _currElem = _elemsListContainers[_currListContainer];
+    scrollMiddle(_currElem);
+    _elemsNPList = _currElem.getElementsByClassName("agMovie"); // TODO: should use fplib to find selector for active page
+    _currListItem = -1;
     NextPreviousListItem(1);
 
     try
     {
-        if (((typeof(elemsListContainers) !== "undefined")) && (elemsListContainers != null))
+        if (((typeof(_elemsListContainers) !== "undefined")) && (_elemsListContainers != null))
         {
-            if (elemsListContainers.length - 1 >= currListContainer)
+            if (_elemsListContainers.length - 1 >= _currListContainer)
             {
-                elemsListContainers[currListContainer].style["border-style"] = "solid";   
+                _elemsListContainers[_currListContainer].style["border-style"] = "solid";   
             }
         }
     } catch (ex)
@@ -348,68 +349,68 @@ function NextPreviousListContainer(direction)
 
 function NextPreviousListItem(direction)
 {
-    if (!ListHasItems(elemsNPList)) {
+    if (!ListHasItems(_elemsNPList)) {
         return;
     }
-    currElem = null;
-    var lastIndex = elemsNPList.length - 1;
+    _currElem = null;
+    var lastIndex = _elemsNPList.length - 1;
     try {
-        currElem = elemsNPList[currListItem];
-        UpdateKeyboardSelection(currElem, false);
+        _currElem = _elemsNPList[_currListItem];
+        UpdateKeyboardSelection(_currElem, false);
     } catch(err) {
         //ignore error
     }
     if (direction == 0) {
         return;
     }
-    var old_listitem = currListItem;
+    var old_listitem = _currListItem;
     while (true)
     {
-        currListItem += direction;
+        _currListItem += direction;
 
-        if (currListItem < 0)
+        if (_currListItem < 0)
         {
-            currListItem = old_listitem;
+            _currListItem = old_listitem;
             break;
         }
-        if (currListItem > lastIndex)
+        if (_currListItem > lastIndex)
         {
-            currListItem = old_listitem;
+            _currListItem = old_listitem;
             break;
         }
 
-        if (!extlib.isHidden(elemsNPList[currListItem]))
+        if (!extlib.isHidden(_elemsNPList[_currListItem]))
             break;
     }
 
-    if (currListItem < 0) {
-        currListItem = 0;
+    if (_currListItem < 0) {
+        _currListItem = 0;
         NextPreviousListPage(-1);
-    } else if (currListItem > lastIndex) {
-        currListItem = lastIndex;
+    } else if (_currListItem > lastIndex) {
+        _currListItem = lastIndex;
         NextPreviousListPage(1);
     } else {
-        currElem = elemsNPList[currListItem];
+        _currElem = _elemsNPList[_currListItem];
 
         try {
-            if ((typeof(elemsListContainers) === 'undefined') || (elemsListContainers.length === 0) || !(extlib.isHidden($("#" + elemsListContainers[currListContainer].id + " .bd"))))
+            if ((typeof(_elemsListContainers) === 'undefined') || (_elemsListContainers.length === 0) || !(extlib.isHidden($("#" + _elemsListContainers[_currListContainer].id + " .bd"))))
             {
-                extlib.simulateEvent(currElem, "mouseover");
-                scrollMiddle(currElem);
+                extlib.simulateEvent(_currElem, "mouseover");
+                scrollMiddle(_currElem);
             } else
             {
-                scrollMiddle(elemsListContainers[currListContainer]);            
+                scrollMiddle(_elemsListContainers[_currListContainer]);            
             }
         } catch (ex)
         {
 
         }
 
-        UpdateKeyboardSelection(currElem, true);
+        UpdateKeyboardSelection(_currElem, true);
 
-        var elemsLinks = currElem.getElementsByTagName("a");
+        var elemsLinks = _currElem.getElementsByTagName("a");
         if (elemsLinks.length == 0) {
-            switch (currListItem) {
+            switch (_currListItem) {
             case 0:
                 NextPreviousListItem(1);
                 break;
@@ -440,82 +441,6 @@ function ListHasItems(list)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Initiate keyboard commands
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-function handleKeyDown(e)
-{
-    if (e.keyCode === 37) // left arrow    
-    {
-        NextPreviousListItem(-1);
-        e.preventDefault();
-    }
-    else if (e.keyCode === 39) // right arrow
-    {
-        NextPreviousListItem(1);
-        e.preventDefault();
-    }
-    else if (e.keyCode === 38) // up arrow
-    {
-        NextPreviousListContainer(-1);
-        e.preventDefault();
-    }
-    else if (e.keyCode === 40) // down arrow
-    {
-        NextPreviousListContainer(1);
-        e.preventDefault();
-    }
-    else if ((e.keyCode === 36) && ((e.ctrlKey) || (e.shiftKey))) // ctrl-home (and shift-home)
-    {
-        UpdateKeyboardSelection(elemsNPList[currListItem], false);
-
-        currListContainer = -1;
-        NextPreviousListContainer(1);
-
-        UpdateKeyboardSelection(elemsNPList[currListItem], false);
-
-        currListItem = -1;
-        NextPreviousListItem(1);
-
-        e.preventDefault();
-    }
-    else if ((e.keyCode === 35) && ((e.ctrlKey) || (e.shiftKey))) // ctrl-end (and shift-end)
-    {
-        UpdateKeyboardSelection(elemsNPList[currListItem], false);
-
-        currListContainer = elemsListContainers.length - 1;
-        NextPreviousListContainer(-1);
-
-        UpdateKeyboardSelection(elemsNPList[currListItem], false);
-
-        currListItem = elemsNPList.length;
-        NextPreviousListItem(-1);
-
-        e.preventDefault();
-    }    
-    else if (e.keyCode === 36) // home
-    {
-        UpdateKeyboardSelection(elemsNPList[currListItem], false);
-        currListItem = -1;
-        NextPreviousListItem(1);
-        e.preventDefault();
-    } else if (e.keyCode === 35) // end
-    {
-        UpdateKeyboardSelection(elemsNPList[currListItem], false);
-        currListItem = elemsNPList.length;
-        NextPreviousListItem(-1);
-        e.preventDefault();
-    }
-    else if (e.keyCode === 27) // ESC
-    {
-        _keyboard_commands_shown = true;
-        toggle_keyboard_commands();
-        $.each($("#layerModalPanes .close"), function(index, value) { this.click()  })
-    }
-//    else if (e.keyCode === 33) // page up
-//        NextPreviousListContainer(-2);
-//    else if (e.keyCode === 34) // page down
-//        NextPreviousListContainer(2);
-}
-
 
 var getKeyboardCommandsHtml = function()
 {
@@ -562,62 +487,398 @@ var toggle_keyboard_commands = function()
     _keyboard_commands_shown = !_keyboard_commands_shown;
 }
 
-function handleKeyPress(e)
+var handle_key_down = function(e)
+{
+    var keyCombo = "";
+
+    // TODO: use full list of keys here instead
+    switch (e.keyCode)
+    {
+        case 27: keyCombo = "Escape"; break;
+        case 37: keyCombo = "Left"; break;
+        case 39: keyCombo = "Right"; break;
+        case 38: keyCombo = "Up"; break;
+        case 40: keyCombo = "Down"; break;
+        case 36: keyCombo = "Home"; break;
+        case 37: keyCombo = "End"; break;
+    }
+    if (keyCombo === "")
+        return;
+
+
+    var ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
+
+    if ((e.altKey)) keyCombo = "Alt+" + keyCombo;
+    if ((e.ctrlKey)) keyCombo = "Ctrl+" + keyCombo;
+    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift+" + keyCombo;
+
+    var command = key_lookup(keyCombo);
+    if (command !== null)
+    {
+        run_command(command);
+        e.preventDefault();   
+    }
+}
+
+// TODO: use a token here instead and do a replace
+var default_keyboard_shortcuts = {
+    "jump_kids": {
+        "suggested_key": {
+            "default": "d"
+        },
+        "description": "Kids"
+    },
+    "rate_clear": {
+        "suggested_key": {
+            "default": "`"
+        },
+        "description": "Rate Clear"
+    },
+    "jump_viewing_activity": {
+        "suggested_key": {
+            "default": "a"
+        },
+        "description": "Viewing activity"
+    },
+    "your_account": {
+        "suggested_key": {
+            "default": "y"
+        },
+        "description": "Your Account"
+    },
+    "move_right": {
+        "suggested_key": {
+            "default": "Right"
+        },
+        "description": "Move right"
+    },
+    "remove_from_my_list": {
+        "suggested_key": {
+            "default": "-"
+        },
+        "description": "Remove from My List"
+    },
+    "open_section_link": {
+        "suggested_key": {
+            "default": "Ctrl+o"
+        },
+        "description": "Open section link"
+    },
+    "help": {
+        "suggested_key": {
+            "default": "?"
+        },
+        "description": "Help"
+    },
+    "rate_1": {
+        "suggested_key": {
+            "default": "1"
+        },
+        "description": "Rate 1"
+    },
+    "rate_0": {
+        "suggested_key": {
+            "default": "0"
+        },
+        "description": "Rate 0"
+    },
+    "rate_3": {
+        "suggested_key": {
+            "default": "3"
+        },
+        "description": "Rate 3"
+    },
+    "rate_2": {
+        "suggested_key": {
+            "default": "2"
+        },
+        "description": "Rate 2"
+    },
+    "rate_5": {
+        "suggested_key": {
+            "default": "5"
+        },
+        "description": "Rate 5"
+    },
+    "rate_4": {
+        "suggested_key": {
+            "default": "4"
+        },
+        "description": "Rate 4"
+    },
+    "move_left": {
+        "suggested_key": {
+            "default": "Left"
+        },
+        "description": "Move left"
+    },
+    "to_my_list": {
+        "suggested_key": {
+            "default": "+"
+        },
+        "description": "To My List"
+    },
+    "zoom_into_details": {
+        "suggested_key": {
+            "default": "z"
+        },
+        "description": "Zoom into details"
+    },
+    "rate_4_5": {
+        "suggested_key": {
+            "default": "9"
+        },
+        "description": "Rate 4.5"
+    },
+    "jump_new_arrival": {
+        "suggested_key": {
+            "default": "r"
+        },
+        "description": "New arrivals"
+    },
+    "play": {
+        "suggested_key": {
+            "default": "p"
+        },
+        "description": "play"
+    },
+    "move_end": {
+        "suggested_key": {
+            "default": "End"
+        },
+        "description": "Go to section ending"
+    },
+    "jump_instant_home": {
+        "suggested_key": {
+            "default": "i"
+        },
+        "description": "Instant Home"
+    },
+    "section_end": {
+        "suggested_key": {
+            "default": "Ctrl+End"
+        },
+        "description": "Last section"
+    },
+    "jump_my_list": {
+        "suggested_key": {
+            "default": "q"
+        },
+        "description": "My List"
+    },
+    "move_home": {
+        "suggested_key": {
+            "default": "Home"
+        },
+        "description": "Go to section beginning"
+    },
+    "prev_section": {
+        "suggested_key": {
+            "default": "Up"
+        },
+        "description": "Previous section"
+    },
+    "search": {
+        "suggested_key": {
+            "default": "/"
+        },
+        "description": "Search"
+    },
+    "toggle_hiding": {
+        "suggested_key": {
+            "default": "h"
+        },
+        "description": "Toggle hiding"
+    },
+    "rate_3_5": {
+        "suggested_key": {
+            "default": "8"
+        },
+        "description": "Rate 3.5"
+    },
+    "jump_your_ratings": {
+        "suggested_key": {
+            "default": "t"
+        },
+        "description": "Your Ratings"
+    },
+    "section_home": {
+        "suggested_key": {
+            "default": "Ctrl+Home"
+        },
+        "description": "First section"
+    },
+    "open_link": {
+        "suggested_key": {
+            "default": "o"
+        },
+        "description": "Open link"
+    },
+    "rate_2_5": {
+        "suggested_key": {
+            "default": "7"
+        },
+        "description": "Rate 2.5"
+    },
+    "toggle_scrollbars": {
+        "suggested_key": {
+            "default": "s"
+        },
+        "description": "Toggle scrollbars"
+    },
+    "rate_1_5": {
+        "suggested_key": {
+            "default": "6"
+        },
+        "description": "Rate 1.5"
+    },
+    "next_section": {
+        "suggested_key": {
+            "default": "Down"
+        },
+        "description": "Next section"
+    },
+    "close_window": {
+        "suggested_key": {
+            "default": "Escape"
+        },
+        "description": "Close window"
+    }
+
+}
+// TODO: the above should get placed into localstorage if not already there.  it is possible user might modify it.
+
+var create_keyboard_shortcut_dict = function()
+{
+    var keyboard_shortcut_dict = {};
+    var shortcuts = Object.keys(default_keyboard_shortcuts);
+    var len = shortcuts.length;
+    for (i = 0; i < len; i++)
+    {
+        var key_name = shortcuts[i];
+        var key = default_keyboard_shortcuts[shortcuts[i]]["suggested_key"]["default"];
+        keyboard_shortcut_dict[key] = key_name;
+    }
+
+    return keyboard_shortcut_dict;
+}
+var _keyboard_shortcut_dict = create_keyboard_shortcut_dict();
+
+var key_lookup = function(keyCombo)
+{
+    var command = "";
+
+    console.log("looking up: " + keyCombo);
+    
+    if (typeof(_keyboard_shortcut_dict[keyCombo]) !== "undefined")
+        command = _keyboard_shortcut_dict[keyCombo];
+
+    console.log("command found: " + command);
+
+    return command;
+}
+
+var handle_key_press = function(e)
 {
     if (e.target.nodeName.match(/^(textarea|input)$/i)) {
         return;
     }
     var override = true;
     var keyCombo = String.fromCharCode(e.charCode||e.which).toLowerCase();
+    console.log("keycombo is");
+    console.log(keyCombo);
 
-    if (e.altKey) { 
-        keyCombo = "Alt+" + keyCombo;
-    }
-    if (e.ctrlKey) { 
-        keyCombo = "Ctrl+" + keyCombo;
-    }
-    if (e.shiftKey) { 
-        keyCombo = "Shift+" + keyCombo;
-    }
+    var ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
 
-    if ((_keyboard_commands_shown) && (keyCombo !== "Shift+?"))
-        return;
+    if (e.altKey) keyCombo = "Alt+" + keyCombo;
+    if (e.ctrlKey) keyCombo = "Ctrl+" + keyCombo;
+    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift+" + keyCombo;
+
+    var command = key_lookup(keyCombo);
+    if ((command !== null) && (command !== ""))
+    {
+        run_command(command);
+        e.preventDefault();   
+    }
+}
+
+var run_command = function(command)
+{
+    console.log("run_command");
+    console.log(command);
+    console.log(_keyboard_commands_shown);
+    if (command === "rate_3")
+        console.log("command is rate_3");
 
     try
     {
-        switch(keyCombo) {
-            case "p": case "z": WatchOrZoomMovie(keyCombo); break;
-            case "`": case "0": case "1": case "2": case "3": case "4": case "5": case "6": case "7": case "8": case "9":  RateMovie(keyCombo); break;
-            case "-": RemoveFromQueue(); break;
-            case "+": case "Shift++": case "=": AddToQueue(); break;
-            case "/": var elem = document.getElementById("searchField"); elem.focus(); elem.select(); break;
-            case "Shift+?": toggle_keyboard_commands(); break; // keycode string is weird here because it applies the shift to the character but shift is still there.
-            case "a": window.location = "http://www.netflix.com/WiViewingActivity"; break;
-            case "h": document.getElementById(elemsListContainers[currListContainer].id + "_showhide").click(); break; // for integration with hidesection in Flix Plus
-            case "i": window.location = "http://www.netflix.com/WiHome"; break;
-            case "k": NextPreviousListItem(-1); break;
-            case "Shift+k": NextPreviousListContainer(-1); break;
-            case "d": window.location = "http://www.netflix.com/Kids"; break;
-            case "j": NextPreviousListItem(1); break;
-            case "Shift+j": NextPreviousListContainer(1); break;
-            case "o": OpenCurrentLink(); break;
-            case "q": window.location = "http://www.netflix.com/MyList"; break;
-            case "r": window.location = "http://www.netflix.com/WiRecentAdditions"; break;
-            case "s": document.getElementById(elemsListContainers[currListContainer].id + "_scrollshowall").click(); break; // for integration with collapsescrollbars in Flix Plus
-            case "t": window.location = "https://www.netflix.com/MoviesYouveSeen"; break;
-            case "Shift+o": OpenSectionLink(); break;
-            case "y": window.location = "https://www.netflix.com/YourAccount"; break;
-            default: return;
-        }
-        if (override) {
-            e.preventDefault();
+        var elem = null;
+
+        if ((_keyboard_commands_shown) && (command !== "help"))
+            return;
+
+        switch(command)
+        {
+            case "rate_0":
+            case "rate_1":
+            case "rate_2":
+            case "rate_3": 
+            case "rate_4": 
+            case "rate_5":
+            case "rate_1_5": 
+            case "rate_2_5":
+            case "rate_3_5": 
+            case "rate_4_5":
+            case "rate_clear": 
+                RateMovie(command); break;
+            case "move_right": NextPreviousListItem(1); break;
+            case "move_left": NextPreviousListItem(-1); break;
+            case "move_home": UpdateKeyboardSelection(_elemsNPList[_currListItem], false); _currListItem = -1; NextPreviousListItem(1); break;
+            case "move_end": UpdateKeyboardSelection(_elemsNPList[_currListItem], false); _currListItem = _elemsNPList.length; NextPreviousListItem(-1); break;
+            case "play": WatchOrZoomMovie(command); break;
+            case "to_my_list": AddToQueue(); break;
+            case "remove_from_my_list": RemoveFromQueue(); break;
+            case "zoom_into_details": WatchOrZoomMovie(command); break;
+            case "open_link": OpenCurrentLink(); break;
+            case "next_section": NextPreviousListContainer(1);  break;
+            case "prev_section": NextPreviousListContainer(-1);  break;
+            case "section_home":
+                UpdateKeyboardSelection(_elemsNPList[_currListItem], false);
+                _currListContainer = -1;
+                NextPreviousListContainer(1);
+
+                UpdateKeyboardSelection(_elemsNPList[_currListItem], false);
+                _currListItem = -1;
+                NextPreviousListItem(1);
+                break;
+            case "section_end":
+                UpdateKeyboardSelection(_elemsNPList[_currListItem], false);
+                _currListContainer = _elemsListContainers.length - 1;
+                NextPreviousListContainer(-1);
+
+                UpdateKeyboardSelection(_elemsNPList[_currListItem], false);
+                _currListItem = _elemsNPList.length;
+                NextPreviousListItem(-1);
+                break;
+            case "open_section_link": OpenSectionLink(); break;
+            case "toggle_scrollbars": elem = document.getElementById(_elemsListContainers[_currListContainer].id + "_scrollshowall"); if (elem !== null) { elem.click(); } break;
+            case "toggle_hiding": elem = document.getElementById(_elemsListContainers[_currListContainer].id + "_showhide"); if (elem !== null) { elem.click(); } break;
+            case "jump_instant_home": window.location = "http://www.netflix.com/WiHome";  break;
+            case "jump_my_list": window.location = "http://www.netflix.com/MyList"; break;
+            case "jump_new_arrivals": window.location = "http://www.netflix.com/WiRecentAdditions"; break;
+            case "jump_kids": window.location = "http://www.netflix.com/Kids"; break;
+            case "jump_viewing_activity": window.location = "http://www.netflix.com/WiViewingActivity";  break;
+            case "jump_your_ratings": window.location = "https://www.netflix.com/MoviesYouveSeen"; break;
+            case "search": elem = document.getElementById("searchField");  elem.focus(); elem.select(); break;
+            case "your_account": window.location = "https://www.netflix.com/YourAccount"; break;
+            case "help": toggle_keyboard_commands(); break;
+            case "close_window": _keyboard_commands_shown = true; toggle_keyboard_commands(); $.each($("#layerModalPanes .close"), function(index, value) { this.click()  }); break;
         }
     } catch (ex)
     {
-        console.log("Exception: ");
-        console.log(ex);
+
     }
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Startup
@@ -630,15 +891,15 @@ fplib.idMrows();
 var selectors = fplib.getSelectorsForPath();
 if (selectors["elementsList"] === ".mrow")
 {
-    elemsListContainers = document.getElementsByClassName("mrow");
-    if ((elemsListContainers.length > 0) && (extlib.hasClass(elemsListContainers[0], 'characterRow')))
+    _elemsListContainers = document.getElementsByClassName("mrow");
+    if ((_elemsListContainers.length > 0) && (extlib.hasClass(_elemsListContainers[0], 'characterRow')))
     {
         newList = []
-        for (i = 1; i < elemsListContainers.length; i++)
+        for (i = 1; i < _elemsListContainers.length; i++)
         {
-            newList.push(elemsListContainers[i]);
+            newList.push(_elemsListContainers[i]);
         }
-        elemsListContainers = newList;  // now an array instead of htmlcollection
+        _elemsListContainers = newList;  // now an array instead of htmlcollection
     }
 
     if ($(".emptyYourListRow").length)
@@ -649,30 +910,30 @@ if (selectors["elementsList"] === ".mrow")
     document.body.arrive(selectors["elementsList"], function()
     {
         console.log(".");
-        elemsListContainers.push(this);
+        _elemsListContainers.push(this);
     });
 
-    if (elemsListContainers.length >= 2)
+    if (_elemsListContainers.length >= 2)
         extlib.simulateEvent($("#mrow_id_1")[0], "mouseover"); // We do this because otherwise it for some reason shows movie info on first movie of this row within remove_dupes code
 
 } else
 {
-    elemsNPList = $(selectors["elements"]).get();
-    //console.log(elemsNPList);
+    _elemsNPList = $(selectors["elements"]).get();
+    //console.log(_elemsNPList);
 
     document.body.arrive(selectors["elements"], function()
     {
         console.log(".");
-        elemsNPList.push(this);
+        _elemsNPList.push(this);
     });
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-if (elemsNPList) {
+if (_elemsNPList) {
     NextPreviousListItem(1);
 }
-if (elemsListContainers) { 
+if (_elemsListContainers) { 
     NextPreviousListContainer(1);
 }
 
@@ -684,5 +945,5 @@ if (location.pathname.indexOf("/WiSearch") === 0)
     }
 }
 
-document.addEventListener('keypress', handleKeyPress, false);
-document.addEventListener('keydown', handleKeyDown, false);
+document.addEventListener('keypress', handle_key_press, false);
+document.addEventListener('keydown', handle_key_down, false);

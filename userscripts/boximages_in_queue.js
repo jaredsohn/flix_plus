@@ -20,6 +20,12 @@
 var DEBUG = 0;
 
 function main() {
+   if (!fplib.isOldMyList())
+   {
+      console.log("Script disabled since it requires old MyList.")
+      return;
+   }
+
    var search_rows = "";
    //list-inactve was added 9/25/2009
    search_rows = "//td[contains(@class, 'tt')]";

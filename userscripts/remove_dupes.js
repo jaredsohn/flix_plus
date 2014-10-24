@@ -10,6 +10,7 @@ extlib.addGlobalStyle(".fp_duplicate { display: none !important; }");
 // Mark 'Rate what you've seen' and 'because you like' elements so that they do not get hidden as duplicates
 $(".mrow-rating .boxShot").each(function() { $(this).attr("data-fp-ignore", true);})
 $(".supportVideos .boxShot").each(function() { $(this).attr("data-fp-ignore", true);})
+$(".recentlyWatched .boxShot").each(function() { $(this).attr("data-fp-ignore", true);})
 
 var dupe_count = 0;
 var already_shown = {};

@@ -2,6 +2,12 @@
 
 // This script will make AJAX requests to get a Netflix user's rating history.
 
+if (fplib.isOldMyList())
+{
+    console.log("Script disabled since it does not work on old MyList.")
+    return;
+}
+
 var key_prefix = "flix_plus " + fplib.getProfileName() + " ";
 
 var get_history = function(start_time, page_no, authUrl, results_json, callback)
@@ -9,7 +15,7 @@ var get_history = function(start_time, page_no, authUrl, results_json, callback)
 	var past_start_time = false;
 
 	$.ajax({
-		url: "https://www.netflix.com/WiViewingActivity",
+		url: window.location.protocol + "https://www.netflix.com/WiViewingActivity",
 		cache: false,
 		success: function(html)
 		{

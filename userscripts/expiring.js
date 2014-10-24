@@ -28,6 +28,12 @@
 
 (function() 
 {
+   	if (!fplib.isOldMyList())
+   	{
+    	console.log("Script disabled since it requires old MyList.")
+      	return;
+	}
+
 	var qbody = document.getElementById('qbody');
 	if (!qbody) return;
 	var qcontent = document.getElementById('queue-page-content');

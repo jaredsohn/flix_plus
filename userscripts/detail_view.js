@@ -22,7 +22,13 @@
  * ----------------------------------------------------------------------------
  */
 
-// jaredsohn-lifehacker: Now requires extlib.js and arrive.js.
+// jaredsohn-lifehacker: Now requires extlib.js, fplib.js, and arrive.js.
+
+if (fplib.isOldMyList())
+{
+    console.log("Script disabled since it does not work on old MyList.")
+    return;
+}
 
 extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important"); // jaredsohn-Lifehacker...so it doesn't show 'Play' on genre pages
 
