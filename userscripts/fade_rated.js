@@ -32,7 +32,10 @@ var get_history = function(start_time, page_no, authUrl, results_json, callback)
 		  			if (results_json === null)
 		  				results_json = json;
 		  			else
+		  			{
+		  				console.log(results_json.ratingItems);
 		  				results_json.ratingItems = results_json.ratingItems.concat(json.ratingItems);
+		  			}
 
 				  	if ((json.ratingItems.length === 0) || ((new Date(json.ratingItems[json.ratingItems.length - 1].date).getTime()) < start_time))
 			  			past_start_time = true;  // This will be our last call.

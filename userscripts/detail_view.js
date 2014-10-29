@@ -45,6 +45,10 @@ var stopIt    = function (e) { e.preventDefault(); e.stopPropagation(); },
 var fixTag = function(tag)
 {
   if (regex.test(tag.href)) {
+    if (tag.id === "play-popover")
+      return;
+
+    tag.playhref     = tag.href;
     tag.className    = tag.className.replace(playClass, ' ');
     tag.href         = linkBase + tag.href.match(regex)[1];
     tag.onmousedown  = stopIt;
@@ -52,14 +56,16 @@ var fixTag = function(tag)
   }
 }
 
-
-/*
-// Added By jaredsohn-lifehacker so that wiMovie page affects the similar movies but not those at the top of the page
-if (location.pathname.indexOf("/WiMovie") === 0)
-{
-  aTags = $("#displaypage-sims a");
+// jQuery link element
+function playLink(movie_id, id) {
+  return $('<a>', {
+    href: window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movie_id,
+    text: 'Play',
+    id: id
+  }).click(function() {
+    //        _gaq.push(['_trackEvent', $(this).attr('id'), 'clicked']);
+  });
 }
-*/
 
 while (i--) {
   tag = aTags[i];
@@ -70,4 +76,15 @@ while (i--) {
 document.arrive("a", function()
 {
   fixTag(this)
+});
+
+// Add a play button to the popup
+// TODO: support other bobmovie classes, too
+document.body.arrive("#BobMovie-content .readMore", function()
+{
+  console.log("arrive");
+  var parts = $("#BobMovie-content .mdpLink")[0].href.split("/");
+  var movie_id = parts[parts.length - 1];
+  var link$ = playLink(movie_id, 'play-popover');
+  $('#' + "BobMovie-content" + ' .readMore').after(link$).after(' \u00B7 ');
 });

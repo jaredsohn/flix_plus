@@ -15,17 +15,17 @@ function main() {
     return 'https://youtube.com/results?search_query=' + encodeURIComponent(movieName + ' trailer');
   }
 
-    // jQuery link element
-    function trailerLink(movieName, id) {
-      return $('<a>', {
-        href: trailerURL(movieName),
-        text: 'Trailer',
-        target: '_blank',
-        id: id
-      }).click(function() {
-//        _gaq.push(['_trackEvent', $(this).attr('id'), 'clicked']);
-      });
-    }
+  // jQuery link element
+  function trailerLink(movieName, id) {
+    return $('<a>', {
+      href: trailerURL(movieName),
+      text: 'Trailer',
+      target: '_blank',
+      id: id
+    }).click(function() {
+      //        _gaq.push(['_trackEvent', $(this).attr('id'), 'clicked']);
+    });
+  }
 
   // Detect movie popover and add trailer link
   function monitorPreview(id, readmore_class) {
@@ -50,17 +50,15 @@ function main() {
 
   /* Route page to proper processing logic */
   switch (window.location.pathname.split('/')[1]) {
-    case "WiHome":            // Home/movie popover
-      monitorPreview('BobMovie-content', 'readMore');
-      break;
-    case "WiRecentAdditions": // added by jaredsohn-lifehacker
+    case "WiHome":            
+    case "WiRecentAdditions":
     case "NewReleases":
     case "WiAgain":
     case "WiAltGenre":
     case "WiSimilarsByViewType":
       monitorPreview('BobMovie-content', 'readMore');
       break;
-    case "WiGenre":           // added by jaredsohn-lifehacker
+    case "WiGenre":
       monitorPreview('bob-container', 'synopsis .mdpLink');
       break;
     case "WiMovie": // Movie detail page
