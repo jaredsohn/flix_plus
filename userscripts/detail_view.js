@@ -56,15 +56,17 @@ var fixTag = function(tag)
   }
 }
 
-// jQuery link element
-function playLink(movie_id, id) {
-  return $('<a>', {
-    href: window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movie_id,
-    text: 'Play',
-    id: id
-  }).click(function() {
-    //        _gaq.push(['_trackEvent', $(this).attr('id'), 'clicked']);
-  });
+function createPlayLink(movie_id, link_id) {
+  var elem = document.createElement('a');
+
+  elem.href = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movie_id;
+  elem.innerHTML = "<img alt='Play' width=32px src='" + chrome.extension.getURL('../src/img/play.png') + "'>";
+  elem.style.cssText = "margin-left: 20px; display:inline-block";
+  elem.id = link_id;
+  elem.title = "Play";
+  elem.className = "fp_play_link";
+
+  return elem;
 }
 
 while (i--) {
@@ -75,16 +77,39 @@ while (i--) {
 // added by jaredsohn-lifehacker so that it fixes links that later are added to the page (such as when you add something to My List).
 document.arrive("a", function()
 {
-  fixTag(this)
+  fixTag(this);
 });
 
-// Add a play button to the popup
-// TODO: support other bobmovie classes, too
-document.body.arrive("#BobMovie-content .readMore", function()
+
+monitorPreview = function(elem_id)
 {
-  console.log("arrive");
-  var parts = $("#BobMovie-content .mdpLink")[0].href.split("/");
-  var movie_id = parts[parts.length - 1];
-  var link$ = playLink(movie_id, 'play-popover');
-  $('#' + "BobMovie-content" + ' .readMore').after(link$).after(' \u00B7 ');
-});
+  // Add a play button to the popup.  mark as play-popover so URL isn't rewritten.
+  document.body.arrive("#" + elem_id + " .readMore", function()
+  {
+    console.log("arrive");
+
+    fplib.create_popup_header_row();
+
+    var parts = $("#" + elem_id + " .mdpLink")[0].href.split("/");
+    var movie_id = parts[parts.length - 1];
+    var link = createPlayLink(movie_id, "play-popover");
+    $(".fp_header_row")[0].appendChild(link);
+  });
+}
+
+/* Route page to proper processing logic */
+switch (window.location.pathname.split('/')[1]) {  //TODO: move to fplib?
+  case "WiHome":            
+  case "WiRecentAdditions":
+  case "NewReleases":
+  case "WiAgain":
+  case "WiAltGenre":
+  case "WiSimilarsByViewType":
+    monitorPreview('BobMovie-content');
+    break;
+  case "WiGenre":
+    monitorPreview('bob-container');
+    break;
+  default:
+    break;
+}

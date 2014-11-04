@@ -418,6 +418,7 @@ var _fplib = function()
 		document.arrive(selectors["borderedElement"], function()
 		{
 			console.log("arrive");
+//			console.log(this);
 			var movie_id = fplib.getMovieIdFromField(this.id);
 			if (typeof(data_dict[movie_id]) !== "undefined")
 			{
@@ -483,6 +484,19 @@ var _fplib = function()
 		}
 
 		return val;
+	}
+
+	// Used for placing play and trailer buttons
+	this.create_popup_header_row = function()
+	{
+	    // Create Flix Plus header row if it doesn't exist (TODO: move to fplib?)
+	    if ($(".midBob .fp_header_row").length === 0)
+	    {
+	        var div = document.createElement("div");
+	        div.className = "fp_header_row";
+	        div.style.cssText = "position: absolute; bottom: 3px; left: 3px;"
+	        $(".midBob")[0].appendChild(div)
+	    }
 	}
 
 

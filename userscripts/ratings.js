@@ -12,6 +12,13 @@ document.arrive(".bobMovieContent", function()
     $(".bobMovieContent").width(325);  // Sometimes the code below wouldn't fit within the popup; make it bigger to accomodate it
     $("#BobMovie-content").width(347); // Match the width
     $(".bobMovieHeader").width(329);   // Match the width
+
+    clearOld(null);
+
+    if (window.location.protocol === "https:")
+    {
+        $(".midBob").append("<br>No https support for Rotten Tomatoes / IMDB ratings.");
+    }
 });
 
 if (window.location.protocol === "https:")
@@ -33,6 +40,8 @@ var key_prefix = "flix_plus " + fplib.getProfileName();
 var IMDB_API =  "http://www.omdbapi.com/?tomatoes=true";
 var TOMATO_LINK = "http://www.rottentomatoes.com/alias?type=imdbid&s=";
 var IMDB_LINK = "http://www.imdb.com/title/";
+var _title = "";
+var _year = "";
 
 //popup movie selectors
 var HOVER_SEL = {
@@ -88,7 +97,7 @@ function getArgs() {
         return args
     }
 
-    key = 'www.netflix.com'; //was movies (jaredsohn/lifehacker)
+    key = 'www.netflix.com';
     var dict = POPUP_INS_SEL[key];
     if (url.indexOf('Queue') != -1) {
         args = dict.Queue;
@@ -104,7 +113,7 @@ function getArgs() {
 /*
     Add item to the cache
 */
-function addCache(title, imdb, tomatoMeter, tomatoUserMeter, imdbID, year) {
+function addCache(title, imdb, tomatoMeter, tomatoUserMeter, imdbID, year, actors) {
     year = year || null;
     imdb = imdb || null;
     tomatoMeter = tomatoMeter || null;
@@ -120,6 +129,7 @@ function addCache(title, imdb, tomatoMeter, tomatoUserMeter, imdbID, year) {
         'imdbID' : imdbID,
         'year' : year,
         'date' : date,
+        'actors' : actors
     };
     
     CACHE[title] = rating;
@@ -173,7 +183,7 @@ function getWrappedTitle(e, key, regex) {
 */
 function clearOld(args){
     var $target = $('#BobMovie');
-    if (args.key in POPUP_INS_SEL['www.netflix.com']){ // was movies (jaredsohn/lifehacker)
+    if ((args === null) || (args.key in POPUP_INS_SEL['www.netflix.com'])){ // was movies (jaredsohn/lifehacker)
         $target.find('.label').contents().remove();
     }
     $target.find('.rating-link').remove();
@@ -202,6 +212,7 @@ function getIMDBAPI(title, year) {
     if (year !== null) {
         url += '&y=' + year;
     }
+    console.log("query url: " + url);
     return url
 }
 
@@ -226,7 +237,11 @@ function getTomatoLink(imdbID) {
     parses form: http://www.netflix.com/WiPlayer?movieid=70171942&trkid=7103274&t=Archer
 */
 function getWIMainTitle(e) {
-    return $(e.target).siblings('img').attr('alt');
+//    var title = $(e.target).siblings('img').attr('alt');
+    var title = $(".bobMovieHeader .title")[0].innerText
+    _title = title;
+    console.log("title = " + title);
+    return title;
 }
 
 /*
@@ -316,10 +331,12 @@ function getRating(title, year, addArgs, callback) {
             addCache(title);
             return null
         }
+        console.log("~~~");
+        console.log(res);
         var imdbScore = parseFloat(res.imdbRating);
         var tomatoMeter = getTomatoScore(res, "tomatoMeter");
         var tomatoUserMeter = getTomatoScore(res, "tomatoUserMeter");
-        var rating = addCache(title, imdbScore, tomatoMeter, tomatoUserMeter, res.imdbID, year);
+        var rating = addCache(title, imdbScore, tomatoMeter, tomatoUserMeter, res.imdbID, year, res.actors);
         callback(rating, addArgs);
     });
 }
@@ -353,26 +370,40 @@ function showRating(rating, args) {
     Call the API with the year and update the rating if neccessary
 */
 function updateCache(title) {
-    var cachedVal = checkCache(title).cachedVal;
-    if (cachedVal.year === null) {
-        var year = parseYear();
-        getRating(title, year, null, function(rating){
-            showRating(rating, getArgs());
-        });
+    var this_title = title;
+    function get_and_show_rating() {    
+        var cachedVal = checkCache(title).cachedVal;
+        if (cachedVal.year === null) {
+            var year = parseYear();
+            getRating(title, year, null, function(rating){
+                if ((rating.title.trim() === _title.trim()))
+                {
+                    // TODO: also do a check for actors, directors, etc.
+                    showRating(rating, getArgs());                
+                }
+            });
+        }
     }
+    get_and_show_rating();
 }
 
 /*
     Build and display the ratings
 */
 function displayRating(rating, args) {
-    var imdb = getIMDBHtml(rating, args.imdbClass);
-    var tomato = getTomatoHtml(rating, args.rtClass);
-    var $target = $(args.selector);
-    $target[args.insertFunc](imdb);
-    $target[args.insertFunc](tomato);
-}
+    console.log("displayRating");
+    console.log(rating);
+    console.log(args);
 
+//    if ((rating.title === $(".bobMovieHeader .title")[0].innerText))
+    {
+        var imdb = getIMDBHtml(rating, args.imdbClass);
+        var tomato = getTomatoHtml(rating, args.rtClass);
+        var $target = $(args.selector);
+        $target[args.insertFunc](imdb);
+        $target[args.insertFunc](tomato);
+    }
+}
 
 ////////SEARCH AND INDIVIDUAL PAGE HANDLERS //////////
 /*
@@ -393,26 +424,6 @@ function searchSetup() {
     }
     return displaySearch(args)
 }
-
-/*
-// added by Jared Sohn for Lifehacker to handle wiMovie page
-function wiMovieSetup() {
-    var url = document.location.href;
-    var args;
-    if (url.indexOf("wiMovie") !== -1) {
-        args = SEARCH_SEL.WiSearch;
-        args.selectorClass = ".media";
-    }
-
-    // TODO: read title, year
-    // TODO: make sure it knows where to show output
-    getRating(title, year, null, function(rating){
-        showRating(rating, getArgs());
-    });
-
-
-}
-*/
 
 /*
     Find ratings for all of the movies found by the search and display them
@@ -440,7 +451,7 @@ function displaySearch(args){
 /////////// HTML BUILDERS ////////////
 function getIMDBHtml(rating, klass) {
     var score = rating.imdb;
-    var html = $('<a class="rating-link" target="_blank" href="' + escapeHTML(getIMDBLink(rating.imdbID)) + '"><div class="imdb imdb-icon star-box-giga-star" title="IMDB Rating"></div></a>');
+    var html = $('<a class="rating-link" target="_blank" href="' + escapeHTML(getIMDBLink(rating.imdbID)) + '"><div class="imdb imdb-icon star-box-giga-star" title="IMDB Rating - ' + rating.title.trim() + '"></div></a>');
     if (!score) {
         html.css('visibility', 'hidden');
     } else {
@@ -449,18 +460,34 @@ function getIMDBHtml(rating, klass) {
     return html
 }
 
+// Updated by jaredsohn-lifehacker to show just critic or user ratings if only one is available
 function getTomatoHtml(rating, klass) {
-    var html = $('<a class="rating-link" target="_blank" href="' + escapeHTML(getTomatoLink(rating.imdbID)) + '"><span class="tomato tomato-wrapper" title="Rotten Tomato Rating"><span class="rt-icon tomato-icon med"></span><span class="rt-score tomato-score"></span><span class="rt-icon audience-icon med"></span><span class="rt-score audience-score"></span></span></a>');
-    if (!rating.tomatoMeter || !rating.tomatoUserMeter) {
+    var html_text = '<a class="rating-link" target="_blank" href="' + escapeHTML(getTomatoLink(rating.imdbID)) + '">';
+    html_text += '<span class="tomato tomato-wrapper" title="Rotten Tomato Rating - ' + rating.title.trim() + '">';
+
+    if (rating.tomatoMeter)
+        html_text += '<span class="rt-icon tomato-icon med"></span><span class="rt-score tomato-score"></span>';
+    if (rating.tomatoUserMeter)
+        html_text += '<span class="rt-icon audience-icon med"></span><span class="rt-score audience-score"></span>';
+    html_text += '</span></a>';
+
+    var html = $(html_text);
+
+    if ((!rating.tomatoMeter) && (!rating.tomatoUserMeter)) {
         html.css('visibility', 'hidden');
         return html
     }
+    if (rating.tomatoMeter)
+    {
+        html.find('.tomato-icon').addClass(getTomatoClass(rating.tomatoMeter)).addClass(klass);
+        html.find('.tomato-score').append(rating.tomatoMeter + '%');    
+    }
 
-    html.find('.tomato-icon').addClass(getTomatoClass(rating.tomatoMeter)).addClass(klass);
-    html.find('.tomato-score').append(rating.tomatoMeter + '%');    
-
-    html.find('.audience-icon').addClass(getTomatoClass(rating.tomatoUserMeter)).addClass(klass);
-    html.find('.audience-score').append(rating.tomatoUserMeter + '%');
+    if (rating.tomatoUserMeter)
+    {
+        html.find('.audience-icon').addClass(getTomatoClass(rating.tomatoUserMeter)).addClass(klass);
+        html.find('.audience-score').append(rating.tomatoUserMeter + '%');
+    }
 
     return html
 }

@@ -19,11 +19,9 @@ var _currListItem = -1;
 var _currElem = null;
 var _keyboard_commands_shown = false;
 var _already_has_shift_chars = [ "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
-var _keyboard_shortcuts = null;
 
 var _keyboard_shortcut_to_id_dict = {};
 var _keyboard_id_to_shortcut_dict = {};
-var _shortcuts_key = "flix_plus " + fplib.getProfileName() + " keyboard_shortcuts";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Scrolling to element with keyboard focus
@@ -450,10 +448,8 @@ var getKeyboardCommandsHtml = function()
     var html = "<div style='{ background-color: rgba(1, 1, 1, 0.7); bottom: 0; left: 0; position: fixed; right: 0; top: 0; }'>"; // capture mouse clicks
     html += "<h1 style='text-align: center;'>Flix Plus keyboard commands</h2><br><br>";
     html += "<div style='font-size: 125%'; }>";
-    console.log("~99");
     console.log(_keyboard_id_to_shortcut_dict);
-    html += keyboard_shortcuts_info.get_help_text(_keyboard_id_to_shortcut_dict);
-    console.log("~100");
+    html += keyboard_shortcuts_info.get_help_text(_keyboard_id_to_shortcut_dict, false);
     html += "</div>";
 
     return html;
@@ -626,7 +622,7 @@ var run_command = function(command)
             case "jump_kids": window.location = "http://www.netflix.com/Kids"; break;
             case "jump_viewing_activity": window.location = "http://www.netflix.com/WiViewingActivity";  break;
             case "jump_your_ratings": window.location = "https://www.netflix.com/MoviesYouveSeen"; break;
-            case "search": elem = document.getElementById("searchField");  elem.focus(); elem.select(); break;
+            case "search": elem = document.getElementById("searchTab").click(); document.getElementById("searchField"); elem.focus(); elem.select(); break;
             case "your_account": window.location = "https://www.netflix.com/YourAccount"; break;
             case "help": toggle_keyboard_commands(); break;
             case "close_window": _keyboard_commands_shown = true; toggle_keyboard_commands(); $.each($("#layerModalPanes .close"), function(index, value) { this.click()  }); break;
@@ -641,33 +637,13 @@ var run_command = function(command)
 // Startup
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-chrome.storage.sync.get(_shortcuts_key, function(items)
+keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName() + " keyboard_shortcuts", function(keyboard_shortcut_to_id_dict, keyboard_id_to_shortcut_dict)
 {
-    console.log("~~");
-    console.log(items);
-
-    if (typeof(items[_shortcuts_key]) === "undefined")
-    {
-        console.log("generating default shortcut keys");
-        _keyboard_shortcuts = keyboard_shortcuts_info.generate_defaults();
-    }
-    else
-    {
-        console.log("shortcut keys found");
-        _keyboard_shortcuts = items[_shortcuts_key];
-        console.log(_keyboard_shortcuts);
-    }
-
-    init();
-});
-
-var init = function()
-{   
-    // Initialize keyboard shortcut dicts
-
-    var dicts = keyboard_shortcuts_info.create_keyboard_shortcut_dicts(_keyboard_shortcuts);
-    _keyboard_shortcut_to_id_dict = dicts[0];
-    _keyboard_id_to_shortcut_dict = dicts[1];
+    console.log("!");
+    console.log(keyboard_shortcut_to_id_dict);
+    console.log(keyboard_id_to_shortcut_dict);
+    _keyboard_shortcut_to_id_dict = keyboard_shortcut_to_id_dict;
+    _keyboard_id_to_shortcut_dict = keyboard_id_to_shortcut_dict;
 
     fplib.addEmptyVideoAnnotations(); // clean up DOM
     fplib.idMrows();
@@ -731,4 +707,4 @@ var init = function()
 
     document.addEventListener('keypress', handle_key_press, false);
     document.addEventListener('keydown', handle_key_down, false);
-}
+});
