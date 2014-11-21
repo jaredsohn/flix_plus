@@ -60,6 +60,7 @@ function main() {
     case "NewReleases":
     case "WiAgain":
     case "WiAltGenre":
+    case "MyList":
     case "WiSimilarsByViewType":
       monitorPreview('BobMovie-content');
       break;

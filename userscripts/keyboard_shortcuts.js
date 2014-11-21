@@ -525,11 +525,11 @@ var key_lookup = function(keyCombo)
 {
     var command = "";
 
-    console.log("looking up: " + keyCombo);
+    //console.log("looking up: " + keyCombo);
     if (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined")
         command = _keyboard_shortcut_to_id_dict[keyCombo];
 
-    console.log("command found: " + command);
+    //console.log("command found: " + command);
 
     return command;
 }
@@ -541,8 +541,8 @@ var handle_key_press = function(e)
     }
     var override = true;
     var keyCombo = String.fromCharCode(e.charCode||e.which).toLowerCase();
-    console.log("keycombo is");
-    console.log(keyCombo);
+    //console.log("keycombo is");
+    //console.log(keyCombo);
 
     var ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
 
@@ -639,7 +639,6 @@ var run_command = function(command)
 
 keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName() + " keyboard_shortcuts", function(keyboard_shortcut_to_id_dict, keyboard_id_to_shortcut_dict)
 {
-    console.log("!");
     console.log(keyboard_shortcut_to_id_dict);
     console.log(keyboard_id_to_shortcut_dict);
     _keyboard_shortcut_to_id_dict = keyboard_shortcut_to_id_dict;

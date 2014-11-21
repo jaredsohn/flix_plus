@@ -35,6 +35,11 @@ hideOnPlayer = function()
         console.log("next episode desc found!");
         this.innerText = "";
     });
+        
+    document.body.arrive(".playback-longpause-container", function() {
+        var paragraphs = $(".playback-longpause-container .content p");
+        paragraphs[paragraphs.length - 1].innerText = "";
+    });
 
     extlib.addGlobalStyle("#fp_blackscreen { display: none };")
     console.log("restoring from black screen");

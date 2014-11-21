@@ -105,6 +105,7 @@ switch (window.location.pathname.split('/')[1]) {  //TODO: move to fplib?
   case "WiAgain":
   case "WiAltGenre":
   case "WiSimilarsByViewType":
+  case "MyList":
     monitorPreview('BobMovie-content');
     break;
   case "WiGenre":

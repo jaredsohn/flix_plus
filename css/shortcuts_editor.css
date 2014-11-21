@@ -1,0 +1,26 @@
+#page_title {
+	font-size: 30px;
+	font-weight: bold;
+}
+
+.shortcuts_category {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.shortcuts_desc {
+	display:inline-block;
+}
+
+.shortcuts_key {
+
+}
+
+input {
+    float:right;
+    clear:both;
+}
+
+.shortcut_item {
+	width: 325px;
+}
