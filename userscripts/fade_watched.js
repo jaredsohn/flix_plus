@@ -89,19 +89,29 @@ var update_history = function(keyname, results, callback)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extlib.addGlobalStyle(".fp_watched { -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
+var keys_dict = {};
+keys_dict[key_prefix + "fpwatched_style"] = "tint";
+
+fplib.syncGet(keys_dict, function(items)
+{
+	fplib.define_poster_css("fp_watched", items[key_prefix + "fp_watched_style"]);
+});
+
 var keyname = "flix_plus " + fplib.getProfileName() + " viewingactivity";
 extlib.checkForNewData(keyname, 
 	5 * 60, // five minutes
 	28 * 60 * 60, // 28 hours
 	function(history_last_checked, callback)
 	{
+		console.log("!")
 		get_history(history_last_checked, 0, fplib.getAuthUrl(), null, function(results)
 		{
 			update_history(keyname, results, callback);
 		});
 	}, function(data)
 	{
+		console.log("callback");
+		console.log(data);
 		var ids_array = data.split(",");
 		fplib.applyClassnameToPosters(ids_array, "fp_watched");
 		fplib.applyClassnameToPostersOnArrive(ids_array, "fp_watched");

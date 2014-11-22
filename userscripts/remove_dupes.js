@@ -5,31 +5,40 @@
 // Hide duplicate titles.  Requires fplib.js
 //////////////////////////////////////////////////////////////////
 
-extlib.addGlobalStyle(".fp_duplicate { display: none !important; }");
+var key_prefix = "flix_plus " + fplib.getProfileName() + " ";
+
+var keys_dict = {};
+keys_dict[key_prefix + " fpduplicate_style"] = "hide";
+
+fplib.syncGet(keys_dict, function(items)
+{
+  fplib.define_poster_css("fp_duplicate", items[key_prefix + " fpduplicate_style"]);
+});
 
 // Mark 'Rate what you've seen' and 'because you like' elements so that they do not get hidden as duplicates
-$(".mrow-rating .boxShot").each(function() { $(this).attr("data-fp-ignore", true);})
-$(".supportVideos .boxShot").each(function() { $(this).attr("data-fp-ignore", true);})
-$(".recentlyWatched .boxShot").each(function() { $(this).attr("data-fp-ignore", true);})
+$(".mrow-rating .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);})
+$(".supportVideos .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);})
+$(".recentlyWatched .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);})
 
 var dupe_count = 0;
 var already_shown = {};
-titles = document.getElementsByClassName("boxShot");
-for (i = 0; i < titles.length; i++) {
-  if (titles[i].getAttribute("data-fp-ignore") === "true")
+var imgs = $(".boxShot img");
+for (i = 0; i < imgs.length; i++) {
+  if (imgs[i].getAttribute("data-fp-ignore") === "true")
     continue;
 
-  var movie_id = fplib.getMovieIdFromField(titles[i].id);
+  var movie_id = fplib.getMovieIdFromField(imgs[i].parentNode.id);
 
   if (typeof(already_shown[movie_id]) === "undefined")
     already_shown[movie_id] = true;
   else
   {
     dupe_count++;
-    titles[i].parentNode.className += " fp_duplicate"; 
+    imgs[i].className += " fp_duplicate";
+    imgs[i].parentNode.parentNode.className += " fp_duplicate_gp"; 
   }
 }
-console.log("Found " + dupe_count + " posters (of " + titles.length + ")");
+console.log("Found " + dupe_count + " posters (of " + imgs.length + ")");
 
 fplib.idMrows();
-fplib.rolloverVisibleImages(["fp_duplicate"]);
+fplib.rolloverVisibleImages(["fp_duplicate_gp"]);

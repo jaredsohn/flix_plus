@@ -377,6 +377,7 @@ var _fplib = function()
 		//consolelog(elem_prefix);
 
 		var count = 0;
+		var grandparent_count = 0;
 		consolelog("applyClassnameToPosters(" + class_name + "):");
 		consolelog(ids_array);
 
@@ -395,17 +396,26 @@ var _fplib = function()
 					//consolelog("found!");
 					var img_elem = elem.getElementsByTagName("img")[0];
 
-			     	if (!extlib.hasClass(img_elem, class_name)) // skips over characters on kids page
+			     	if (!extlib.hasClass(img_elem, class_name))
 					{
 						img_elem.className += " " + class_name;
-						count += 1;
+						count += 1;		
 					}
+
+					// This grandparent node lets allows us to hide posters via CSS (We don't fade the full poster because we don't want to fade the border.)
+					var grandparentElem = img_elem.parentNode.parentNode;
+			     	if (!extlib.hasClass(grandparentElem, class_name + "_gp"))
+					{
+						grandparentElem.className += " " + class_name + "_gp";
+						grandparent_count += 1;
+					}
+
 				} else
 					break;
 				instance += 1;
 			}
 		}
-		consolelog("applyClassnameToPosters count = " + count);
+		consolelog("applyClassnameToPosters count = " + count + ", " + grandparent_count);
 	}
 
 	this.applyClassnameToPostersOnArrive = function(ids_array, class_name) {
@@ -499,7 +509,20 @@ var _fplib = function()
 	    }
 	}
 
-
+	this.define_poster_css = function(className, behavior)
+	{
+		if (behavior === "hide")
+		{
+			extlib.addGlobalStyle("." + className + "_gp { display: none !important }");
+		} else if (behavior === "tint")
+		{
+			extlib.addGlobalStyle("." + className + "{ -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
+		} else if (behavior === "fade")
+		{
+			extlib.addGlobalStyle("." + className + "{ opacity: 0.2; -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
+		}
+	}
+	
 	function consolelog(msg)
 	{
 		if (typeof(localStorage["fplib debug"]) !== "undefined")

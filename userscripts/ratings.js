@@ -2,9 +2,13 @@
 // Heavily modified by jaredsohn-lifehacker to: 
 //
 //  1. prevent displaying wrong rating by comparing title/year with ui before updating
-//  2. telling user when there is not an 'exact' match.
-//  3. removing support for DVD and old-style (pre-Fall 2014) search
-//  4. warn about lack of https support
+//  2. make sure that movies are matched with movies and tv series are matched with series.
+//  3. Simplify titles to do a better job of matching
+//  4. A new 'long' matching algorithm that does some searching and then does more careful comparison against each result
+//  5. removing support for DVD and old-style (pre-Fall 2014) search
+//  6. warn about lack of https support
+//  7. indicate when still searching for matches
+//  8. indicate if no match is found
 
 if (fplib.isOldMyList())
 {
@@ -30,25 +34,14 @@ document.arrive(".bobMovieContent", function()
         var ui_data = get_ui_data();
         var args = getArgs();
 
-        getRating(ui_data, args, function(rating) {
-            console.log(rating);
-            if (rating !== null)
-            {
-                if (!rating_match_ui(rating))
-                {
-                    clearOld(args);
-                    $(".midBob").append("<br>Rotten Tomatoes / IMDB ratings not found.");
-                    // TODO: need to make more requests to identify show.  If unsuccessful, cache it.
-                } else
-                {
-                    clearOld(args);
-                    displayRating(rating, args);
-                }
-            } else
-            {
-                clearOld(args);
+        getRating(ui_data, function(movie_info) {
+            console.log(movie_info);
+            clearOld(args);
+
+            if ((movie_info.nodata === true) || (!info_match_ui(movie_info)))
                 $(".midBob").append("<br>Rotten Tomatoes / IMDB ratings not found.");
-            }
+            else
+                displayRating(movie_info, args);
         });
     }
 });
@@ -123,6 +116,7 @@ var parse_movie_info = function(omdb_json)
     info.roles["directors"] = omdb_json["Director"];
     info.roles["creators"] = omdb_json["Creator"];
     info.rated = omdb_json["Rated"];
+    info.nodata = false;
 
     return info;
 }
@@ -160,55 +154,39 @@ function getArgs() {
 /*
     Add item to the cache
 */
-/*
-function addCache(title, imdb, tomatoMeter, tomatoUserMeter, imdbID, year, roles) {
-    year = year || null;
-    imdb = imdb || null;
-    tomatoMeter = tomatoMeter || null;
-    tomatoUserMeter = tomatoUserMeter || null;
-    imdbID = imdbID || null;
+function addCache(ui_data, movie_info) {
+    if (movie_info === null) // We don't cache when the movie wasn't found
+        return null;
 
-    var date = new Date().getTime();
-    var rating = {
-        'title' : title,
-        'imdbScore' : imdb,
-        'tomatoMeter' : tomatoMeter,
-        'tomatoUserMeter' : tomatoUserMeter,
-        'imdbID' : imdbID,
-        'year' : year,
-        'date' : date,
-        'roles' : roles
-    };
-    
-    CACHE[title] = rating;
+    var compact_movie_info = {};
+    var fields = ["title", "year", "type", "date", "imdbID", "imdbScore", "tomatoMeter", "tomatoUserMeter", "metaScore", "nodata"];
+    var len = fields.length;
+    for (i = 0; i < len; i++)
+        compact_movie_info[fields[i]] = movie_info[fields[i]];
+
+    var key = ui_data["title"] + "_" + ui_data["year"] + "_" + ui_data["type"];
+
+    CACHE[key] = compact_movie_info;
     localStorage[key_name] = JSON.stringify(CACHE);
 
-    return rating
+    return movie_info;
 }
 
-function checkCache(title) {
-    if(!(title in CACHE)) {
-        return {
-            'inCache' : false,
-            'cachedVal' : null,
-        }
-    }
+function checkCache(title, year, type) {
+    var key = title + "_" + year + "_" + type;
+    console.log("checking cache");
+    console.log(title + " - " + year + " - " + type);
 
-    var cachedVal = CACHE[title];
-    var inCache = false;
-    if (cachedVal !== undefined && cachedVal.tomatoMeter !== undefined && cachedVal.year !== null){
-        var now = new Date().getTime();
-        var lifetime = now - cachedVal.date;
-        if(lifetime <= CACHE_LIFE) {
-            inCache = true;
-        }
-    }
-    return {
-        'inCache' : inCache,
-        'cachedVal' : cachedVal,
-    }
+    if(!(key in CACHE))
+        return null;
+
+    console.log("is in cache");
+    console.log("cached entry: ");
+    console.log(((new Date().getTime() - CACHE[key].date) <= CACHE_LIFE) ? CACHE[key] : null);
+
+    // Return cached value if not expired
+    return ((new Date().getTime() - CACHE[key].date) <= CACHE_LIFE) ? CACHE[key] : null;
 }
-*/
 
 /*
     Clear old ratings and unused content. Differs for different popups
@@ -355,7 +333,7 @@ function score_movie_info(ui_data, movie_info)
 
 function get_movie_info(url, callback)
 {
-    var out = {};
+    var movie_info = {};
 
     // TODO: check cache first (maybe just store json based on the url?)
 
@@ -363,20 +341,16 @@ function get_movie_info(url, callback)
     {
         try {
             var omdb_json = JSON.parse(res);
-
-            out.ui_data = get_ui_data();
-            out.movie_info = parse_movie_info(omdb_json);
-            out.scores = score_movie_info(out.ui_data, out.movie_info);
+            movie_info = parse_movie_info(omdb_json);
         } catch(e) {
             console.log(e);
         }
-        callback(out);
+        callback(movie_info);
     });
 }
 
 function get_all_movie_infos(title, callback)
 {
-    console.log("parallel!");
     async.parallel(
         [
             function(callback2) {
@@ -437,16 +411,16 @@ function get_all_movie_infos(title, callback)
                 async.map(search_request_datas, function(search_request_data, callback3)
                 {
                     search_request_data["type"] = search_request_data["Type"];
-                    if (!rating_match_ui_type(search_request_data)) // don't bother if not of appopriate type
+                    if (!info_match_ui_type(search_request_data)) // don't bother if not of appopriate type
                         callback3(0, null);
                     else
                     {
-                        get_movie_info(getForIdIMDBAPI(search_request_data["imdbID"]), function(out)
+                        get_movie_info(getForIdIMDBAPI(search_request_data["imdbID"]), function(movie_info)
                         {
-                            if (rating_match_ui(out.movie_info) === false)
+                            if (info_match_ui(movie_info) === false)
                                 callback3(0, null);
                             else
-                                callback3(0, out);
+                                callback3(0, movie_info);
                         });
                     }
                 }, function(err, results)
@@ -454,22 +428,13 @@ function get_all_movie_infos(title, callback)
                     console.log("getallmovieinfos");
                     console.log(results);
 
-                    var best = null;
-                    var count = 0;
+                    var matches = [];
 
                     var len = results.length;
                     for (i = 0; i < len; i++)
-                    {
-                        if (results[i] !== null)
-                        {
-                            best = results[i];
-                            console.log("possibility:");
-                            console.log(results[i]);
-                            count++;
-                        }
-                    }
-                    console.log("match count = " + count);
-                    callback(best);
+                        if ((results[i] !== null) && (results[i].nodata === false))
+                            matches.push(results[i]);
+                    callback(matches);
                 });
             } else
             {
@@ -482,80 +447,70 @@ function get_all_movie_infos(title, callback)
 /*
     Search for the title, first in the CACHE and then through the API
 */
-function getRating(ui_data, addArgs, callback) {
-    //var cached = checkCache(ui_data["title"]);
-    //if (cached.inCache){
-    //    callback(cached.cachedVal, addArgs);
-    //    return;
-    //}
+function getRating(ui_data, callback) {
+    var cached = checkCache(ui_data["title"], ui_data["year"], ui_data["type"]);
+    if (cached !== null)
+    {
+        callback(cached);
+        return;
+    }
 
-    get_movie_info(getIMDBAPI(simplify_title_for_search(ui_data["title"]), ui_data["year"]), function(info) {
-        console.log(info);
-        var movie_info = info.movie_info;
+    if (ui_data["type"] !== "series")
+    {
+        get_movie_info(getIMDBAPI(simplify_title_for_search(ui_data["title"]), ui_data["year"]), function(movie_info) {
+            console.log(movie_info);
 
-        if ((movie_info !== null) && rating_match_ui(movie_info))
+            if ((movie_info !== null) && info_match_ui(movie_info))
+            {
+                addCache(ui_data, movie_info);
+                callback(movie_info);
+            } else
+                getRatingWithSearch(ui_data, callback);
+        });
+    } else // Don't bother a direct search for tv series
+    {
+        console.log("skipping first search!");
+        getRatingWithSearch(ui_data, callback);
+    }
+}
+
+function getRatingWithSearch(ui_data, callback)
+{
+    // If not a good match doing a naive lookup, then find all similar titles and find the best match
+    get_all_movie_infos(ui_data["title"], function(movie_infos) {
+        console.log(movie_infos);
+
+        var best_info = null;
+        if (movie_infos !== null)
         {
-            // TODO: handle caching later... var rating = addCache(ui_data.title, imdbScore, tomatoMeter, tomatoUserMeter, res.imdbID, ui_data.year, roles);
-            callback(movie_info, addArgs);
+            if (movie_infos.length === 1)
+                best_info = movie_infos[0];
+            else if (movie_infos.length > 1)
+            {
+                best_info = movie_infos[0]; // TODO: arbitrary for now
+            }
+        }
+
+        if (best_info !== null)
+        {
+            if (movie_infos.length === 1)
+                addCache(ui_data, best_info); // Only store in cache if just one result (since we don't store other factors that we use for matching).  Could store all matches otherwise.
+
+            callback(best_info);                    
         } else
         {
-            // If not a good match doing a naive lookup, then find all similar titles and find the best match
-            get_all_movie_infos(ui_data["title"], function(best_info) {
-                if (best_info !== null)
-                {
-                    var movie_info = best_info.movie_info;
-
-                    if (movie_info !== null)
-                    {
-                        callback(movie_info, addArgs);                    
-                    }
-                } else
-                {
-                    callback(null, addArgs);
-                }
-            });
+            var best_info = {};
+            best_info["title"] = ui_data["title"];
+            best_info["year"] = ui_data["year"];
+            best_info["type"] = ui_data["type"];
+            best_info["nodata"] = true;
+            best_info["date"] = new Date().getTime();
+            addCache(ui_data, best_info); // Store that we couldn't find it
+            callback(best_info);
         }
     });
 }
 
-        // TODO: compare info against UI
-        // add to cache and call callback if it looks okay
-
-        // otherwise, make some more requests and figure out which is best before doing the same thing again.
-
-
-/*
-        console.log("2");        
-        // If received data doesn't seem like a good match, then make a search request and then analyze each of those results.
-        // for each individual request, check the cache first
-
-
-// TODO: below code should get run once we have found our match
-        //console.log("~~~");
-        //console.log(res);
-        //if (res["Title"].trim() !== ui_data.title.trim())
-        //{
-        //    console.log("retrieved title doesn't match");
-////            console.log(res["Title"]);
-////            console.log(title);
-       //     callback(null, addArgs);
-       //     return;
-        //}
-        //var imdbScore = parseFloat(res.imdbRating);
-        //var tomatoMeter = getTomatoScore(res, "tomatoMeter");
-        //var tomatoUserMeter = getTomatoScore(res, "tomatoUserMeter");
-
-        //var roles = {};
-        //roles["directors"] = res["Director"];
-        //roles["actors"] = res["Actors"];
-        //roles["writers"] = res["Writer"];
-        //var rating = addCache(ui_data.title, imdbScore, tomatoMeter, tomatoUserMeter, res.imdbID, ui_data.year, roles);
-        //console.log("addcache...");
-        //console.log(roles);
-        //console.log(rating);
-        //callback(rating, addArgs);
-    });
-}
 
 /*
     parse tomato rating from api response object
@@ -609,9 +564,9 @@ function simplify_title_for_search(title)
     return simple.replace(" and ", " ");
 }
 
-function rating_match_ui_type(rating) {
+function info_match_ui_type(movie_info) {
     var type = parseType();
-    if (type !== rating["type"])
+    if (type !== movie_info["type"])
     {
         console.log("type doesn't match");
         return false;
@@ -619,26 +574,26 @@ function rating_match_ui_type(rating) {
     return true;
 }
 
-function rating_match_ui(rating) {
-    if ((typeof(rating) === "undefined") || (rating === null))
+function info_match_ui(movie_info) {
+    if ((typeof(movie_info) === "undefined") || (movie_info === null))
     {
         console.log("No data returned to compare.");
         return false;
     }
 
-    if (!rating_match_ui_type(rating))
+    if (!info_match_ui_type(movie_info))
         return false;
 
-    if (simplify_title(rating["title"]) !== simplify_title(parseTitle()))
+    if (simplify_title(movie_info["title"]) !== simplify_title(parseTitle()))
     {
         console.log("titles don't match");
         return false;
     }
 
     // TODO - hack.  ignore year for series right now
-    if (rating.type === "movie")
+    if (movie_info.type === "movie")
     {
-        if ((rating["year"] !== null) && (rating["year"] !== parseYear()))
+        if ((movie_info["year"] !== null) && (movie_info["year"] !== parseYear()))
         {
             console.log("years don't match");
             return false;
@@ -651,23 +606,23 @@ function rating_match_ui(rating) {
 /*
     Build and display the ratings
 */
-function displayRating(rating, args) {
-    if (!rating_match_ui(rating))
+function displayRating(movie_info, args) {
+    if (!info_match_ui(movie_info))
         return;
-    var imdb = getIMDBHtml(rating, args.imdbClass);
-    var tomato = getTomatoHtml(rating, args.rtClass);
+    var imdb = getIMDBHtml(movie_info, args.imdbClass);
+    var tomato = getTomatoHtml(movie_info, args.rtClass);
     var $target = $(args.selector);
     $target[args.insertFunc](imdb);
     $target[args.insertFunc](tomato);
 
-    var poster = "<div id='poster'><img width=80 src='" + "http://img.omdbapi.com/?i=" + rating.imdbID + "&apikey=f35e5684" + "'></div>";
-    $target[args.insertFunc](poster);
+//    var poster = "<div id='poster'><img width=80 src='" + "http://img.omdbapi.com/?i=" + movie_info.imdbID + "&apikey=f35e5684" + "'></div>";
+//    $target[args.insertFunc](poster);
 }
 
 /////////// HTML BUILDERS ////////////
-function getIMDBHtml(rating, klass) {
-    var score = rating.imdbScore;
-    var html = $('<a class="rating-link" target="_blank" href="' + escapeHTML(getIMDBLink(rating.imdbID)) + '"><div class="imdb imdb-icon star-box-giga-star" title="IMDB Rating - ' + rating.title.trim() + '"></div></a>');
+function getIMDBHtml(movie_info, klass) {
+    var score = movie_info.imdbScore;
+    var html = $('<a class="rating-link" target="_blank" href="' + escapeHTML(getIMDBLink(movie_info.imdbID)) + '"><div class="imdb imdb-icon star-box-giga-star" title="IMDB Rating - ' + movie_info.title.trim() + '"></div></a>');
     if (!score) {
         html.css('visibility', 'hidden');
     } else {
@@ -677,32 +632,32 @@ function getIMDBHtml(rating, klass) {
 }
 
 // Updated by jaredsohn-lifehacker to show just critic or user ratings if only one is available
-function getTomatoHtml(rating, klass) {
-    var html_text = '<a class="rating-link" target="_blank" href="' + escapeHTML(getTomatoLink(rating.imdbID)) + '">';
-    html_text += '<span class="tomato tomato-wrapper" title="Rotten Tomato Rating - ' + rating.title.trim() + '">';
+function getTomatoHtml(movie_info, klass) {
+    var html_text = '<a class="rating-link" target="_blank" href="' + escapeHTML(getTomatoLink(movie_info.imdbID)) + '">';
+    html_text += '<span class="tomato tomato-wrapper" title="Rotten Tomato Rating - ' + movie_info.title.trim() + '">';
 
-    if (rating.tomatoMeter)
+    if (movie_info.tomatoMeter)
         html_text += '<span class="rt-icon tomato-icon med"></span><span class="rt-score tomato-score"></span>';
-    if (rating.tomatoUserMeter)
+    if (movie_info.tomatoUserMeter)
         html_text += '<span class="rt-icon audience-icon med"></span><span class="rt-score audience-score"></span>';
     html_text += '</span></a>';
 
     var html = $(html_text);
 
-    if ((!rating.tomatoMeter) && (!rating.tomatoUserMeter)) {
+    if ((!movie_info.tomatoMeter) && (!movie_info.tomatoUserMeter)) {
         html.css('visibility', 'hidden');
         return html
     }
-    if (rating.tomatoMeter)
+    if (movie_info.tomatoMeter)
     {
-        html.find('.tomato-icon').addClass(getTomatoClass(rating.tomatoMeter)).addClass(klass);
-        html.find('.tomato-score').append(rating.tomatoMeter + '%');    
+        html.find('.tomato-icon').addClass(getTomatoClass(movie_info.tomatoMeter)).addClass(klass);
+        html.find('.tomato-score').append(movie_info.tomatoMeter + '%');    
     }
 
-    if (rating.tomatoUserMeter)
+    if (movie_info.tomatoUserMeter)
     {
-        html.find('.audience-icon').addClass(getTomatoClass(rating.tomatoUserMeter)).addClass(klass);
-        html.find('.audience-score').append(rating.tomatoUserMeter + '%');
+        html.find('.audience-icon').addClass(getTomatoClass(movie_info.tomatoUserMeter)).addClass(klass);
+        html.find('.audience-score').append(movie_info.tomatoUserMeter + '%');
     }
 
     return html

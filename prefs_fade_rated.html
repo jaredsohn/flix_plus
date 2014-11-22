@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+	<title>Fading Preferences - Flix Plus</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="css/prefs.css" />
+
+	<script src='/forge/app_config.js'></script><script src='/forge/all.js'></script>
+	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="js/fplib.js"></script>
+	<script type="text/javascript" src="js/fade_rated_editor.js"></script>
+  </head>
+  <body>
+
+    <div class="container">
+    	<div id="page_title">Flix Plus settings - Fading Preferences</div>
+    	<form id="prefs_form">
+            Show rated posters as 
+            <select id="fade_rated_select" class="form-control">
+                <option value="hide">hidden</option>
+                <option value="fade">faded</option>
+                <option value="tint">tinted</option>
+            </select>
+            <br>
+            Show posters rated 'not interested' as 
+            <select id="fade_rated_notinterested_select" class="form-control">
+                <option value="hide">hidden</option>
+                <option value="fade">faded</option>
+                <option value="tint">tinted</option>
+            </select>
+            <br>
+
+            Show watched posters as 
+            <select id="fade_watched_select" class="form-control">
+                <option value="hide">hidden</option>
+                <option value="fade">faded</option>
+                <option value="tint">tinted</option>
+            </select>
+            <br>
+
+            Show duplicates as 
+            <select id="fade_duplicates_select" class="form-control">
+                <option value="hide">hidden</option>
+                <option value="fade">faded</option>
+                <option value="tint">tinted</option>
+            </select>
+            <br>
+
+
+    		<button id="save">Save</button>&nbsp;&nbsp;
+    		<button id="defaults">Restore defaults</button>&nbsp;&nbsp;
+    	</form>
+        <br>
+    </div><!-- /.container -->
+
+    <script src="js/bootstrap.min.js"></script>
+  </body>
+</html>
