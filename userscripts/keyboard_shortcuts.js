@@ -496,6 +496,7 @@ var handle_key_down = function(e)
     switch (e.keyCode)
     {
         case 27: keyCombo = "Escape"; break;
+        case 32: keyCombo = "Space"; break;
         case 37: keyCombo = "Left"; break;
         case 39: keyCombo = "Right"; break;
         case 38: keyCombo = "Up"; break;
@@ -639,8 +640,8 @@ var run_command = function(command)
 
 keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName() + " keyboard_shortcuts", function(keyboard_shortcut_to_id_dict, keyboard_id_to_shortcut_dict)
 {
-    console.log(keyboard_shortcut_to_id_dict);
-    console.log(keyboard_id_to_shortcut_dict);
+    //console.log(keyboard_shortcut_to_id_dict);
+    //console.log(keyboard_id_to_shortcut_dict);
     _keyboard_shortcut_to_id_dict = keyboard_shortcut_to_id_dict;
     _keyboard_id_to_shortcut_dict = keyboard_id_to_shortcut_dict;
 
@@ -668,7 +669,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
 
         document.body.arrive(selectors["elementsList"], function()
         {
-            console.log(".");
+            //console.log(".");
             _elemsListContainers.push(this);
         });
 
@@ -682,7 +683,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
 
         document.body.arrive(selectors["elements"], function()
         {
-            console.log(".");
+            //console.log(".");
             _elemsNPList.push(this);
         });
     }

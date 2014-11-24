@@ -242,6 +242,14 @@ var _keyboard_shortcuts_info = function(){
         return new_defaults;
     }
 
+    this.get_already_has_shift_chars = function() {
+      return [ "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+    };
+
+    this.get_shift_symbols_dict = function() {
+      return {"1": "!", "2": "@", "3": "#", "4": "$", "5": "%", "6": "^", "7": "&", "8": "*", "9": "(", "0": ")"};
+    };
+
     // Create dictionaries to look up keys and commands
     this.create_keyboard_shortcut_dicts = function(orig_shortcuts_list)
     {
@@ -273,25 +281,25 @@ var _keyboard_shortcuts_info = function(){
         {
             var keyboard_shortcuts = "";
 
-            console.log(items[key]);
+            //console.log(items[key]);
 
             if (typeof(items[key]) === "undefined")
             {
                 console.log("generating default shortcut keys");
                 keyboard_shortcuts = self.generate_defaults();
-                console.log(keyboard_shortcuts);
+                //console.log(keyboard_shortcuts);
             }
             else
             {
                 console.log("shortcut keys found");
                 keyboard_shortcuts = items[key];
-                console.log(keyboard_shortcuts);
+                //console.log(keyboard_shortcuts);
             }
 
             var dicts = self.create_keyboard_shortcut_dicts(keyboard_shortcuts);
-            console.log("dicts");
-            console.log(keyboard_shortcuts);
-            console.log(dicts);
+            //console.log("dicts");
+            //console.log(keyboard_shortcuts);
+            //console.log(dicts);
             callback(dicts[0], dicts[1]);
         });
     };

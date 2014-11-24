@@ -6,8 +6,6 @@ var _shortcuts_editor = function() {
 	var _keyboard_id_to_shortcut_dict = {};
 	var _keyboard_shortcut_to_id_dict = {};
 
-	var _already_has_shift_chars = [ "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
-
 	this.init = function(profilename)
 	{
 		console.log("init");
@@ -83,6 +81,12 @@ var _shortcuts_editor = function() {
 		$(".shortcuts_key").each(function() { this.addEventListener("keydown", function(e) {
 			console.log("keydown");
 
+			if ((e.altKey) || (e.ctrlKey) || (e.metaKey))
+			{
+				// We don't allow alt, ctrl, and comand keys right now (helps avoid breaking system keys)
+				return;
+			}
+
 		    // TODO: use full list of keys here instead
 		    id = this.id;
 		    keyCombo = "";
@@ -93,6 +97,10 @@ var _shortcuts_editor = function() {
 		    }
 		    switch (e.keyCode)
 		    {
+		    	case 8: 
+		    		e.preventDefault();
+		    		break;
+		    	case 32: keyCombo = "Space"; break;
 		        case 27: keyCombo = "Escape"; break;
 		        case 37: keyCombo = "Left"; break;
 		        case 39: keyCombo = "Right"; break;
@@ -106,14 +114,23 @@ var _shortcuts_editor = function() {
 
 			e.preventDefault();		    
 
-		    ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
+		    ignoreShift = (keyboard_shortcuts_info.get_already_has_shift_chars().indexOf(keyCombo) !== -1);
 
-		    if ((e.altKey)) keyCombo = "Alt-" + keyCombo;
-		    if ((e.ctrlKey)) keyCombo = "Ctrl-" + keyCombo;
-		    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
+		    //if ((e.altKey)) keyCombo = "Alt-" + keyCombo;
+		    //if ((e.ctrlKey)) keyCombo = "Ctrl-" + keyCombo;
+		    if (!ignoreShift && (e.shiftKey)) 
+		    {
+		    	keyCombo = "Shift-" + keyCombo;
+			}
 
 		    if (keyCombo.length === 1)
-		    	keyCombo = keyCombo.toLowerCase();		    
+		    {
+		   		var dict = keyboard_shortcuts_info.get_shift_symbols_dict();
+		   		if (keyCombo in dict)
+		   			keyCombo = dict[keyCombo];
+		   		else
+			    	keyCombo = keyCombo.toLowerCase();
+		    }
 
 		    // Don't allow duplicating key
 			if (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined")
@@ -134,22 +151,34 @@ var _shortcuts_editor = function() {
 		$(".shortcuts_key").each(function() { this.addEventListener("keypress", function(e) {
 			console.log("keypress");
 
+			if ((e.altKey) || (e.ctrlKey) || (e.metaKey))
+			{
+				// We don't allow alt, ctrl, and comand keys right now (helps avoid breaking system keys)
+				return;
+			}
+
 	        id = this.id;
 		    keyCombo = String.fromCharCode(e.charCode||e.which).toLowerCase();
 		    //console.log("keycombo is");
 		    //console.log(keyCombo);
 
-		    ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
+		    ignoreShift = (keyboard_shortcuts_info.get_already_has_shift_chars().indexOf(keyCombo) !== -1);
 
 		    if (e.altKey || e.ctrlKey || (!ignoreShift && (e.shiftKey)))
 		        keyCombo = keyCombo.toUpperCase();
 
-		    if (e.altKey) keyCombo = "Alt+" + keyCombo;
-		    if (e.ctrlKey) keyCombo = "Ctrl+" + keyCombo;
-		    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift+" + keyCombo;
+		    if (e.altKey) keyCombo = "Alt-" + keyCombo;
+		    if (e.ctrlKey) keyCombo = "Ctrl-" + keyCombo;
+		    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
 
 		    if (keyCombo.length === 1)
-		    	keyCombo = keyCombo.toLowerCase();
+		    {	
+		   		var dict = keyboard_shortcuts_info.get_shift_symbols_dict();
+		   		if (keyCombo in dict)
+		   			keyCombo = dict[keyCombo];
+		   		else
+			    	keyCombo = keyCombo.toLowerCase();
+		    }
 
 	        e.preventDefault();   
 

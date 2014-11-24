@@ -75,6 +75,7 @@ var _fplib = function()
 	    results["movieIdAttribute"] = "id";
 	    results["borderedElement"] = ".boxShot"; // This selects the part of the DOM that gets the keyboard focus CSS
         results["posterImageIdPrefix"] = "dbs";
+        results["bobPopup"] = ".bobMovieContent"; // place in dom to check to see if popup has changed
 
 //	    consolelog("location.pathname = " + location.pathname);
 
@@ -136,6 +137,7 @@ var _fplib = function()
 			results["queueMouseOver"] = ".btnWrap";
 			results["elemContainerId"] = "displaypage-overview";
 			results["movieInfoSelector"] = ".displayPagePlayable";
+	        results["bobPopup"] = ".bobContent";
 
 	        // for navigating episodes; not working yet
 /*	        results["elements"] = ".episodeList li";
@@ -189,6 +191,9 @@ var _fplib = function()
 	    } else if (location.pathname.indexOf("/WiPlayer") === 0)
 	    {
 	    	// do nothing
+	    } else if (location.pathname.indexOf("/WiRoleDisplay") === 0) // not complete yet
+	    {
+	        results["bobPopup"] = ".bobContent";
 	    } else
 	    {
 	        consolelog("getSelectorsForPath: unexpected location.pathname: " + location.pathname);

@@ -1,5 +1,5 @@
 /*imdb-style*/
-.star-box-giga-star {
+.fp_rt_star_box_giga_star {
   background-position: -180px -71px;
   width: 66px;
   height: 66px;
@@ -13,7 +13,7 @@
   font-family: tahoma;
 }
 
-.imdb-icon {
+.fp_rt_imdb_icon {
   background-image: url('../img/imdbSprite.png');
   display: inline-block;
   vertical-align: middle;
@@ -23,53 +23,50 @@
   margin-top: 5px;
 }
 
-.queue-icon {
-  margin-left: -10px;
+#fp_rt_spinner_div {
+  position:relative; 
+  top: 20px;
+}
+
+.fp_rt_spinner {
+  width: 180px;
 }
 
 /*tomato-style*/
-.rt-icon {
+.fp_rt_icon {
   display: inline-block;
   vertical-align: text-bottom;
   background: transparent url('../img/tomatoSprite.png') no-repeat -312px -160px;
 }
 
-.search-rt-icon {
-  margin-left: 12px !important;
-}
-
-.dvd-rt-icon {
-  margin-left: 10px !important;
-}
-
-.tomato-icon.med.rotten {
+.fp_rt_tomato_icon.fp_rt_med.fp_rt_rotten {
   background-position: -96px -129px;
 }
 
-.tomato-icon.med.fresh {
+.fp_rt_tomato_icon.fp_rt_med.fp_rt_fresh {
   background-position: -64px -129px;
 }
 
-.audience-icon.med.rotten {
+.fp_rt_audience_icon.fp_rt_med.fp_rt_rotten {
   background-position: -127px -129px;
 }
 
-.audience-icon.med.fresh {
+.fp_rt_audience_icon.fp_rt_med.fp_rt_fresh {
   background-position: -31px -129px;
 }
 
-.rt-icon.med {
+.fp_rt_icon.fp_rt_med {
   margin-left:-2px;
   width: 32px;
   height: 32px;
 }
 
-.rt-score {
+.fp_rt_score {
   font-size: .9em;
   vertical-align: 7px;
 }
 
-.tomato-wrapper {
+.fp_rt_tomato_wrapper {
   padding-left:11px;
 }
 
@@ -78,27 +75,34 @@
     margin-bottom: 15px !important;
 }
 
-.rating-link {
+.fp_rt_rating_link {
   text-decoration:none !important;
   color:black !important;
   padding:5px;
   padding-left: 0px;
 }
 
-.dvd-popup {
-  margin-bottom: -15px;
-  margin-top: -29px;
-  margin-left: 45px;
+.fp_rt_metacritic-favorable {
+  background-color: #6c3;
 }
 
-.dvd-search-page {
-  margin-bottom: 10px;
-  margin-top: -6px;
-  margin-left: 0px;
+
+.fp_rt_metacritic-average {
+  background-color: #fc3;
 }
 
-.wi-search-page {
-  margin-bottom: -4px;
-  margin-top: -30px;
-  margin-left: 13px;
+.fp_rt_metacritic-unfavorable {
+  background-color: #f00;
 }
+
+.fp_rt_metascore {
+  vertical-align: super;
+  text-align: center;
+  padding: 6px;
+  font-size: 17px;
+  color: #fff;
+  font-family: Arial,Helvetica,sans-serif;
+  font-style: normal!important;
+  font-weight: bold!important;
+}
+
