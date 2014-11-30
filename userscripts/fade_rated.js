@@ -50,8 +50,6 @@ var create_unique_ids_dict = function(id_array, results_json, notinterested_only
 	for (i = 0; i < id_array.length; i++)
 		unique_ids_dict[id_array[i]] = true;
 
-
-
 	for (i = 0; i < results_json.ratingItems.length; i++)
 	{
 		//console.log(results_json.ratingItems[i]);
@@ -101,14 +99,14 @@ var update_history = function(keyname, results, callback)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var keys_dict = {};
-keys_dict[key_prefix + "fprated_style"] = "fade";
-keys_dict[key_prefix + "fprated_notinterested_style"] = "hide";
+keys_dict[key_prefix + "fp_rated_style"] = "fade";
+keys_dict[key_prefix + "fp_rated_notinterested_style"] = "hide";
 
 fplib.syncGet(keys_dict, function(items)
 {
 	console.log(items);
-	fplib.define_poster_css("fp_rated", items[key_prefix + "fprated_style"]);
-	fplib.define_poster_css("fp_rated_notinterested", items[key_prefix + "fprated_notinterested_style"]);
+	fplib.define_poster_css("fp_rated", items[key_prefix + "fp_rated_style"]);
+	fplib.define_poster_css("fp_rated_notinterested", items[key_prefix + "fp_rated_notinterested_style"]);
 });
 //extlib.addGlobalStyle(".fp_rated { opacity: 0.2; -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
 ////extlib.addGlobalStyle(".fp_rated_gp { display: none !important }");

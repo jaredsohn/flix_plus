@@ -86,6 +86,14 @@ var _fplib = function()
 	        results["queueMouseOver"] = ".btnWrap";
 	        results["ratingMouseOver"] = ".stbrOl";
 		    results["borderedElement"] = ".boxShot";
+		} else if (location.pathname.indexOf("/search") === 0)
+		{
+	    	results["elementsList"] = ".mrow";
+	        results["elemContainerId"] = "BobMovie";
+	        results["queueMouseOver"] = ".btnWrap";
+	        results["ratingMouseOver"] = ".stbrOl";
+		    results["borderedElement"] = ".boxShot";
+			results["bobPopup"] = "#bob";
 	    } else if ((location.pathname.indexOf("/WiRecentAdditions") === 0) || (location.pathname.indexOf("/NewReleases") === 0))  // NewReleases seems to be a rename
 	    {
 	       results["elementsList"] = ".mrow";
@@ -423,6 +431,7 @@ var _fplib = function()
 		consolelog("applyClassnameToPosters count = " + count + ", " + grandparent_count);
 	}
 
+	// TODO: needs to work with '_gp' again
 	this.applyClassnameToPostersOnArrive = function(ids_array, class_name) {
 		var data_dict = {};
 		var len = ids_array.length;
@@ -435,12 +444,13 @@ var _fplib = function()
 			console.log("arrive");
 //			console.log(this);
 			var movie_id = fplib.getMovieIdFromField(this.id);
+//			console.log(movie_id);
 			if (typeof(data_dict[movie_id]) !== "undefined")
 			{
-				console.log(this);
+				//console.log(this);
 				var imgs = this.getElementsByTagName("img");
-				console.log("marking as " + class_name + " - " + movie_id);
-				imgs[0].className += " " + class_name;
+//				console.log("marking as " + class_name + " - " + movie_id);
+//				imgs[0].className += " " + class_name;
 			}
 		});
 	}	

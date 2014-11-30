@@ -90,10 +90,15 @@ var update_history = function(keyname, results, callback)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var keys_dict = {};
-keys_dict[key_prefix + "fpwatched_style"] = "tint";
+keys_dict[key_prefix + "fp_watched_style"] = "tint";
 
 fplib.syncGet(keys_dict, function(items)
 {
+	console.log("define_poster_css1");
+	console.log(items);
+	console.log("key: ");
+	console.log(key_prefix + "fp_watched_style");
+	console.log(items[key_prefix + "fp_watched_style"]);
 	fplib.define_poster_css("fp_watched", items[key_prefix + "fp_watched_style"]);
 });
 

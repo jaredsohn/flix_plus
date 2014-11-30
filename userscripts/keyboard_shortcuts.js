@@ -515,7 +515,7 @@ var handle_key_down = function(e)
     if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
 
     var command = key_lookup(keyCombo);
-    if (command !== null)
+    if ((command !== null) && (command !== ""))
     {
         run_command(command);
         e.preventDefault();   
@@ -707,4 +707,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
 
     document.addEventListener('keypress', handle_key_press, false);
     document.addEventListener('keydown', handle_key_down, false);
+
+    // Make borders more visible on many pages
+    extlib.addGlobalStyle(".agMovieGallery {position: relative; top: 10px; left:10px}");
 });

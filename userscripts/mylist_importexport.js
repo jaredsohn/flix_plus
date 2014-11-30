@@ -3,12 +3,14 @@
 // This script will make AJAX requests to import a Netflix user's rating history.
 
 // Add a button
+/*
 var import_button = document.createElement("a");
 var createAText = document.createTextNode("Import JSON");
 import_button.setAttribute("href", 'javascript:var div = document.createElement("div"); div.className="fp_import_cmd"; div.style="display:none"; document.body.appendChild(div);');
 import_button.appendChild(createAText);
 import_button.className = "extlib_button";
 import_button.style = "align:right;"
+*/
 
 var export_button = document.createElement("a");
 var createAText = document.createTextNode("Export JSON");
@@ -22,18 +24,18 @@ if (fplib.isOldMyList())
 	var header = document.getElementsByClassName("listQueueHead")[0];
 	if ($(".listQueueHead br").length === 0)
 		header.appendChild(document.createElement("br"));
-	header.appendChild(import_button);
+//	header.appendChild(import_button);
 	header.appendChild(export_button);
 
 } else if (fplib.isNewMyList())
 {
 	$(".main-content").prepend(export_button);
-	$(".main-content").prepend(import_button);
+//	$(".main-content").prepend(import_button);
 	$(".main-content").prepend(document.createElement("br"));
 }
 
 extlib.initButtonCss();
-
+/*
 document.body.arrive(" .fp_import_cmd", function() {
 
 	console.log("import clicked");
@@ -59,7 +61,7 @@ document.body.arrive(" .fp_import_cmd", function() {
 	document.getElementById("fp_import_file_chooser").click();
 	$("#fp_import_file_chooser").remove();	
 });    
-
+*/
 document.body.arrive(" .fp_export_cmd", function() {
 	console.log("export clicked");
 	var export_data = {};
@@ -124,7 +126,7 @@ var get_list_new_mylist = function()
 
 	return export_data;
 }
-
+/*
 var set_ratings = function(ratings, index, authURL, callback)
 {
 	if ((index < 0) || (index >= ratings.length))
@@ -155,4 +157,4 @@ this.getAuthUrl = function()
 //	var authUrl = fplib.parseEmbeddedJson(document.body.innerHTML, "authURL");
 //	console.log(authUrl);
 //	return authUrl;
-}
+}*/

@@ -30,15 +30,14 @@ else
 
 var CACHE_LIFE = 1000*60*60*24*7*2; //two weeks in milliseconds
 
-
 //////////// CACHE //////////////
 
 function addCache(ui_data, movie_info) {
-    if (movie_info === null) // We don't cache when the movie wasn't found
+    if ((movie_info === null) || (movie_info["nodata"] === true)) // We don't cache when the movie wasn't found
         return null;
 
     var compact_movie_info = {};
-    var fields = ["title", "year", "type", "date", "imdbID", "imdbScore", "tomatoMeter", "tomatoUserMeter", "metaScore", "nodata"];
+    var fields = ["title", "year", "type", "date", "imdbID", "imdbScore", "tomatoMeter", "tomatoUserMeter", "metaScore"];
     var len = fields.length;
     for (i = 0; i < len; i++)
         compact_movie_info[fields[i]] = movie_info[fields[i]];
@@ -123,7 +122,7 @@ function parseYear(args) {
 function parseEndYear(args) {
     var $target = $(args["info_section"] + " .year");
     var endYear = null;
-    if ($target.indexOf("-") !== -1)
+    if ($target[0].innerText.indexOf("-") !== -1)
         endYear = $target.text().split('-')[1];
     return endYear;
 }
@@ -280,21 +279,32 @@ function get_all_movie_infos(title, args, callback)
 }
 
 // Search for the title, first in the CACHE and then through the API
-function getRating(args, callback) {
+function getRating(args, cache_only, callback) {
 
     var ui_data = get_ui_data(args);
 
+console.log("4");
     var $target = $(args["selector"]);
     var spinner = "<div id='fp_rt_spinner_div'>Looking up external ratings...<br><img class='fp_rt_spinner' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'></div>";
     $target.append(spinner);
 
     var cached = checkCache(ui_data["title"], ui_data["year"], ui_data["type"]);
+console.log("5");
+
     if (cached !== null)
     {
         callback(cached);
         return;
     }
+console.log("6");
 
+
+    if (cache_only)
+    {
+        console.log("quitting since cache-only mode is in effect");
+        callback(null);
+        return
+    }
     if (ui_data["type"] !== "series")
     {
         get_movie_info(getIMDBAPI(simplify_title_for_search(ui_data["title"]), ui_data["year"]), function(movie_info) {
@@ -326,7 +336,7 @@ function getRatingWithSearch(ui_data, args, callback)
                 best_info = movie_infos[0];
             else if (movie_infos.length > 1)
             {
-                best_info = movie_infos[0]; // TODO: arbitrary for now.  Should look at roles, years, etc.
+                best_info = null; // We reject it for now to avoid showing wrong information.
             }
         }
 
@@ -338,7 +348,7 @@ function getRatingWithSearch(ui_data, args, callback)
             callback(best_info);
         } else
         {
-            // Could not find it; create a dummy object, store it in the cache, and pass it along to update the UI
+            // Could not find it; create a dummy object and pass it along to update the UI (this exists because we used to cache this)
             var best_info = {"title" : ui_data["title"], "year": ui_data["year"], "type": ui_data["type"], "nodata": true, "data": new Date().getTime()};
             addCache(ui_data, best_info);
             callback(best_info);
@@ -352,7 +362,7 @@ var parse_movie_info = function(omdb_json)
         return null;
     if ((omdb_json["Type"] === "episode") || (omdb_json["Type"] === "game") || (omdb_json["Type"] === "N/A"))
         return null;
-
+    
     var info = {};
     info.title = omdb_json["Title"] || null;
     info.year = omdb_json["Year"] || null;
@@ -397,6 +407,9 @@ function simplify_title(title)
     var title = title.trim().toLowerCase();
     if (title.indexOf("the ") === 0)
         title = title.substring(4);
+
+    if (title.indexOf("classic ") === 0)
+        title = title.substring(8);
 
     title = title.replace(" & ", " and ");
     title = title.replace("the movie", "");
@@ -447,7 +460,7 @@ function info_match_ui(movie_info, args) {
 
     if (!info_match_ui_type(movie_info, args))
     {
-        console.log("types don't match");
+        //message already shown by method console.log("types don't match");
         return false;
     }
 
@@ -457,26 +470,49 @@ function info_match_ui(movie_info, args) {
         return false;
     }
 
-    // TODO - hack.  ignore year for series right now
-    if (movie_info.type === "movie")
+    try
     {
-        if ((movie_info["year"] !== null) && (movie_info["year"] !== parseYear(args)))
+        // The year (or start year) must be
+        var ajax_year_str = movie_info["year"];
+        var ui_year_str = parseYear(args);
+
+        if ((ajax_year_str !== null) && (ajax_year_str.trim() !== ""))
+        {
+            var ajax_year = parseInt(ajax_year_str);
+
+            if ((ui_year_str !== ((ajax_year).toString())) && 
+                (ui_year_str !== ((ajax_year - 1).toString())) && 
+                (ui_year_str !== ((ajax_year + 1).toString())))
+            {
+                console.log("years don't match");
+                return false;
+            }
+        } else
         {
             console.log("years don't match");
-            return false;
+            return false;        
         }
+    } catch (ex)
+    {
+        console.log(ex);
+        console.log("years don't match");
+        return false;                
     }
 
     return true;
 }
 
 //    Build and display the ratings
-function displayRating(movie_info, args) {
+function displayRating(movie_info, is_https, args) {
     console.log(movie_info);
     clearOld(args);
-
     if ((movie_info === null) || (movie_info.nodata === true) || (!info_match_ui(movie_info, args)))
-        $(args["selector"]).append("<div id='fp_rt_not_found'><br>Rotten Tomatoes / IMDB ratings not found.</div>");
+    {
+        if (is_https)
+            $(args["selector"]).append("<div class='fp_rt_no_https'><br>No HTTPS support for external ratings.</div>");
+        else
+            $(args["selector"]).append("<div id='fp_rt_not_found'><br>Could not find external ratings.</div>");
+    }
     else
     {
         var imdb = getIMDBHtml(movie_info, '');
@@ -498,7 +534,7 @@ function clearOld(args){
     $target.find('.ratingPredictor').remove();
     $target.find('.fp_rt_rating_link').remove();
     $target.find('#fp_rt_spinner_div').remove();
-    $target.find('.fp_rt_not_found').remove();
+    $target.find('#fp_rt_not_found').remove();
     $target.find('.fp_rt_no_https').remove();
 
     if (args["fix_alignment"] === true)
@@ -527,10 +563,13 @@ function getMetacriticClass(score) {
 function getIMDBHtml(movie_info, klass) {
     var score = movie_info.imdbScore;
     var html = $('<a class="fp_rt_rating_link" target="_blank" href="' + extlib.escapeHTML(getIMDBLink(movie_info.imdbID)) + '"><div class="fp_rt_imdb fp_rt_imdb_icon fp_rt_star_box_giga_star" title="IMDB Rating - ' + movie_info.title.trim() + '"></div></a>');
-    if (!score) {
+    if (!movie_info.imdbID) {
         html.css('visibility', 'hidden');
     } else {
-        html.find('.fp_rt_imdb').addClass(klass).append(score.toFixed(1));
+        if (!score)
+            html.find('.fp_rt_imdb').addClass(klass).append("N/A");            
+        else
+            html.find('.fp_rt_imdb').addClass(klass).append(score.toFixed(1));
     }
     return html
 }
@@ -589,15 +628,11 @@ var onPopup = function()
     var args = {"info_section" : "#BobMovie", "roles_section" : ".info", "selector" : ".midBob", "hide_labels" : true, "fix_alignment": true }
     clearOld(args);
 
-    if (window.location.protocol === "https:")
-    {
-        $(args["info_section"]).append("<div class='fp_rt_no_https'><br>No https support for Rotten Tomatoes / IMDB ratings.</div>");
-    } else
-    {
-        getRating(args, function(movie_info) {
-            displayRating(movie_info, args);
-        });
-    }
+    var is_https = (window.location.protocol === "https:");
+    getRating(args, is_https, function(movie_info) {
+console.log("7");
+        displayRating(movie_info, is_https, args);
+    });
 };
 
 $(document).ready(function() {
@@ -613,8 +648,11 @@ $(document).ready(function() {
             $(args["info_section"]).append("<div class='fp_rt_no_https'><br>No https support for Rotten Tomatoes / IMDB ratings.</div>");
         } else
         {
-            getRating(args, function(movie_info) {
-                displayRating(movie_info, args);
+            getRating(args, false, function(movie_info) {
+                console.log("3");
+
+                var is_https = (window.location.protocol === "https:");
+                displayRating(movie_info, is_https, args);
             });
         }
     }

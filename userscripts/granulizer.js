@@ -101,11 +101,46 @@ var patch_all_arrive = function(selector_str, classname, wrap_in_li)
     });    
 }
 
-// TODO: convert this to use fplib
-if (location.pathname.indexOf("/WiHome") === 0)
+switch (window.location.pathname.split('/')[1])
 {
-    patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
+    case "WiHome":
+    case "WiRecentAdditions":
+    case "NewReleases":
+    case "WiAgain":
+    case "WiSimilarsByViewType":
+    case "WiAltGenre":
+    case "WiMovie":
+    case "RoleDisplay":
+    case "WiRoleDisplay":
+        patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
+        break;
+    case "MyList":
+        if (fplib.isOldMyList())
+            patch_all(document.body, "stbrIl", false);
+        else
+        {
+            patch_all_arrive("#BobMovie-content", "strbrContainer", false)
+        }
+        break;
+    case "Search": // when DVDs are enabled
+        patch_all(document.body, "stbrIl", true);
+        break;
+    case "WiSearch": // When DVDs are not enabled; likely deprecated with newer search page
+        patch_all(document.body, "stbrIl", false);
+        break;
+    case "RateMovies":
+        patch_all(document.body, "strbrContainer", false);
+        patch_all_arrive("", "strbrContainer", false);
+        break;
+    case "MoviesYouveSeen":
+    case "WiGenre": // page gets redirected in Flix Plus to WiAltGenre anyway
+        // TODO: css is different
+        break;   
+}
 
+// Extra logic for WiHome
+if ((window.location.pathname.split('/')[1]) === "WiHome")
+{
     // handle rating viewed content at bottom of page (initial and arrivals)
     var rating_rows = document.getElementsByClassName("mrow-rating");
     if ((typeof(rating_rows) !== "undefined") && (rating_rows.length > 0))
@@ -119,55 +154,3 @@ if (location.pathname.indexOf("/WiHome") === 0)
     if (headerRow !== null)
         patch_all(headerRow, "strbrContainer", false);
 }
-
-
-else if ((location.pathname.indexOf("/WiRecentAdditions") === 0) || (location.pathname.indexOf("/NewReleases") === 0))
-{
-    patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
-} 
-else if (location.pathname.indexOf("/WiAgain") === 0)
-{
-    patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
-}
-else if (location.pathname.indexOf("/WiSimilarsByViewType") === 0)
-{
-    patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
-}
-else if (location.pathname.indexOf("/WiAltGenre") === 0)
-{
-    patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
-}
-else if (location.pathname.indexOf("/WiMovie") === 0)
-{
-    patch_all(document.body, "strbrContainer", false);
-} else if (location.pathname.indexOf("/MyList") === 0)
-{ 
-    if (fplib.isOldMyList())
-        patch_all(document.body, "stbrIl", false);
-    else
-    {
-        patch_all_arrive("#BobMovie-content", "strbrContainer", false)
-    }
-}
-else if (location.pathname.indexOf("/Search") === 0) // Search when DVDs are enabled
-{
-    patch_all(document.body, "stbrIl", true);
-}
-else if (location.pathname.indexOf("/RateMovies") === 0) 
-{
-    patch_all(document.body, "strbrContainer", false);
-    patch_all_arrive("", "strbrContainer", false);   
-}
-else if (location.pathname.indexOf("/WiSearch") === 0) 
-{
-    patch_all(document.body, "stbrIl", false);
-
-    
-} else if (location.pathname.indexOf("/MoviesYouveSeen") === 0)
-{
-    // TODO: css is different
-} else if (location.pathname.indexOf("/WiGenre") === 0)
-{
-    // similar css to /MoviesYouveSeen
-}
-

@@ -24,12 +24,6 @@
 
 // jaredsohn-lifehacker: Now requires extlib.js, fplib.js, and arrive.js.
 
-if (fplib.isOldMyList())
-{
-    console.log("Script disabled since it does not work on old MyList.")
-    return;
-}
-
 extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important"); // jaredsohn-Lifehacker...so it doesn't show 'Play' on genre pages
 
 var stopIt    = function (e) { e.preventDefault(); e.stopPropagation(); },
@@ -97,20 +91,23 @@ monitorPreview = function(elem_id)
   });
 }
 
-/* Route page to proper processing logic */
-switch (window.location.pathname.split('/')[1]) {  //TODO: move to fplib?
-  case "WiHome":            
-  case "WiRecentAdditions":
-  case "NewReleases":
-  case "WiAgain":
-  case "WiAltGenre":
-  case "WiSimilarsByViewType":
-  case "MyList":
-    monitorPreview('BobMovie-content');
-    break;
-  case "WiGenre":
-    monitorPreview('bob-container');
-    break;
-  default:
-    break;
-}
+monitorPreview('BobMovie-content');
+// for wiGenre, would use monitorPreview('bob-container'), but that page now redirects to wiAltGenre
+
+
+
+// Make window bigger so there is room for button
+var onPopup = function()
+{
+    console.log("arrive");
+
+    $(".bobMovieContent").height(250); // jaredsohn-lifehacker: Added to make room for ratings buttons (after recommend button was added)
+    $(".bobMovieContent").width(325);  // Sometimes the code below wouldn't fit within the popup; make it bigger to accomodate it
+    $("#BobMovie-content").width(347); // Match the width
+    $(".bobMovieHeader").width(329);   // Match the width
+};
+
+var selectors = fplib.getSelectorsForPath();
+if (selectors !== null)
+  document.arrive(selectors["bobPopup"], onPopup);
+
