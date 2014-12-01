@@ -10,11 +10,11 @@ function trailerURL(movieName) {
 
 function createTrailerElem(movieName, id) {
   var elem = document.createElement("a");
-  elem.className = "fp_preview_link";
+  elem.className = "fp_preview_link fp_button";
   elem.href = trailerURL(movieName);
   elem.innerHTML = "<img alt='Watch trailer' width=32px src='" + chrome.extension.getURL('../src/img/trailer.png') + "'>";
   elem.target = '_blank';
-  elem.style.cssText = "margin-left: 20px; display:inline-block";
+  elem.style.cssText = "display:inline-block;";
   elem.id = id;
   elem.title = "Watch trailer";
 
@@ -30,7 +30,10 @@ function monitorPreview(id) {
 
     var movieName = $('#' + id + ' .mdpLink .title').text().trim();
     var linkElem = createTrailerElem(movieName, 'trailer-popover');
+    linkElem.style.cssText += " margin-left: 20px;"
+
     $(".fp_header_row")[0].appendChild(linkElem);
+
   });
   observer.observe(target, { childList: true });
 }

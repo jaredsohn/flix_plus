@@ -132,13 +132,13 @@ function parseRoles(args) {
     var target_elem = $(args["roles_section"]);
     try
     {
-        var dts = $(args["roles_section"] + " dl dt", target_elem);
-        var dds = $(args["roles_section"] + " dl dd", target_elem);
+        var dts = $(" dl dt", target_elem);
+        var dds = $(" dl dd", target_elem);
 
         var dts_len = dts.length;
         for (i = 0; i < dts_len; i++)
         {
-            var dt = dts[i].innerText.trim().Replace(":", "").toLowerCase();
+            var dt = dts[i].innerText.trim().replace(":", "").toLowerCase();
 
             var elems = $("a", dds[i]);
             var elems_len = elems.length;
@@ -253,6 +253,8 @@ function get_all_movie_infos(title, args, callback)
                         {
                             if (info_match_ui(movie_info, args) === false)
                                 callback3(0, null);
+                            else if (info_match_ui_roles_count(movie_info, args) === 0)
+                                callback3(0, null);
                             else
                                 callback3(0, movie_info);
                         });
@@ -283,21 +285,17 @@ function getRating(args, cache_only, callback) {
 
     var ui_data = get_ui_data(args);
 
-console.log("4");
     var $target = $(args["selector"]);
-    var spinner = "<div id='fp_rt_spinner_div'>Looking up external ratings...<br><img class='fp_rt_spinner' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'></div>";
+    var spinner = "<div id='fp_rt_spinner_div'>Looking up external ratings...<br><img class='fp_button fp_rt_spinner' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'></div>";
     $target.append(spinner);
 
     var cached = checkCache(ui_data["title"], ui_data["year"], ui_data["type"]);
-console.log("5");
 
     if (cached !== null)
     {
         callback(cached);
         return;
     }
-console.log("6");
-
 
     if (cache_only)
     {
@@ -374,11 +372,13 @@ var parse_movie_info = function(omdb_json)
     info.date = new Date().getTime();
     info.type = omdb_json["Type"];
     info.roles = {};
-    info.roles["actors"] = omdb_json["Actors"];
-    info.roles["directors"] = omdb_json["Director"];
-    info.roles["creators"] = omdb_json["Creator"];
+    info.roles["actors"] = getRolesArray(omdb_json, "Actors");
+    info.roles["directors"] = getRolesArray(omdb_json, "Director");
+    info.roles["creators"] = getRolesArray(omdb_json, "Creator");
     info.rated = omdb_json["Rated"];
     info.nodata = false;
+    console.log("parsed movie info");
+    console.log(info);
 
     return info;
 }
@@ -386,6 +386,17 @@ var parse_movie_info = function(omdb_json)
 // parse tomato rating from api response object
 function getTomatoScore(res, meterType) {
     return ((typeof(res[meterType]) === "undefined") || res[meterType] === "N/A") ? null : parseInt(res[meterType])
+}
+
+function getRolesArray(json_obj, field)
+{
+    var roles_array = [];
+    if ((typeof(json_obj[field]) !== "undefined") && (json_obj[field] !== null))
+        roles_array = json_obj[field].split(",");
+    for (i = 0; i < roles_array.length; i++)
+        roles_array[i] = roles_array[i].trim();
+
+    return roles_array;
 }
 
 function get_ui_data(args) {
@@ -451,6 +462,60 @@ function info_match_ui_type(movie_info, args) {
     return true;
 }
 
+function info_match_ui_roles_count(movie_info, args) {
+    if (typeof(movie_info["roles"]) === "undefined")
+        return 1;
+
+    var ui_roles = parseRoles(args);
+    var ajax_roles = movie_info["roles"];
+    var match_count = 0;
+
+    console.log("ajax_roles: ~~~~");
+    console.log(ajax_roles);
+
+
+    console.log("ui_roles: ~~~~");
+    console.log(ui_roles);
+
+    var match_count_text = "";
+    var ui_roles_count = ui_roles["actors"].length + ui_roles["directors"].length + ui_roles["creators"].length;
+    var ajax_roles_count = ajax_roles["actors"].length + ajax_roles["directors"].length + ajax_roles["creators"].length;
+    if ((ui_roles_count === 0) || (ajax_roles_count === 0))
+        return 1; // If either is missing role data we treat it as a low match.
+    else
+    {
+        // must have at least one match.
+        var role_names = ["actors", "directors", "creators"];
+        for (i = 0; i < role_names.length; i++)
+        {
+            var dict = {};
+
+            var keys = Object.keys(ui_roles[role_names[i]]);;
+            var len = keys.length;
+            for (j = 0; j < len; j++)
+            {
+                var name = keys[j].toLowerCase().trim();
+                dict[name] = true;
+            }
+
+            for (j = 0; j < ajax_roles[role_names[i]].length; j++)
+            {
+                var name = ajax_roles[role_names[i]][j].trim();
+                if (typeof(dict[name.toLowerCase()]) !== "undefined")
+                {
+                    match_count_text += name + ", ";
+                    match_count += 1;
+                }
+            }
+        }
+    }
+    console.log('match count is ' + match_count);
+    console.log(match_count_text);
+
+    return match_count;
+}
+
+
 function info_match_ui(movie_info, args) {
     if ((typeof(movie_info) === "undefined") || (movie_info === null))
     {
@@ -464,6 +529,16 @@ function info_match_ui(movie_info, args) {
         return false;
     }
 
+    var roles_match_count = info_match_ui_roles_count(movie_info, args);
+    console.log("~~~");
+    console.log(movie_info);
+    console.log(roles_match_count);
+    if (roles_match_count === 0)
+    {
+        console.log("roles don't match.");
+        return false;
+    }
+
     if (simplify_title(movie_info["title"]) !== simplify_title(parseTitle(args)))
     {
         console.log("titles don't match");
@@ -472,13 +547,16 @@ function info_match_ui(movie_info, args) {
 
     try
     {
-        // The year (or start year) must be
-        var ajax_year_str = movie_info["year"];
-        var ui_year_str = parseYear(args);
+        // The year (or start year) must be within one
+        var ajax_years = extlib.parse_year_range(movie_info["year"]);
+        var ajax_year_str = null;
+        if (ajax_years.length)
+            ajax_year_str = ajax_years[0].toString();
 
         if ((ajax_year_str !== null) && (ajax_year_str.trim() !== ""))
         {
             var ajax_year = parseInt(ajax_year_str);
+            var ui_year_str = parseYear(args);
 
             if ((ui_year_str !== ((ajax_year).toString())) && 
                 (ui_year_str !== ((ajax_year - 1).toString())) && 

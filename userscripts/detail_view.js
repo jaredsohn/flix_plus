@@ -58,7 +58,7 @@ function createPlayLink(movie_id, link_id) {
   elem.style.cssText = "margin-left: 20px; display:inline-block";
   elem.id = link_id;
   elem.title = "Play";
-  elem.className = "fp_play_link";
+  elem.className = "fp_play_link fp_button";
 
   return elem;
 }
