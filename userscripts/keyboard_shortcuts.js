@@ -495,6 +495,7 @@ var handle_key_down = function(e)
     // TODO: use full list of keys here instead
     switch (e.keyCode)
     {
+        case 13: keyCombo = "Enter"; break;
         case 27: keyCombo = "Escape"; break;
         case 32: keyCombo = "Space"; break;
         case 37: keyCombo = "Left"; break;
@@ -507,6 +508,13 @@ var handle_key_down = function(e)
     if (keyCombo === "")
         return;
 
+    // hack
+    if ((location.pathname.indexOf("/ProfilesGate") === 0) && ((keyCombo === "Space") || (keyCombo === "Enter")))
+    {
+        console.log("running hack");
+        extlib.simulateClick($("img", _elemsNPList[_currListItem])[0]);
+        return;
+    }
 
     var ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
 
@@ -649,6 +657,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     fplib.idMrows();
 
     var selectors = fplib.getSelectorsForPath();
+    console.log(selectors);
     if (selectors["elementsList"] === ".mrow")
     {
         _elemsListContainers = document.getElementsByClassName("mrow");
@@ -679,7 +688,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     } else
     {
         _elemsNPList = $(selectors["elements"]).get();
-        //console.log(_elemsNPList);
+        console.log(_elemsNPList);
 
         document.body.arrive(selectors["elements"], function()
         {

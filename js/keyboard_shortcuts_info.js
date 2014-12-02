@@ -285,13 +285,13 @@ var _keyboard_shortcuts_info = function(){
 
             if (typeof(items[key]) === "undefined")
             {
-                console.log("generating default shortcut keys");
+                //console.log("generating default shortcut keys");
                 keyboard_shortcuts = self.generate_defaults();
                 //console.log(keyboard_shortcuts);
             }
             else
             {
-                console.log("shortcut keys found");
+                //console.log("shortcut keys found");
                 keyboard_shortcuts = items[key];
                 //console.log(keyboard_shortcuts);
             }
@@ -341,9 +341,9 @@ var _keyboard_shortcuts_info = function(){
     this.get_help_text = function(id_to_key_dict, link_to_editor)
     {        
         var s = id_to_key_dict; // s is for shortcut and is short to make it easy to reference the dict a lot 
-        console.log(id_to_key_dict);
+        //console.log(id_to_key_dict);
 
-        console.log("get help text");
+        //console.log("get help text");
         var text = "Cursor and section are highlighted by borders.  Press '" + s["help"] + "' for list of commands or see below.<br><br>";
         text += "Move around items: " + s["move_right"] + ", " + s["move_left"] + ", " + s["move_home"] + ", " + s["move_end"] + "<BR>&nbsp;&nbsp;&nbsp;Play: " + s["play"] + "<BR>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"] + "<BR>";
         text += "&nbsp;&nbsp;&nbsp;Zoom into details: " + s["zoom_into_details"] + "<BR>&nbsp;&nbsp;&nbsp;Rate: " + s["rate_clear"] + " to clear, 0-5: " + s["rate_0"] + ", " + s["rate_1"] + ", " + s["rate_2"] + ", " + s["rate_3"] + ", " + s["rate_4"] + ", " + s["rate_5"] + "; half stars: " + s["rate_1_5"] + ", " + s["rate_2_5"] + ", " + s["rate_3_5"] + ", " + s["rate_4_5"]

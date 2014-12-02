@@ -12,7 +12,7 @@
 
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-	<link rel="stylesheet" type="text/css" href="css/shortcuts_editor.css" />
+	<link rel="stylesheet" type="text/css" href="css/prefs.css" />
 
 	<script src='/forge/app_config.js'></script><script src='/forge/all.js'></script>
 	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
@@ -25,9 +25,12 @@
 
     <div class="container">
 
-    	<div id="page_title">Edit Flix Plus shortcuts</div>
+    	<h3><div id="page_title">Edit Flix Plus shortcuts</div></h3>
+        <br><br>
     	<form id="shortcuts_editor_form">
-    		<div id="shortcuts"></div>
+            <div class="row">
+        		<div id="shortcuts" class="col-md-4"></div>
+            </div>
     		<button id="save">Save</button>&nbsp;&nbsp;
     		<button id="defaults">Restore defaults</button>&nbsp;&nbsp;
     	</form>

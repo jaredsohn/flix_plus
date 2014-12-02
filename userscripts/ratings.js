@@ -696,7 +696,7 @@ function getMetatcriticHtml(movie_info, klass) {
 
 var onPopup = function()
 {
-    console.log("arrive");
+    console.log("arrive-ratings-onPopup");
 
     $(".bobMovieContent").height(250); // jaredsohn-lifehacker: Added to make room for ratings buttons (after recommend button was added)
     $(".bobMovieContent").width(325);  // Sometimes the code below wouldn't fit within the popup; make it bigger to accomodate it
@@ -704,6 +704,12 @@ var onPopup = function()
     $(".bobMovieHeader").width(329);   // Match the width
 
     var args = {"info_section" : "#BobMovie", "roles_section" : ".info", "selector" : ".midBob", "hide_labels" : true, "fix_alignment": true }
+    if (location.pathname.indexOf("/search") === 0)
+    {
+        console.log("fix alignment set to false");
+        args["fix_alignment"] = false;
+    }
+
     clearOld(args);
 
     var is_https = (window.location.protocol === "https:");

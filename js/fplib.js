@@ -199,9 +199,23 @@ var _fplib = function()
 	    } else if (location.pathname.indexOf("/WiPlayer") === 0)
 	    {
 	    	// do nothing
-	    } else if (location.pathname.indexOf("/WiRoleDisplay") === 0) // not complete yet
+	    } else if (location.pathname.indexOf("/WiRoleDisplay") === 0)
 	    {
 	        results["bobPopup"] = ".bobContent";
+		} else if (location.pathname.indexOf("/ProfilesGate") === 0)
+		{
+		    results["elements"] = ".profile";
+		    results["elemContainerId"] = "[selected]"; // This field is not a jquery selector and can also be [selected] or [document]
+		    results["queueMouseOver"] = null;
+		    results["queueRemove"] = null;
+		    results["queueAdd"] = null;
+		    results["ratingMouseOver"] = null;
+		    results["elementsList"] = null;
+		    results["movieInfoSelector"] = null;
+		    results["movieIdAttribute"] = null;
+		    results["borderedElement"] = null;
+	        results["posterImageIdPrefix"] = "dbs";
+	        results["bobPopup"] = null;
 	    } else
 	    {
 	        consolelog("getSelectorsForPath: unexpected location.pathname: " + location.pathname);
@@ -431,7 +445,6 @@ var _fplib = function()
 		consolelog("applyClassnameToPosters count = " + count + ", " + grandparent_count);
 	}
 
-	// TODO: needs to work with '_gp' again
 	this.applyClassnameToPostersOnArrive = function(ids_array, class_name) {
 		var data_dict = {};
 		var len = ids_array.length;
@@ -441,16 +454,27 @@ var _fplib = function()
 		var selectors = fplib.getSelectorsForPath();		
 		document.arrive(selectors["borderedElement"], function()
 		{
-			console.log("arrive");
-//			console.log(this);
-			var movie_id = fplib.getMovieIdFromField(this.id);
-//			console.log(movie_id);
+			console.log("arrive (applyClassnameToPostersOnArrive)");
+			var id = 0;
+			if (this.id === "")
+			{
+				var elem = $("a", $(this));
+				if ((typeof(elem) !== "undefined") && (elem !== null))
+					id = elem.attr("data-id"); // for search pages
+			}
+			else
+				id = this.id;
+
+			var movie_id = fplib.getMovieIdFromField(id);
+			//console.log(movie_id);
 			if (typeof(data_dict[movie_id]) !== "undefined")
 			{
-				//console.log(this);
+				this.parentNode.className += " " + class_name + "_gp";
+
+				console.log(this);
 				var imgs = this.getElementsByTagName("img");
 //				console.log("marking as " + class_name + " - " + movie_id);
-//				imgs[0].className += " " + class_name;
+				imgs[0].className += " " + class_name;
 			}
 		});
 	}	
@@ -535,6 +559,9 @@ var _fplib = function()
 		} else if (behavior === "fade")
 		{
 			extlib.addGlobalStyle("." + className + "{ opacity: 0.2; -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
+		} else if (behavior == "normal")
+		{
+			extlib.addGlobalStyle("." + className + "{ }");			
 		}
 	}
 	

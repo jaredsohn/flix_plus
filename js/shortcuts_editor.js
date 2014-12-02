@@ -43,6 +43,7 @@ var _shortcuts_editor = function() {
 			node = document.createElement("div");
 			node.innerText = categories[category_index];
 			node.className = "shortcuts_category";
+			node.style.innerText = "font-weight: bold";
 			shortcuts_div.appendChild(node);
 
 			//console.log("For category '" + categories[category_index] + "'");
