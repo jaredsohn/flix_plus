@@ -2,7 +2,8 @@
 
 // This script will make AJAX requests to get a Netflix user's viewing history.
 
-var key_prefix = "flix_plus " + fplib.getProfileName() + " ";
+var _key_prefix = "flix_plus " + fplib.getProfileName() + " ";
+var _ignore_tv = false;
 
 var get_history = function(start_time, page_no, authUrl, results_json, callback)
 {
@@ -59,7 +60,11 @@ var create_unique_ids_dict = function(id_array, results_json)
 	for (i = 0; i < results_json.viewedItems.length; i++)
 	{
 		if ((typeof(results_json.viewedItems[i].series) !== 'undefined') && (results_json.viewedItems[i].series != null))
+		{
+			if (_ignore_tv)
+				continue;
 			id = results_json.viewedItems[i].series;
+		}
 		else
 			id = results_json.viewedItems[i].movieID;
 		unique_ids_dict[id] = true;
@@ -89,36 +94,56 @@ var update_history = function(keyname, results, callback)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var keys_dict = {};
-keys_dict[key_prefix + "fp_watched_style"] = "tint";
 
-fplib.syncGet(keys_dict, function(items)
+chrome.storage.sync.get(_key_prefix + "fp_ignore_tv", function(items)
 {
-	console.log("define_poster_css1");
-	console.log(items);
-	console.log("key: ");
-	console.log(key_prefix + "fp_watched_style");
-	console.log(items[key_prefix + "fp_watched_style"]);
-	fplib.define_poster_css("fp_watched", items[key_prefix + "fp_watched_style"]);
-});
+	console.log("fp_ignore_tv = ");
+	console.log(items[_key_prefix + "fp_ignore_tv"]);
 
-var keyname = "flix_plus " + fplib.getProfileName() + " viewingactivity";
-extlib.checkForNewData(keyname, 
-	5 * 60, // five minutes
-	28 * 60 * 60, // 28 hours
-	function(history_last_checked, callback)
+	if (typeof(items[_key_prefix + "fp_ignore_tv"] !== "undefined"))
+		_ignore_tv = items[_key_prefix + "fp_ignore_tv"];
+	else
+		_ignore_tv = false;
+
+	// force a reload of stored data when this changes
+	if (_ignore_tv !== (localStorage[_key_prefix + "fp_ignore_tv"] === "true"))
 	{
-		console.log("!")
-		get_history(history_last_checked, 0, fplib.getAuthUrl(), null, function(results)
-		{
-			update_history(keyname, results, callback);
-		});
-	}, function(data)
-	{
-		console.log("callback");
-		console.log(data);
-		var ids_array = data.split(",");
-		fplib.applyClassnameToPosters(ids_array, "fp_watched");
-		fplib.applyClassnameToPostersOnArrive(ids_array, "fp_watched");
+		delete localStorage[_key_prefix + "viewingactivity_last_checked"];
 	}
-);
+	localStorage[_key_prefix + "fp_ignore_tv"] = _ignore_tv;
+
+
+	var keys_dict = {};
+	keys_dict[_key_prefix + "fp_watched_style"] = "tint";
+
+	fplib.syncGet(keys_dict, function(items)
+	{
+		console.log("define_poster_css1");
+		console.log(items);
+		console.log("key: ");
+		console.log(_key_prefix + "fp_watched_style");
+		console.log(items[_key_prefix + "fp_watched_style"]);
+		fplib.define_poster_css("fp_watched", items[_key_prefix + "fp_watched_style"]);
+	});
+
+	var keyname = "flix_plus " + fplib.getProfileName() + " viewingactivity";
+	extlib.checkForNewData(keyname, 
+		5 * 60, // five minutes
+		28 * 60 * 60, // 28 hours
+		function(history_last_checked, callback)
+		{
+			console.log("!")
+			get_history(history_last_checked, 0, fplib.getAuthUrl(), null, function(results)
+			{
+				update_history(keyname, results, callback);
+			});
+		}, function(data)
+		{
+			console.log("callback");
+			console.log(data);
+			var ids_array = data.split(",");
+			fplib.applyClassnameToPosters(ids_array, "fp_watched");
+			fplib.applyClassnameToPostersOnArrive(ids_array, "fp_watched");
+		}
+	);
+});

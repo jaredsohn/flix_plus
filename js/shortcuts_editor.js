@@ -82,19 +82,26 @@ var _shortcuts_editor = function() {
 		$(".shortcuts_key").each(function() { this.addEventListener("keydown", function(e) {
 			console.log("keydown");
 
-			if ((e.altKey) || (e.ctrlKey) || (e.metaKey))
+			if ((e.altKey) || (e.metaKey))
 			{
-				// We don't allow alt, ctrl, and comand keys right now (helps avoid breaking system keys)
+				// don't allow alt and meta keys for now.  Want to avoid breaking system keys.
 				return;
 			}
+			if (e.ctrlKey)
+			{
+				if ((e.keyCode !== 36) && (e.keyCode !== 37) && (e.keyCode !== 111))
+				{
+					// don't allow ctrl keys other than the built-in ones (home, end, o) for now
+					return;
+				}
+			}
 
-		    // TODO: use full list of keys here instead
 		    id = this.id;
 		    keyCombo = "";
 
 		    if ((e.keyCode >= 33) && (e.keyCode <= 127))
 		    {
-			    keyCombo = String.fromCharCode(e.charCode||e.which).toUpperCase();
+			    keyCombo = String.fromCharCode(e.charCode||e.which).toLowerCase();
 		    }
 		    switch (e.keyCode)
 		    {
@@ -124,7 +131,7 @@ var _shortcuts_editor = function() {
 		    	keyCombo = "Shift-" + keyCombo;
 			}
 
-		    if (keyCombo.length === 1)
+		    if ((keyCombo.length === 1) && e.shiftKey)
 		    {
 		   		var dict = keyboard_shortcuts_info.get_shift_symbols_dict();
 		   		if (keyCombo in dict)
@@ -172,7 +179,7 @@ var _shortcuts_editor = function() {
 		    if (e.ctrlKey) keyCombo = "Ctrl-" + keyCombo;
 		    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
 
-		    if (keyCombo.length === 1)
+		    if (e.shiftKey && (keyCombo.length === 1))
 		    {	
 		   		var dict = keyboard_shortcuts_info.get_shift_symbols_dict();
 		   		if (keyCombo in dict)

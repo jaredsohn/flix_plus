@@ -16,6 +16,7 @@ var _fade_editor = function() {
 		$("#fade_rated_notinterested_select")[0].value = config_items["flix_plus " +  _profilename + " fp_rated_notinterested_style"];
 		$("#fade_watched_select")[0].value = config_items["flix_plus " +  _profilename + " fp_watched_style"];
 		$("#fade_duplicates_select")[0].value = config_items["flix_plus " +  _profilename + " fp_duplicates_style"];
+		$("#notv")[0].checked = config_items["flix_plus " + _profilename + " fp_ignore_tv"];
 	}
 
 	this.onSave = function(e)
@@ -27,6 +28,7 @@ var _fade_editor = function() {
 		dict["flix_plus " + _profilename + " fp_rated_notinterested_style"] = $("#fade_rated_notinterested_select")[0].value;
 		dict["flix_plus " + _profilename + " fp_watched_style"] = $("#fade_watched_select")[0].value;
 		dict["flix_plus " + _profilename + " fp_duplicates_style"] = $("#fade_duplicates_select")[0].value;
+		dict["flix_plus " + _profilename + " fp_ignore_tv"] = $("#notv")[0].checked;
 
 	    chrome.storage.sync.set(dict, function() {
 	    	alert("Saved");
@@ -39,6 +41,7 @@ var _fade_editor = function() {
 		$("#fade_rated_notinterested_select")[0].value = "hide";
 		$("#fade_watched_select")[0].value = "tint";
 		$("#fade_duplicates_select")[0].value = "hide";
+		$("#notv")[0].checked = true;
 
 		e.preventDefault();
 	}
@@ -60,6 +63,7 @@ $(document).ready(function()
 		keys_dict[key_prefix + "fp_rated_notinterested_style"] = "hide";
 		keys_dict[key_prefix + "fp_watched_style"] = "tint";
 		keys_dict[key_prefix + "fp_duplicates_style"] = "hide";
+		keys_dict[key_prefix + "fp_ignore_tv"] = true;
 
 		chrome.storage.sync.get(keys_dict, function(items)
 		{

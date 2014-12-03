@@ -24,41 +24,50 @@
     <div class="container">
     	<div id="page_title">Flix Plus settings - Fading Preferences</div>
     	<form id="prefs_form">
-            Show rated posters as 
-            <select id="fade_rated_select" class="form-control">
-                <option value="normal">normal</option>
-                <option value="hide">hidden</option>
-                <option value="fade">faded</option>
-                <option value="tint">tinted</option>
-            </select>
             <br>
-            Show posters rated 'not interested' as 
-            <select id="fade_rated_notinterested_select" class="form-control">
-                <option value="normal">normal</option>
-                <option value="hide">hidden</option>
-                <option value="fade">faded</option>
-                <option value="tint">tinted</option>
-            </select>
-            <br>
-
-            Show watched posters as 
-            <select id="fade_watched_select" class="form-control">
-                <option value="normal">normal</option>
-                <option value="hide">hidden</option>
-                <option value="fade">faded</option>
-                <option value="tint">tinted</option>
-            </select>
-            <br>
-
-            Show duplicates as 
-            <select id="fade_duplicates_select" class="form-control">
-                <option value="normal">normal</option>
-                <option value="hide">hidden</option>
-                <option value="fade">faded</option>
-                <option value="tint">tinted</option>
-            </select>
-            <br>
-
+            <div id="fade_rated">
+                Show rated posters as 
+                <select id="fade_rated_select" class="form-control">
+                    <option value="normal">normal</option>
+                    <option value="hide">hidden</option>
+                    <option value="fade">faded</option>
+                    <option value="tint">tinted</option>
+                </select>
+                <br>
+            </div>
+            <div id= "fade_rated_notinterested">
+                Show posters rated 'not interested' as 
+                <select id="fade_rated_notinterested_select" class="form-control">
+                    <option value="normal">normal</option>
+                    <option value="hide">hidden</option>
+                    <option value="fade">faded</option>
+                    <option value="tint">tinted</option>
+                </select>
+                <br>
+            </div>
+            <div id="fade_watched">
+                Show watched posters as 
+                <select id="fade_watched_select" class="form-control">
+                    <option value="normal">normal</option>
+                    <option value="hide">hidden</option>
+                    <option value="fade">faded</option>
+                    <option value="tint">tinted</option>
+                </select>
+                <div class="checkbox">
+                    <label><input type="checkbox" id="notv">Exclude TV shows</input></label>
+                </div>
+                <br>
+            </div>
+            <div id="hide_dupes">
+                Show duplicates as 
+                <select id="fade_duplicates_select" class="form-control">
+                    <option value="normal">normal</option>
+                    <option value="hide">hidden</option>
+                    <option value="fade">faded</option>
+                    <option value="tint">tinted</option>
+                </select>
+                <br>
+            </div>
 
     		<button id="save">Save</button>&nbsp;&nbsp;
     		<button id="defaults">Restore defaults</button>&nbsp;&nbsp;
