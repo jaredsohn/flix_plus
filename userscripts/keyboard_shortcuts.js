@@ -446,8 +446,8 @@ var getKeyboardCommandsHtml = function()
 {
     console.log("getkeyboardcommandshtml");
     var html = "<div style='{ background-color: rgba(1, 1, 1, 0.7); bottom: 0; left: 0; position: fixed; right: 0; top: 0; }'>"; // capture mouse clicks
-    html += "<h1 style='text-align: center;'>Flix Plus keyboard commands</h2><br><br>";
-    html += "<div style='font-size: 125%'; }>";
+    html += "<h1 style='text-align: center;'>Flix Plus by Lifehacker keyboard commands</h2><br>";
+    html += "<div style='font-size: 100%'; }>";
     console.log(_keyboard_id_to_shortcut_dict);
     html += keyboard_shortcuts_info.get_help_text(_keyboard_id_to_shortcut_dict, false);
     html += "</div>";
@@ -490,8 +490,12 @@ var toggle_keyboard_commands = function()
 
 var handle_key_down = function(e)
 {
+    console.log("handle_key_down");
+
     var keyCombo = "";
 
+console.log("keycode = ");
+console.log(e.keyCode);
     // TODO: use full list of keys here instead
     switch (e.keyCode)
     {
@@ -503,7 +507,7 @@ var handle_key_down = function(e)
         case 38: keyCombo = "Up"; break;
         case 40: keyCombo = "Down"; break;
         case 36: keyCombo = "Home"; break;
-        case 37: keyCombo = "End"; break;
+        case 35: keyCombo = "End"; break;
     }
     if (keyCombo === "")
         return;
@@ -526,25 +530,53 @@ var handle_key_down = function(e)
     if ((command !== null) && (command !== ""))
     {
         run_command(command);
-        e.preventDefault();   
+      //  e.preventDefault();   
     }
+
+    undo_builtin_key(keyCombo);
 }
 
 var key_lookup = function(keyCombo)
 {
     var command = "";
-
-    //console.log("looking up: " + keyCombo);
+console.log(_keyboard_shortcut_to_id_dict);
+    console.log("looking up: " + keyCombo);
     if (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined")
         command = _keyboard_shortcut_to_id_dict[keyCombo];
 
-    //console.log("command found: " + command);
+    console.log("command found: " + command);
 
     return command;
 }
 
+var undo_builtin_key = function(keyCombo)
+{
+    console.log("~~");
+    console.log(keyCombo);
+    var player_override_dict = { 'm': 'player_toggle_mute', 
+                                 'enter': 'player_playpause',
+                                 'space': 'player_playpause',
+                                 'left': 'player_fastforward',
+                                 'right': 'player_rewind',
+                                 'up': 'player_volume_down',
+                                 'down': 'player_volume_up'
+                             }
+
+    if (location.pathname.indexOf("/WiPlayer") === 0)
+    {
+        if (typeof(player_override_dict[keyCombo.toLowerCase()]) !== "undefined")
+        {
+            console.log("override command - " + player_override_dict[keyCombo.toLowerCase()]);
+            run_command(player_override_dict[keyCombo.toLowerCase()]);
+        }
+    }
+}
+
 var handle_key_press = function(e)
 {
+    console.log("handle_key_press");
+    console.log(e);
+
     if (e.target.nodeName.match(/^(textarea|input)$/i)) {
         return;
     }
@@ -558,16 +590,18 @@ var handle_key_press = function(e)
     if (e.altKey || e.ctrlKey || (!ignoreShift && (e.shiftKey)))
         keyCombo = keyCombo.toUpperCase();
 
-    if (e.altKey) keyCombo = "Alt+" + keyCombo;
-    if (e.ctrlKey) keyCombo = "Ctrl+" + keyCombo;
-    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift+" + keyCombo;
+    if (e.altKey) keyCombo = "Alt-" + keyCombo;
+    if (e.ctrlKey) keyCombo = "Ctrl-" + keyCombo;
+    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
 
     var command = key_lookup(keyCombo);
     if ((command !== null) && (command !== ""))
     {
         run_command(command);
-        e.preventDefault();   
+        //e.preventDefault();   
     }
+
+    undo_builtin_key(keyCombo);
 }
 
 var run_command = function(command)
@@ -635,12 +669,32 @@ var run_command = function(command)
             case "your_account": window.location = "https://www.netflix.com/YourAccount"; break;
             case "help": toggle_keyboard_commands(); break;
             case "close_window": _keyboard_commands_shown = true; toggle_keyboard_commands(); $.each($("#layerModalPanes .close"), function(index, value) { this.click()  }); break;
+            case "player_mute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(true);"); break;
+            case "player_unmute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(false);"); break;
+            case "player_toggle_mute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(!netflix.cadmium.objects.videoPlayer().getMuted());"); break;
+            case "player_volume_up": console.log("VOLUP"); injectJs("netflix.cadmium.objects.videoPlayer().setVolume(netflix.cadmium.objects.videoPlayer().getVolume() + 0.1);"); break;
+            case "player_volume_down": console.log("VOLDOWN"); injectJs("netflix.cadmium.objects.videoPlayer().setVolume(netflix.cadmium.objects.videoPlayer().getVolume() - 0.1);"); break;
+            case "player_fastforward": injectJs("netflix.cadmium.objects.videoPlayer().seek(netflix.cadmium.objects.videoPlayer().getCurrentTime() + 10000);"); break;
+            case "player_rewind": injectJs("netflix.cadmium.objects.videoPlayer().seek(netflix.cadmium.objects.videoPlayer().getCurrentTime() - 10000);"); break;
+            case "player_goto_beginning": injectJs("netflix.cadmium.objects.videoPlayer().seek(0);"); break;
+            case "player_goto_ending": injectJs("netflix.cadmium.objects.videoPlayer().seek(netflix.cadmium.objects.videoPlayer().getDuration());"); break;
+            case "player_playpause": injectJs("netflix.cadmium.objects.videoPlayer().getPaused() ? netflix.cadmium.objects.videoPlayer().play() : netflix.cadmium.objects.videoPlayer().pause();"); break;
+            case "player_play": injectJs("netflix.cadmium.objects.videoPlayer().play();"); break;
+            case "player_pause": injectJs("netflix.cadmium.objects.videoPlayer().pause();"); break;
+            case "player_nextepisode": $("#player-menu-next-episode")[0].click(); break;
         }
     } catch (ex)
     {
 
     }
 };
+
+var injectJs = function(js)
+{
+    var scriptNode = document.createElement("script");
+    scriptNode.innerText = js; // "setTimeout(function() {" + js + "}, 2000);"
+    document.body.appendChild(scriptNode);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Startup

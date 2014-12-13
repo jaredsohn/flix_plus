@@ -24,8 +24,6 @@
 
 // jaredsohn-lifehacker: Now requires extlib.js, fplib.js, and arrive.js.
 
-extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important"); // jaredsohn-Lifehacker...so it doesn't show 'Play' on genre pages
-
 var stopIt    = function (e) { e.preventDefault(); e.stopPropagation(); },
     clickIt   = function (e) { stopIt(e); window.location.href = this.href; },
     regex     = /^https?\:\/\/www\.netflix\.com\/WiPlayer\?movieid=([\d]+)/, // changed from movies to www lifehacker-jaredsohn
@@ -39,7 +37,7 @@ var stopIt    = function (e) { e.preventDefault(); e.stopPropagation(); },
 var fixTag = function(tag)
 {
   if (regex.test(tag.href)) {
-    if (tag.id === "play-popover")
+    if ((tag.id === "fp_play_popover") || (tag.id === "fp_play"))
       return;
 
     tag.playhref     = tag.href;
@@ -63,6 +61,13 @@ function createPlayLink(movie_id, link_id) {
   return elem;
 }
 
+extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important"); // jaredsohn-Lifehacker...so it doesn't show 'Play' on genre pages
+
+// Don't affect play button on wimovie
+var elems = $(".displayPagePlayable a");
+if (elems.length)
+  elems[0].id = "fp_play";
+
 while (i--) {
   tag = aTags[i];
   fixTag(tag);
@@ -77,7 +82,7 @@ document.arrive("a", function()
 
 monitorPreview = function(elem_id)
 {
-  // Add a play button to the popup.  mark as play-popover so URL isn't rewritten.
+  // Add a play button to the popup.  mark as fp_play_popover so URL isn't rewritten.
   document.body.arrive("#" + elem_id + " .readMore", function()
   {
     console.log("arrive");
@@ -86,7 +91,7 @@ monitorPreview = function(elem_id)
 
     var parts = $("#" + elem_id + " .mdpLink")[0].href.split("/");
     var movie_id = parts[parts.length - 1];
-    var link = createPlayLink(movie_id, "play-popover");
+    var link = createPlayLink(movie_id, "fp_play_popover");
     $(".fp_header_row")[0].appendChild(link);
   });
 }

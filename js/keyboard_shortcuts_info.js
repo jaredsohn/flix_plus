@@ -2,7 +2,7 @@ var keyboard_shortcuts_info = _keyboard_shortcuts_info || {};
 var _keyboard_shortcuts_info = function(){
     var self = this;
 
-    var _categories_in_order = ["Posters", "Sections", "Jump to page", "Misc"];
+    var _categories_in_order = ["Posters", "Sections", "Player", "Jump to page", "Misc"];
 
     var _keyboard_shortcuts_defs = {
       jump_kids: 
@@ -226,7 +226,87 @@ var _keyboard_shortcuts_info = function(){
          default_key: 'Escape',
          description: 'Close window',
          category: 'Misc',
-         order: 2 } }
+         order: 2 },
+      player_mute: 
+       { 
+         default_key: 'None',
+         description: 'Mute',
+         category: 'Player',
+         order: 0 },
+      player_unmute: 
+       { 
+         default_key: 'None',
+         description: 'Unmute',
+         category: 'Player',
+         order: 1 },
+      player_toggle_mute: 
+       { 
+         default_key: 'm',
+         description: 'Toggle mute',
+         category: 'Player',
+         order: 2 },
+      player_volume_up: 
+       { 
+         default_key: 'Up',
+         description: 'Volume up',
+         category: 'Player',
+         order: 3 },
+      player_volume_down: 
+       { 
+         default_key: 'Down',
+         description: 'Volume down',
+         category: 'Player',
+         order: 4 },
+      player_fastforward: 
+       { 
+         default_key: 'None',
+         description: 'Fast forward',
+         category: 'Player',
+         order: 5 },
+      player_rewind: 
+       { 
+         default_key: 'None',
+         description: 'Rewind',
+         category: 'Player',
+         order: 6 },
+      player_goto_beginning: 
+       { 
+         default_key: 'Home',
+         description: 'Goto beginning',
+         category: 'Player',
+         order: 7 },
+      player_goto_ending: 
+       { 
+         default_key: 'End',
+         description: 'Goto ending',
+         category: 'Player',
+         order: 8 },
+      player_playpause: 
+       { 
+         default_key: 'Space',
+         description: 'Play/pause',
+         category: 'Player',
+         order: 9 },
+      player_play: 
+       { 
+         default_key: 'None',
+         description: 'Play',
+         category: 'Player',
+         order: 10 },
+      player_pause: 
+       { 
+         default_key: 'None',
+         description: 'Pause',
+         category: 'Player',
+         order: 11 },
+      player_nextepisode: 
+       { 
+         default_key: 'n',
+         description: 'Next episode',
+         category: 'Player',
+         order: 12 }, 
+       }
+
 
     this.generate_defaults = function()
     {
@@ -242,6 +322,20 @@ var _keyboard_shortcuts_info = function(){
         return new_defaults;
     }
 
+    this.generate_clear = function()
+    {
+        var new_defaults = [];
+        var ids = Object.keys(_keyboard_shortcuts_defs);
+        for (i = 0; i < ids.length; i++)
+        {
+            var obj = {};
+            obj[ids[i]] = "None";
+            new_defaults.push(obj);
+        }
+
+        return new_defaults;
+    }    
+
     this.get_already_has_shift_chars = function() {
       return [ "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
     };
@@ -251,6 +345,7 @@ var _keyboard_shortcuts_info = function(){
     };
 
     // Create dictionaries to look up keys and commands
+    // Handle conflicts by making a preference based on the shortcuts group and the webpage
     this.create_keyboard_shortcut_dicts = function(orig_shortcuts_list)
     {
         var keyboard_shortcut_to_id_dict = {};
@@ -261,11 +356,33 @@ var _keyboard_shortcuts_info = function(){
         var orig_shortcuts = Object.keys(orig_shortcuts_list);
         var len = orig_shortcuts_list.length;
 
+        var isPlayer = (location.pathname.indexOf("/WiPlayer") === 0);
+        console.log("isplayer = " + isPlayer);
+
         for (i = 0; i < len; i++)
         {
             var id = Object.keys(orig_shortcuts_list[i])[0];
             var key = orig_shortcuts_list[i][id];
-            keyboard_shortcut_to_id_dict[key] = id;
+            var category = _keyboard_shortcuts_defs[id]["category"];
+            var should_add = false; // this only indicates if the shortcut->id mapping should take place or not.  
+            // We still want the mapping to show in editor UI and shortcuts help
+
+            switch (category)
+            {
+              case "Posters":
+              case "Sections":
+                should_add = !isPlayer;
+                break;
+              case "Player":
+                should_add = isPlayer;
+                break;
+              case "Jump to page":
+              case "Misc":
+                should_add = true;
+                break;
+            }
+            if (should_add)
+              keyboard_shortcut_to_id_dict[key] = id;
             keyboard_id_to_shortcut_dict[id] = key;
         }
         dicts.push(keyboard_shortcut_to_id_dict);
@@ -337,6 +454,31 @@ var _keyboard_shortcuts_info = function(){
         return _keyboard_shortcuts_defs;
     }
 
+    // Ignores 'None'
+    this.get_keys_string = function(shortcut_keys)
+    {
+      var keys = [];
+
+      var str = "";
+      var len = shortcut_keys.length;
+      for (i = 0; i < len; i++)
+        if (shortcut_keys[i] !== "None")
+          keys.push(shortcut_keys[i]);
+
+      var len2 = keys.length;
+      for (i = 0; i < len2; i++)
+      {
+        str += keys[i];
+        if (i < (len2 - 1))
+          str += ", ";
+      }
+
+      if (str === "")
+        str = "None";
+
+      return str;
+    }
+
     // Note that the parameter here is different than the output of generate_defaults
     this.get_help_text = function(id_to_key_dict, link_to_editor)
     {        
@@ -345,12 +487,26 @@ var _keyboard_shortcuts_info = function(){
 
         //console.log("get help text");
         var text = "Cursor and section are highlighted by borders.  Press '" + s["help"] + "' for list of commands or see below.<br><br>";
-        text += "Move around items: " + s["move_right"] + ", " + s["move_left"] + ", " + s["move_home"] + ", " + s["move_end"] + "<BR>&nbsp;&nbsp;&nbsp;Play: " + s["play"] + "<BR>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"] + "<BR>";
+        console.log(self.get_keys_string([s["move_right"], s["move_left"], s["move_home"], s["move_end"]]));
+        
+        text += "Move around items: " + self.get_keys_string([s["move_right"], s["move_left"], s["move_home"], s["move_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Play: " + s["play"] + "<BR>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"] + "<BR>";
         text += "&nbsp;&nbsp;&nbsp;Zoom into details: " + s["zoom_into_details"] + "<BR>&nbsp;&nbsp;&nbsp;Rate: " + s["rate_clear"] + " to clear, 0-5: " + s["rate_0"] + ", " + s["rate_1"] + ", " + s["rate_2"] + ", " + s["rate_3"] + ", " + s["rate_4"] + ", " + s["rate_5"] + "; half stars: " + s["rate_1_5"] + ", " + s["rate_2_5"] + ", " + s["rate_3_5"] + ", " + s["rate_4_5"]
         text += "<BR>&nbsp;&nbsp;&nbsp;Open link: " + s["open_link"];
-        text += "<br><br>Move around sections: " + s["next_section"] + ", " + s["prev_section"] + ", " + s["section_home"] + ", " + s["section_end"] + "<BR>&nbsp;&nbsp;&nbsp;Open section link: " + s["open_section_link"] + "<br>&nbsp;&nbsp;&nbsp;Toggle scrollbars: " + s["toggle_scrollbars"] + "<br>";
-        text += "&nbsp;&nbsp;&nbsp;Toggle hiding: " + s["toggle_hiding"] + "<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"];
+
+        text += "<br><br>Move around sections: " + self.get_keys_string([s["next_section"], s["prev_section"], s["section_home"], s["section_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Open section link: " + s["open_section_link"] + "<br>&nbsp;&nbsp;&nbsp;Toggle scrollbars: " + s["toggle_scrollbars"] + "<br>";
+        text += "&nbsp;&nbsp;&nbsp;Toggle hiding: " + s["toggle_hiding"] + "<br>";
+
+        text += "<br>Player<br>";
+        text += "&nbsp;&nbsp;&nbsp;Muting: " + self.get_keys_string([s["player_toggle_mute"], s["player_mute"], s["player_unmute"]]) + "<br>";
+        text += "&nbsp;&nbsp;&nbsp;Change volume: " + self.get_keys_string([s["player_volume_up"], s["player_volume_down"]]) + "<br>";
+        text += "&nbsp;&nbsp;&nbsp;Jump to time: Right/Left (built-in), " + self.get_keys_string([s["player_fastforward"], s["player_rewind"], s["player_goto_beginning"], s["player_goto_ending"]]) + "<br>";
+        text += "&nbsp;&nbsp;&nbsp;Play/Pause: " + self.get_keys_string([s["player_playpause"], s["player_play"], s["player_pause"]])+ "<br>";
+        text += "&nbsp;&nbsp;&nbsp;Next episode: " + s["player_nextepisode"] + "<br>";
+
+        text += "<br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"];
         text += "<BR>&nbsp;&nbsp;&nbsp;Viewing activity: " + s["jump_viewing_activity"] + "<br>&nbsp;&nbsp;&nbsp;Your Ratings: " + s["jump_your_ratings"] + "<BR><br>Search: " + s["search"] + "<BR>Your Account: " + s["your_account"] + "<BR>Help: " + s["help"] + "<BR>";
+
+
         if (link_to_editor)
           text += "<br>Click 'configure' to the left to change shortcuts.";
         else

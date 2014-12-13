@@ -11,6 +11,7 @@ var _shortcuts_editor = function() {
 		console.log("init");
 		_profilename = profilename;
 		document.getElementById("save").addEventListener("click", self.onSave);
+		document.getElementById("clearall").addEventListener("click", self.onClearAll);
 		document.getElementById("defaults").addEventListener("click", self.onRestoreDefaultShortcuts);
 		keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + _profilename + " keyboard_shortcuts", self.show_shortcuts);
 	}
@@ -82,53 +83,45 @@ var _shortcuts_editor = function() {
 		$(".shortcuts_key").each(function() { this.addEventListener("keydown", function(e) {
 			console.log("keydown");
 
-			if ((e.altKey) || (e.metaKey))
-			{
-				// don't allow alt and meta keys for now.  Want to avoid breaking system keys.
-				return;
-			}
-			if (e.ctrlKey)
-			{
-				if ((e.keyCode !== 36) && (e.keyCode !== 37) && (e.keyCode !== 111))
-				{
-					// don't allow ctrl keys other than the built-in ones (home, end, o) for now
-					return;
-				}
-			}
-
 		    id = this.id;
 		    keyCombo = "";
-
 		    if ((e.keyCode >= 33) && (e.keyCode <= 127))
 		    {
 			    keyCombo = String.fromCharCode(e.charCode||e.which).toLowerCase();
 		    }
 		    switch (e.keyCode)
 		    {
-		    	case 8: 
-		    		e.preventDefault();
-		    		break;
-		    	case 32: keyCombo = "Space"; break;
+		    	case 8: keyCombo = "None"; break;
+		    	case 13: keyCombo = "Enter"; break;
 		        case 27: keyCombo = "Escape"; break;
+		    	case 32: keyCombo = "Space"; break;
 		        case 37: keyCombo = "Left"; break;
 		        case 39: keyCombo = "Right"; break;
 		        case 38: keyCombo = "Up"; break;
 		        case 40: keyCombo = "Down"; break;
 		        case 36: keyCombo = "Home"; break;
 		        case 37: keyCombo = "End"; break;
+		        case 111: 
+		        	if ((e.altKey) || (e.metaKey))
+		        		return;
+		        	break; // we'll allow ctro-o
+		    	default:
+		    		if ((e.altKey) || (e.metaKey) || (e.ctrlKey))
+		    			return; // don't allow for most keys
 		    }
 		    if (keyCombo === "")
 		        return;
 
-			e.preventDefault();		    
+			e.preventDefault();
 
 		    ignoreShift = (keyboard_shortcuts_info.get_already_has_shift_chars().indexOf(keyCombo) !== -1);
 
 		    //if ((e.altKey)) keyCombo = "Alt-" + keyCombo;
 		    //if ((e.ctrlKey)) keyCombo = "Ctrl-" + keyCombo;
-		    if (!ignoreShift && (e.shiftKey)) 
+		    if (!ignoreShift && (e.shiftKey))
 		    {
-		    	keyCombo = "Shift-" + keyCombo;
+		    	return;
+		    	//keyCombo = "Shift-" + keyCombo;
 			}
 
 		    if ((keyCombo.length === 1) && e.shiftKey)
@@ -141,8 +134,8 @@ var _shortcuts_editor = function() {
 		    }
 
 		    // Don't allow duplicating key
-			if (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined")
-				return;
+			//if ((keyCombo !== "None") && (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined"))
+			//	return;
 
 			// Remove old key
 			var old_shortcut = _keyboard_id_to_shortcut_dict[id];
@@ -164,6 +157,7 @@ var _shortcuts_editor = function() {
 				// We don't allow alt, ctrl, and comand keys right now (helps avoid breaking system keys)
 				return;
 			}
+	        e.preventDefault();			
 
 	        id = this.id;
 		    keyCombo = String.fromCharCode(e.charCode||e.which).toLowerCase();
@@ -178,6 +172,8 @@ var _shortcuts_editor = function() {
 		    if (e.altKey) keyCombo = "Alt-" + keyCombo;
 		    if (e.ctrlKey) keyCombo = "Ctrl-" + keyCombo;
 		    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
+		    if (keyCombo.length > 1)
+		    	return; // alt, ctrl, shift not supported right now	
 
 		    if (e.shiftKey && (keyCombo.length === 1))
 		    {	
@@ -188,11 +184,9 @@ var _shortcuts_editor = function() {
 			    	keyCombo = keyCombo.toLowerCase();
 		    }
 
-	        e.preventDefault();   
-
 		    // Don't allow duplicating key
-			if (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined")
-				return;
+			//if (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined")
+			//	return;
 
 			// Remove old key
 			var old_shortcut = _keyboard_id_to_shortcut_dict[id];
@@ -224,6 +218,15 @@ var _shortcuts_editor = function() {
 			// shortcut used by something else
 			return false;
 		}
+	}
+
+	this.onClearAll = function(e)
+	{
+		e.preventDefault();
+		var clear = keyboard_shortcuts_info.generate_clear();
+		var dicts = keyboard_shortcuts_info.create_keyboard_shortcut_dicts(clear);
+		self.clear_shortcuts();
+		self.show_shortcuts(dicts[0], dicts[1]);
 	}
 
 	this.onSave = function(e)

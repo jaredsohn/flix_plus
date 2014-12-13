@@ -100,7 +100,7 @@ chrome.storage.sync.get(_key_prefix + "fp_ignore_tv", function(items)
 	console.log("fp_ignore_tv = ");
 	console.log(items[_key_prefix + "fp_ignore_tv"]);
 
-	if (typeof(items[_key_prefix + "fp_ignore_tv"] !== "undefined"))
+	if (typeof(items[_key_prefix + "fp_ignore_tv"]) !== "undefined")
 		_ignore_tv = items[_key_prefix + "fp_ignore_tv"];
 	else
 		_ignore_tv = false;
