@@ -486,7 +486,13 @@ var _keyboard_shortcuts_info = function(){
         //console.log(id_to_key_dict);
 
         //console.log("get help text");
-        var text = "Cursor and section are highlighted by borders.  Press '" + s["help"] + "' for list of commands or see below.<br><br>";
+        var text = "Cursor and section are highlighted by borders.  Press '" + s["help"] + "' for list of commands or see below.  ";
+        if (link_to_editor)
+          text += "Click 'configure' to the left to change shortcuts.";
+        else
+          text += "Shortcut keys can be changed in options.";
+
+        text += "<br><br>";
         console.log(self.get_keys_string([s["move_right"], s["move_left"], s["move_home"], s["move_end"]]));
         
         text += "Move around items: " + self.get_keys_string([s["move_right"], s["move_left"], s["move_home"], s["move_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Play: " + s["play"] + "<BR>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"] + "<BR>";
@@ -506,11 +512,6 @@ var _keyboard_shortcuts_info = function(){
         text += "<br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"];
         text += "<BR>&nbsp;&nbsp;&nbsp;Viewing activity: " + s["jump_viewing_activity"] + "<br>&nbsp;&nbsp;&nbsp;Your Ratings: " + s["jump_your_ratings"] + "<BR><br>Search: " + s["search"] + "<BR>Your Account: " + s["your_account"] + "<BR>Help: " + s["help"] + "<BR>";
 
-
-        if (link_to_editor)
-          text += "<br>Click 'configure' to the left to change shortcuts.";
-        else
-          text += "<br>Shortcut keys can be changed in options.";
         return text;
     }    
 };

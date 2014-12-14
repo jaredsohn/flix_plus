@@ -34,6 +34,8 @@ Element.prototype.documentOffsetTop = function () {
 // jaredsohn-lifehacker Adapted from http://stackoverflow.com/questions/8922107/javascript-scrollintoview-middle-alignment.  Using instead of just scrollIntoView
 function scrollMiddle(elem)
 {
+    console.log("scrollmiddle:");
+    console.log(elem);
     if (elem === null)
         return;
     elem.scrollIntoView(true);
@@ -463,7 +465,7 @@ var toggle_keyboard_commands = function()
         commands_div.id = "flix_plus_keyboard_commands";
         commands_div.innerHTML = getKeyboardCommandsHtml();
 
-        var help_css_main = "#flix_plus_keyboard_commands { align: center; width: 500px; top: 50%; left: 50%; z-index: 9999; position: fixed; margin-left: -250px; margin-top: -325px; padding: 20px; height: 650px; opacity: 0.9; border-width: 5px; border-style: solid; "
+        var help_css_main = "#flix_plus_keyboard_commands { align: center; width: 60%; left: 20%; z-index: 9999; position: fixed; padding: 20px; height: 85%; top: 5%; opacity: 0.9; border-width: 5px; border-style: solid; overflow: auto;"
         if ((enabled_scripts === null) || (enabled_scripts["id_darker_netflix"]))
             extlib.addGlobalStyle(help_css_main + " background-color: black; foreground-color: white; border-color: white; }");
         else
@@ -508,6 +510,7 @@ console.log(e.keyCode);
         case 40: keyCombo = "Down"; break;
         case 36: keyCombo = "Home"; break;
         case 35: keyCombo = "End"; break;
+        case 79: keyCombo = "O"; break; // only ctrl-letter that we support for now
     }
     if (keyCombo === "")
         return;
