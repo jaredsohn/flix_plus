@@ -40,6 +40,8 @@ function scrollMiddle(elem)
         return;
     elem.scrollIntoView(true);
     var pos = elem.documentOffsetTop() - (window.innerHeight / 2 );
+    console.log("pos = ");
+    console.log(pos);
     window.scrollTo( 0, pos );
 }
 
@@ -226,6 +228,15 @@ function RateMovie(rating)
 
 var UpdateKeyboardSelection = function(elem, selected)
 {
+    if ((_keyboard_id_to_shortcut_dict["move_right"] === "None") && 
+        (_keyboard_id_to_shortcut_dict["move_left"] === "None") && 
+        (_keyboard_id_to_shortcut_dict["move_home"] === "None") && 
+        (_keyboard_id_to_shortcut_dict["move_end"] === "None"))
+    {
+        // Don't show border if associated keys aren't set.
+        return;
+    }
+
     var selectors = fplib.getSelectorsForPath();
 
     var border_elem = elem;
@@ -339,7 +350,14 @@ function NextPreviousListContainer(direction)
         {
             if (_elemsListContainers.length - 1 >= _currListContainer)
             {
-                _elemsListContainers[_currListContainer].style["border-style"] = "solid";   
+                if ((_keyboard_id_to_shortcut_dict["prev_section"] !== "None") ||
+                    (_keyboard_id_to_shortcut_dict["next_section"] !== "None") || 
+                    (_keyboard_id_to_shortcut_dict["section_home"] !== "None") || 
+                    (_keyboard_id_to_shortcut_dict["section_end"] !== "None"))
+                {
+                    // only draw border if a section navigation-related key was set
+                    _elemsListContainers[_currListContainer].style["border-style"] = "solid";   
+                }
             }
         }
     } catch (ex)
@@ -490,94 +508,10 @@ var toggle_keyboard_commands = function()
     _keyboard_commands_shown = !_keyboard_commands_shown;
 }
 
-var handle_key_down = function(e)
+// We use this for 'normal' (a-z, 0-9, special characters) keys since we don't want to deal with repeating
+var handle_keypress = function(e)
 {
-    console.log("handle_key_down");
-
-    var keyCombo = "";
-
-console.log("keycode = ");
-console.log(e.keyCode);
-    // TODO: use full list of keys here instead
-    switch (e.keyCode)
-    {
-        case 13: keyCombo = "Enter"; break;
-        case 27: keyCombo = "Escape"; break;
-        case 32: keyCombo = "Space"; break;
-        case 37: keyCombo = "Left"; break;
-        case 39: keyCombo = "Right"; break;
-        case 38: keyCombo = "Up"; break;
-        case 40: keyCombo = "Down"; break;
-        case 36: keyCombo = "Home"; break;
-        case 35: keyCombo = "End"; break;
-        case 79: keyCombo = "O"; break; // only ctrl-letter that we support for now
-    }
-    if (keyCombo === "")
-        return;
-
-    // hack
-    if ((location.pathname.indexOf("/ProfilesGate") === 0) && ((keyCombo === "Space") || (keyCombo === "Enter")))
-    {
-        console.log("running hack");
-        extlib.simulateClick($("img", _elemsNPList[_currListItem])[0]);
-        return;
-    }
-
-    var ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
-
-    if ((e.altKey)) keyCombo = "Alt-" + keyCombo;
-    if ((e.ctrlKey)) keyCombo = "Ctrl-" + keyCombo;
-    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
-
-    var command = key_lookup(keyCombo);
-    if ((command !== null) && (command !== ""))
-    {
-        run_command(command);
-      //  e.preventDefault();   
-    }
-
-    undo_builtin_key(keyCombo);
-}
-
-var key_lookup = function(keyCombo)
-{
-    var command = "";
-console.log(_keyboard_shortcut_to_id_dict);
-    console.log("looking up: " + keyCombo);
-    if (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined")
-        command = _keyboard_shortcut_to_id_dict[keyCombo];
-
-    console.log("command found: " + command);
-
-    return command;
-}
-
-var undo_builtin_key = function(keyCombo)
-{
-    console.log("~~");
-    console.log(keyCombo);
-    var player_override_dict = { 'm': 'player_toggle_mute', 
-                                 'enter': 'player_playpause',
-                                 'space': 'player_playpause',
-                                 'left': 'player_fastforward',
-                                 'right': 'player_rewind',
-                                 'up': 'player_volume_down',
-                                 'down': 'player_volume_up'
-                             }
-
-    if (location.pathname.indexOf("/WiPlayer") === 0)
-    {
-        if (typeof(player_override_dict[keyCombo.toLowerCase()]) !== "undefined")
-        {
-            console.log("override command - " + player_override_dict[keyCombo.toLowerCase()]);
-            run_command(player_override_dict[keyCombo.toLowerCase()]);
-        }
-    }
-}
-
-var handle_key_press = function(e)
-{
-    console.log("handle_key_press");
+    console.log("handle_keypress");
     console.log(e);
 
     if (e.target.nodeName.match(/^(textarea|input)$/i)) {
@@ -585,8 +519,6 @@ var handle_key_press = function(e)
     }
     var override = true;
     var keyCombo = String.fromCharCode(e.charCode||e.which).toLowerCase();
-    //console.log("keycombo is");
-    //console.log(keyCombo);
 
     var ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
 
@@ -597,23 +529,148 @@ var handle_key_press = function(e)
     if (e.ctrlKey) keyCombo = "Ctrl-" + keyCombo;
     if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
 
-    var command = key_lookup(keyCombo);
-    if ((command !== null) && (command !== ""))
+    if ((typeof(keyCombo) !== "undefined") && (keyCombo !== null))
     {
-        run_command(command);
-        //e.preventDefault();   
+        console.log("keypress: keycombo is " + keyCombo);
+
+        var command = key_lookup(keyCombo);
+        if ((command !== null) && (command !== ""))
+        {
+            run_command(command);
+            //console.log("preventdefault");
+            //e.preventDefault();
+        }
     }
 
-    undo_builtin_key(keyCombo);
+    if ((typeof(keyCombo) !== "undefined") && (keyCombo !== null))
+        undo_builtin_key(keyCombo, e);
+}
+
+
+// We ignore 'normal' characters here and have handle_keypress do it for us
+var determine_keydown = function(e)
+{
+    var keyCombo = "";
+
+    //if ((e.keyCode >= 48) && (e.keyCode <= 57))
+    //    keyCombo = String.fromCharCode(e.keyCode);
+
+    //if ((e.keyCode >= 65) && (e.keyCode <= 90))
+    //    keyCombo = String.fromCharCode(e.keyCode).toLowerCase();
+
+    // using http://www.javascripter.net/faq/keycodes.htm
+    switch (e.keyCode)
+    {
+        case 13: keyCombo = "Enter"; break;
+        case 27: keyCombo = "Escape"; break;
+        case 32: keyCombo = "Space"; break;
+        case 33: keyCombo = "PgUp"; break;
+        case 34: keyCombo = "PgDn"; break;
+        case 35: keyCombo = "End"; break;
+        case 36: keyCombo = "Home"; break;
+        case 37: keyCombo = "Left"; break;
+        case 39: keyCombo = "Right"; break;
+        case 38: keyCombo = "Up"; break;
+        case 40: keyCombo = "Down"; break;
+        case 45: keyCombo = "Insert"; break;
+        case 46: keyCombo = "Delete"; break;
+        //case 188: keyCombo = ","; break;
+        //case 190: keyCombo = "."; break;
+        //case 191: keyCombo = "/"; break;
+        //case 192: keyCombo = "`"; break;
+        //case 219: keyCombo = "["; break;
+        //case 220: keyCombo = "\\"; break;
+        //case 221: keyCombo = "]"; break;
+        //case 222: keyCombo = "'"; break;
+    }
+    if (keyCombo === "")
+        return "";
+
+    var ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
+
+    if ((e.altKey)) keyCombo = "Alt-" + keyCombo;
+    if ((e.ctrlKey)) keyCombo = "Ctrl-" + keyCombo;
+    if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
+
+    return keyCombo;
+}
+
+
+// While this code supports ctrl, alt, and shift modifiers, most use is restricted by the shortcuts editor. (But a user could maybe get such support by modifying their shortcuts JSON in localstorage.)
+var handle_keydown = function(e)
+{
+    console.log("handle_keydown");
+
+    var keyCombo = determine_keydown(e);
+
+    // hack; keys aren't user-definable.  Also, ideally would have an observer check if profilegate div is shown and switch modes
+    // to allow this support when page is interrupted.  For now, users can instead use script that automatically hides it instead.
+    if ((location.pathname.indexOf("/ProfilesGate") === 0) && ((keyCombo === "Space") || (keyCombo === "Enter")))
+    {
+        extlib.simulateClick($("img", _elemsNPList[_currListItem])[0]);
+        return;
+    }
+
+    if (keyCombo !== "")
+    {
+        var command = key_lookup(keyCombo);
+        if ((command !== null) && (command !== ""))
+        {
+            run_command(command);
+//            console.log("preventdefault");
+//            e.preventDefault();   
+        }
+    }
+
+    if ((typeof(keyCombo) !== "undefined") && (keyCombo !== null))
+        undo_builtin_key(keyCombo, e);    
+}
+
+var key_lookup = function(keyCombo)
+{
+    var command = "";
+    console.log("looking up: " + keyCombo);
+    if (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined")
+        command = _keyboard_shortcut_to_id_dict[keyCombo];
+
+    console.log("command found: " + command);
+
+    return command;
+}
+
+var undo_builtin_key = function(keyCombo, e)
+{
+    if (location.pathname.indexOf("/WiPlayer") === 0)
+    {
+
+        //console.log(keyCombo);
+        var player_override_dict = { //'m': 'player_toggle_mute', 
+                                     'enter': 'player_playpause',
+                                     'space': 'player_playpause',
+                                     //'left': 'player_fastforward',
+                                     //'right': 'player_rewind',
+                                     'up': 'player_volume_down',
+                                     'down': 'player_volume_up'
+                                 }
+
+        if (typeof(player_override_dict[keyCombo.toLowerCase()]) !== "undefined")
+        {
+            //console.log("preventdefault");
+            //e.preventDefault();
+            console.log("override command - " + player_override_dict[keyCombo.toLowerCase()]);
+            run_command(player_override_dict[keyCombo.toLowerCase()]);
+        }
+    }
 }
 
 var run_command = function(command)
 {
+    console.log("runcommand - " + command);
     try
     {
         var elem = null;
 
-        if ((_keyboard_commands_shown) && (command !== "help"))
+        if ((_keyboard_commands_shown) && (command !== "help") && (command !== "close_window"))
             return;
 
         switch(command)
@@ -671,7 +728,11 @@ var run_command = function(command)
             case "search": elem = document.getElementById("searchTab").click(); document.getElementById("searchField"); elem.focus(); elem.select(); break;
             case "your_account": window.location = "https://www.netflix.com/YourAccount"; break;
             case "help": toggle_keyboard_commands(); break;
-            case "close_window": _keyboard_commands_shown = true; toggle_keyboard_commands(); $.each($("#layerModalPanes .close"), function(index, value) { this.click()  }); break;
+            case "close_window": 
+                _keyboard_commands_shown = true; toggle_keyboard_commands(); 
+                $.each($("#layerModalPanes .close"), function(index, value) { this.click() });
+                $.each($("#profiles-gate .close"), function(index, value) { this.click(); });
+                break;
             case "player_mute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(true);"); break;
             case "player_unmute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(false);"); break;
             case "player_toggle_mute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(!netflix.cadmium.objects.videoPlayer().getMuted());"); break;
@@ -681,10 +742,11 @@ var run_command = function(command)
             case "player_rewind": injectJs("netflix.cadmium.objects.videoPlayer().seek(netflix.cadmium.objects.videoPlayer().getCurrentTime() - 10000);"); break;
             case "player_goto_beginning": injectJs("netflix.cadmium.objects.videoPlayer().seek(0);"); break;
             case "player_goto_ending": injectJs("netflix.cadmium.objects.videoPlayer().seek(netflix.cadmium.objects.videoPlayer().getDuration());"); break;
-            case "player_playpause": injectJs("netflix.cadmium.objects.videoPlayer().getPaused() ? netflix.cadmium.objects.videoPlayer().play() : netflix.cadmium.objects.videoPlayer().pause();"); break;
+            case "player_playpause": console.log("player_playpause"); injectJs("setTimeout(function() {netflix.cadmium.objects.videoPlayer().getPaused() ? netflix.cadmium.objects.videoPlayer().play() : netflix.cadmium.objects.videoPlayer().pause();}, 10);"); break;
             case "player_play": injectJs("netflix.cadmium.objects.videoPlayer().play();"); break;
             case "player_pause": injectJs("netflix.cadmium.objects.videoPlayer().pause();"); break;
             case "player_nextepisode": $("#player-menu-next-episode")[0].click(); break;
+            case "player_fullscreen": $(".player-fill-screen")[0].click(); break;
         }
     } catch (ex)
     {
@@ -771,8 +833,8 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
         }
     }
 
-    document.addEventListener('keypress', handle_key_press, false);
-    document.addEventListener('keydown', handle_key_down, false);
+    document.addEventListener('keypress', handle_keypress, false);
+    document.addEventListener('keydown', handle_keydown, false);
 
     // Make borders more visible on many pages
     extlib.addGlobalStyle(".agMovieGallery {position: relative; top: 10px; left:10px}");

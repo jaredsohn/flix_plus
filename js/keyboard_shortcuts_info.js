@@ -305,8 +305,13 @@ var _keyboard_shortcuts_info = function(){
          description: 'Next episode',
          category: 'Player',
          order: 12 }, 
-       }
-
+      player_fullscreen: 
+       { 
+         default_key: 'f',
+         description: 'Full screen',
+         category: 'Player',
+         order: 13 }
+    }
 
     this.generate_defaults = function()
     {
@@ -486,7 +491,7 @@ var _keyboard_shortcuts_info = function(){
         //console.log(id_to_key_dict);
 
         //console.log("get help text");
-        var text = "Cursor and section are highlighted by borders.  Press '" + s["help"] + "' for list of commands or see below.  ";
+        var text = "Cursor and section are highlighted by borders (unless navigation keys are set to None).  Press '" + s["help"] + "' for list of commands or see below.  ";
         if (link_to_editor)
           text += "Click 'configure' to the left to change shortcuts.";
         else

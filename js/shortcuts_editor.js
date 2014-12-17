@@ -82,6 +82,7 @@ var _shortcuts_editor = function() {
 
 		$(".shortcuts_key").each(function() { this.addEventListener("keydown", function(e) {
 			console.log("keydown");
+			console.log(e);
 
 		    id = this.id;
 		    keyCombo = "";
@@ -95,16 +96,22 @@ var _shortcuts_editor = function() {
 		    	case 13: keyCombo = "Enter"; break;
 		        case 27: keyCombo = "Escape"; break;
 		    	case 32: keyCombo = "Space"; break;
+      			case 33: keyCombo = "PgUp"; break;
+        		case 34: keyCombo = "PgDn"; break;
+        		case 35: keyCombo = e.ctrlKey ? "Ctrl-End" : "End"; break;
+		        case 36: keyCombo = e.ctrlKey ? "Ctrl-Home" : "Home"; break;
 		        case 37: keyCombo = "Left"; break;
-		        case 39: keyCombo = "Right"; break;
 		        case 38: keyCombo = "Up"; break;
+		        case 39: keyCombo = "Right"; break;
 		        case 40: keyCombo = "Down"; break;
-		        case 36: keyCombo = "Home"; break;
-		        case 37: keyCombo = "End"; break;
-		        case 111: 
+		        case 45: keyCombo = "Insert"; break;
+		        case 46: keyCombo = "Delete"; break;		        
+		        case 79:
 		        	if ((e.altKey) || (e.metaKey))
 		        		return;
-		        	break; // we'll allow ctro-o
+		        	if (e.ctrlKey)
+		        		keyCombo = "Ctrl-O";
+		        	break;
 		    	default:
 		    		if ((e.altKey) || (e.metaKey) || (e.ctrlKey))
 		    			return; // don't allow for most keys
