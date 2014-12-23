@@ -22,6 +22,62 @@ var _shortcuts_editor = function() {
 		shortcuts_div.innerText = "";		
 	}
 
+	this.key_is_duplicate = function(keyCombo, id, category)
+	{
+		var is_duplicate = false;
+
+		if (keyCombo === "None")
+			return false;
+
+		// look at ui
+		var keys;
+
+		switch(category)
+		{
+			case "Misc":
+			case "Jump to page":
+				keys = $(
+						"#category_Player .shortcut_item, " +
+						"#category_Posters .shortcut_item, " +
+						"#category_Sections .shortcut_item, " +
+						"#category_Jumptopage .shortcut_item, " +
+						"#category_Misc .shortcut_item"
+					);
+				break;
+
+			case "Posters":
+			case "Sections":
+				keys = $(
+						"#category_Posters .shortcut_item, " +
+						"#category_Sections .shortcut_item, " +
+						"#category_Jumptopage .shortcut_item, " +
+						"#category_Misc .shortcut_item"
+					);
+				break;
+
+			case "Player":
+				keys = $(
+						"#category_Player .shortcut_item, " +
+						"#category_Jumptopage .shortcut_item, " +
+						"#category_Misc .shortcut_item"
+					);
+				break;
+		}
+
+		for (i = 0; i < keys.length; i++)
+		{
+			if (keys[i].id === id)
+				continue;
+			if ($("input", keys[i])[0].value === keyCombo)
+			{
+				is_duplicate = true;
+				break;				
+			}	
+		}
+
+		return is_duplicate;
+	}
+
 	this.show_shortcuts = function(keyboard_shortcut_to_id_dict, keyboard_id_to_shortcut_dict)
 	{
 		_keyboard_id_to_shortcut_dict = keyboard_id_to_shortcut_dict;
@@ -46,6 +102,9 @@ var _shortcuts_editor = function() {
 			node.className = "shortcuts_category";
 			node.style.innerText = "font-weight: bold";
 			shortcuts_div.appendChild(node);
+			var category_div = document.createElement("div");
+			category_div.id = "category_" + categories[category_index].replace(" ", "");
+			shortcuts_div.appendChild(category_div);
 
 			//console.log("For category '" + categories[category_index] + "'");
 			var ids_for_category = keyboard_shortcuts_info.get_shortcuts_for_category(keyboard_id_to_shortcut_dict, categories[category_index]);
@@ -58,7 +117,7 @@ var _shortcuts_editor = function() {
 
 				var div_node = document.createElement("div");
 				div_node.className = "shortcut_item";
-				shortcuts_div.appendChild(div_node);
+				category_div.appendChild(div_node);
 
 				node = document.createElement("div");
 				node.innerText = defs[ids_for_category[j]].description;
@@ -74,10 +133,10 @@ var _shortcuts_editor = function() {
 				div_node.appendChild(node);
 
 				node = document.createElement("br");
-				shortcuts_div.appendChild(node);
+				category_div.appendChild(node);
 			}
 			var node = document.createElement("br");
-			shortcuts_div.appendChild(node);			
+			category_div.appendChild(node);			
 		}
 
 		$(".shortcuts_key").each(function() { this.addEventListener("keydown", function(e) {
@@ -140,9 +199,17 @@ var _shortcuts_editor = function() {
 			    	keyCombo = keyCombo.toLowerCase();
 		    }
 
-		    // Don't allow duplicating key
-			//if ((keyCombo !== "None") && (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined"))
-			//	return;
+			var defs = keyboard_shortcuts_info.get_shortcuts_defs();
+			if (((defs[id].category === "Player") || (defs[id].category === "Jump to page") || (defs[id].category === "Misc")) &&
+				((keyCombo === "Left") || (keyCombo === "Right")))
+					return; // Don't allow left/right arrow keys for global or player keys
+
+
+			// Make sure that key is unique (based on section)
+			if (self.key_is_duplicate(keyCombo, this.id, defs[id].category))
+			{
+				return;
+			}
 
 			// Remove old key
 			var old_shortcut = _keyboard_id_to_shortcut_dict[id];

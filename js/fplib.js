@@ -144,7 +144,7 @@ var _fplib = function()
 			results["movieIdAttribute"] = "data-movieid";
 			results["queueMouseOver"] = ".btnWrap";
 			results["elemContainerId"] = "displaypage-overview";
-			results["movieInfoSelector"] = ".displayPagePlayable";
+			results["movieInfoSelector"] = ".displayPagePlayable a"; 
 	        results["bobPopup"] = ".bobContent";
 
 	        // for navigating episodes; not working yet
@@ -491,6 +491,7 @@ var _fplib = function()
 		chrome.storage.sync.get(varname, callback);
 	}
 
+	// 'old mylist' is really 'manual' order
 	this.isOldMyList = function()
 	{
 		try
@@ -503,6 +504,7 @@ var _fplib = function()
 		return val;
 	}
 
+	// 'new mylist' is really 'netflix suggests' order
 	this.isNewMyList = function()
 	{
 		try

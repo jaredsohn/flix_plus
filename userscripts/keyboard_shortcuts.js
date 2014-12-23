@@ -51,12 +51,24 @@ function scrollMiddle(elem)
 
 function WatchOrZoomMovie(command)
 {
-    if (_currElem === null)
-        return;
-
     var selectors = fplib.getSelectorsForPath();
     if (selectors === null)
         return;
+
+    console.log("~~~~~~");
+    if ((location.pathname.indexOf("/WiMovie") === 0) && (command === "play"))
+    {
+        attr_elem = $(selectors["movieInfoSelector"])[0];
+        var full_str = ($(attr_elem)).attr(selectors["movieIdAttribute"]);
+        var movie_id = fplib.getMovieIdFromField(full_str);
+        this.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movie_id;
+        return;
+    }
+
+    if (_currElem === null)
+        return;
+
+    console.log("~~2");
 
     var attr_elem = null;
     if (selectors["movieInfoSelector"] !== null)
@@ -67,15 +79,19 @@ function WatchOrZoomMovie(command)
         attr_elem = $(_currElem);
     }
 
+    console.log("~~3");
+
+
     var full_str = attr_elem.attr(selectors["movieIdAttribute"]);
     var movie_id = fplib.getMovieIdFromField(full_str);
+    console.log("~~4");
 
     switch (command) {
         case "play":
             this.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movie_id;
             break;
         case "zoom_into_details":
-            this.location = window.location.protocol + "www.netflix.com/WiMovie/" + movie_id;
+            this.location = window.location.protocol + "//www.netflix.com/WiMovie/" + movie_id;
             break;
     }
 }

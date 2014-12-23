@@ -6,11 +6,24 @@
 hidePostPlay = function()
 {
     document.body.arrive(".player-postplay", function() {
-        console.log("hiding post play2...");
+        console.log("hiding post play...");
 
         $("#netflix-player").removeClass("player-postplay");
         $(".player-postplay")[0].style.display = "none";
     });
+
+/*)
+    // issue: this won't ever trigger
+    console.log("waiting for video-ended");
+    document.body.arrive(".video-ended", function() {
+    	console.log("video ended...");
+    	$("#netflix-player").addClass("player-postplay");
+    	$(".player-postplay").show();
+
+        $(".player-postplay-background-gradient").hide();
+        $(".player-postplay-background-image").hide();
+        $(".player-postplay-show-metadata").hide();
+    });*/
 }
 
 hidePostPlay();

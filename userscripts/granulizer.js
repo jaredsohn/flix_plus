@@ -109,9 +109,12 @@ switch (window.location.pathname.split('/')[1])
     case "WiAgain":
     case "WiSimilarsByViewType":
     case "WiAltGenre":
-    case "WiMovie":
     case "RoleDisplay":
     case "WiRoleDisplay":
+        patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
+        break;
+    case "WiMovie":
+        patch_all($("#displaypage-overview-details")[0], "strbrContainer", false);
         patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
         break;
     case "MyList":

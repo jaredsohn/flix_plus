@@ -1351,7 +1351,7 @@
             elt2 = elt.getElementsByTagName('a')[0];
         }
 
-        return elt2.innerHTML;
+        return (elt2) ? elt2.innerHTML : "unknown";
     };
 
     // Extracts availability indication; could be a date of format m/dd/yyyy.

@@ -38,6 +38,21 @@ for (i = 0; i < imgs.length; i++) {
     imgs[i].parentNode.parentNode.className += " fp_duplicate_gp"; 
   }
 }
+
+// Don't mark anything as dupe if it is within My List
+var myListImgs = $(".yourListRow .boxShot img");
+var len = myListImgs.length;
+for (i = 0; i < len; i++)
+{
+  if (myListImgs[i].classList.contains("fp_duplicate"))
+  {
+    myListImgs[i].classList.remove("fp_duplicate");
+    myListImgs[i].parentNode.parentNode.classList.remove("fp_duplicate_gp");
+    dupe_count--;
+  }
+}
+
+
 console.log("Found " + dupe_count + " posters (of " + imgs.length + ")");
 
 fplib.idMrows();
