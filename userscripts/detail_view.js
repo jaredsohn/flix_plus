@@ -37,9 +37,10 @@ var stopIt    = function (e) { e.preventDefault(); e.stopPropagation(); },
 var fixTag = function(tag)
 {
   if (regex.test(tag.href)) {
-    if ((tag.id === "fp_play_popover") || (tag.id === "fp_play"))
+    if ((tag.id === "fp_play_popover") || tag.classList.contains("fp_play"))
+    {
       return;
-
+    }
     tag.playhref     = tag.href;
     tag.className    = tag.className.replace(playClass, ' ');
     tag.href         = linkBase + tag.href.match(regex)[1];
@@ -56,17 +57,21 @@ function createPlayLink(movie_id, link_id) {
   elem.style.cssText = "margin-left: 20px; display:inline-block";
   elem.id = link_id;
   elem.title = "Play";
-  elem.className = "fp_play_link fp_button";
+  elem.className = "fp_play fp_button";
 
   return elem;
 }
-
 extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important"); // jaredsohn-Lifehacker...so it doesn't show 'Play' on genre pages
 
 // Don't affect play button on wimovie
 var elems = $(".displayPagePlayable a");
 if (elems.length)
-  elems[0].id = "fp_play";
+  elems[0].classList.add("fp_play");
+
+// Don't affect play buttons for episodes on wimovie
+elems = $(".episodeList .playBtn");
+for (j = 0; j < elems.length; j++)
+  elems[i].classList.add("fp_play");
 
 while (i--) {
   tag = aTags[i];
@@ -98,7 +103,6 @@ monitorPreview = function(elem_id)
 
 monitorPreview('BobMovie-content');
 // for wiGenre, would use monitorPreview('bob-container'), but that page now redirects to wiAltGenre
-
 
 
 // Make window bigger so there is room for button

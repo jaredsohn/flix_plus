@@ -4,7 +4,7 @@
 
 if (fplib.isOldMyList())
 {
-    console.log("Script disabled since it does not work on old MyList.")
+    console.log("Script disabled since it requires Netflix Suggests mode.")
     return;
 }
 
@@ -12,6 +12,12 @@ var key_prefix = "flix_plus " + fplib.getProfileName() + " ";
 
 var get_history = function(start_time, page_no, netflix_api_base, authUrl, results_json, callback)
 {
+	if (authUrl === "")
+	{
+		callback({ratingItems: []});
+		return;
+	}
+
 	var past_start_time = false;
 
 	var url = netflix_api_base + "/ratinghistory?pg=" + page_no + "&authURL=" + authUrl + "&_retry=0";

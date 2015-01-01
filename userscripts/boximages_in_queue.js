@@ -22,7 +22,7 @@ var DEBUG = 0;
 function main() {
    if (!fplib.isOldMyList())
    {
-      console.log("Script disabled since it requires old MyList.")
+      console.log("Script disabled since it requires Netflix Suggests mode.")
       return;
    }
 

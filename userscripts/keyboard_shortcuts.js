@@ -55,20 +55,19 @@ function WatchOrZoomMovie(command)
     if (selectors === null)
         return;
 
-    console.log("~~~~~~");
     if ((location.pathname.indexOf("/WiMovie") === 0) && (command === "play"))
     {
         attr_elem = $(selectors["movieInfoSelector"])[0];
         var full_str = ($(attr_elem)).attr(selectors["movieIdAttribute"]);
         var movie_id = fplib.getMovieIdFromField(full_str);
+        if (movie_id === "0")
+            return;
         this.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movie_id;
         return;
     }
 
     if (_currElem === null)
         return;
-
-    console.log("~~2");
 
     var attr_elem = null;
     if (selectors["movieInfoSelector"] !== null)
@@ -79,12 +78,10 @@ function WatchOrZoomMovie(command)
         attr_elem = $(_currElem);
     }
 
-    console.log("~~3");
-
-
     var full_str = attr_elem.attr(selectors["movieIdAttribute"]);
     var movie_id = fplib.getMovieIdFromField(full_str);
-    console.log("~~4");
+    if (movie_id === "0")
+        return;
 
     switch (command) {
         case "play":
@@ -111,6 +108,42 @@ function OpenSectionLink()
         window.location = url;
     
     return;
+}
+
+
+// code for highlight_random:
+//
+// var index = findRandomNonhiddenInList(_elemsNPList);
+// unselect current index
+// set index, show border, set focus
+
+// Find random index of nonhidden element within a list.  Return -1 if there are none.
+function FindRandomNonhiddenInList(list)
+{
+    console.log("findrandom");
+    console.log(list);
+    if (!ListHasItems(list)) {
+        return -1;
+    }
+    var count = list.length;
+    while(true)
+    {
+        rnd = Math.floor(Math.random()*count);
+
+        if (!extlib.isHidden(list[rnd]))
+            break;
+    }
+
+    return rnd;
+}
+
+function FindRandomOnPage(list)
+{
+    // determine that there is at least one nonhidden
+    // TODO: get count within each section
+    // choose a random number based on overall
+    // figure out which section to go to.
+    // if match is hidden, then repeat
 }
 
 function OpenCurrentLink()
@@ -467,7 +500,7 @@ function ListHasItems(list)
     if (list) {
         for (i = 0; i < list.length; i++)
         {
-            if (!extlib.isHidden(list[i])) // Updated jaredsohn-Lifehacker to ignore hidden elements
+            if (!extlib.isHidden(list[i]))// Updated jaredsohn-Lifehacker to ignore hidden elements
                 return true;
         }
     }
@@ -501,9 +534,9 @@ var toggle_keyboard_commands = function()
 
         var help_css_main = "#flix_plus_keyboard_commands { align: center; width: 60%; left: 20%; z-index: 9999; position: fixed; padding: 20px; height: 85%; top: 5%; opacity: 0.9; border-width: 5px; border-style: solid; overflow: auto;"
         if ((enabled_scripts === null) || (enabled_scripts["id_darker_netflix"]))
-            extlib.addGlobalStyle(help_css_main + " background-color: black; foreground-color: white; border-color: white; }");
+            extlib.addGlobalStyle(help_css_main + " background-color: black; color: white; border-color: white; }");
         else
-            extlib.addGlobalStyle(help_css_main + " background-color: white; foreground-color: black; border-color: black; }");
+            extlib.addGlobalStyle(help_css_main + " background-color: white; color: black; border-color: black; }");
 
         document.body.appendChild(commands_div);
 
@@ -732,6 +765,52 @@ var run_command = function(command)
                 _currListItem = _elemsNPList.length;
                 NextPreviousListItem(-1);
                 break;
+            case "all_show_random":
+            /*
+                 var section_and_elem_indices = FindRandomNonhiddenOnPage();
+                 console.log("random = ");
+                 console.log(section_and_elem_indices);
+
+                 if (rnd >= 0)
+                 {
+                    UpdateKeyboardSelection(_elemsNPList[_currListItem], false);
+                    _currListContainer = -1;
+
+                    // TODO: also change section
+                    NextPreviousListContainer(1);
+
+                    _currListItem = rnd;
+                    UpdateKeyboardSelection(_elemsNPList[_currListItem], true);
+                    extlib.simulateEvent(_elemsNPList[_currListItem], "mouseover");                    
+                    scrollMiddle(_elemsNPList[_currListItem]);
+                 }*/
+                break;
+            case "section_show_random": // Note: if page dynamically adds posters (or things that look like posters), this occasionally will select nothing
+                if (location.pathname.indexOf("/WiMovie") === 0)
+                {
+                    if ($("#random_button").length)
+                        $("#random_button")[0].click()
+                } else
+                {
+                     rnd = FindRandomNonhiddenInList(_elemsNPList);
+                     console.log("random = " + rnd);
+                     if (rnd >= 0)
+                     {
+                        try
+                        {
+                            UpdateKeyboardSelection(_elemsNPList[_currListItem], false);
+                        } catch (ex)
+                        {
+                            console.log(ex);
+                        }
+                        _currListItem = rnd;
+                        UpdateKeyboardSelection(_elemsNPList[_currListItem], true);
+                        extlib.simulateEvent(_elemsNPList[_currListItem], "mouseover");                    
+                        scrollMiddle(_elemsNPList[_currListItem]);
+                    }
+                }
+                break;
+            case "player_random_episode": if ($("#fp_random_episode").length) { $("#fp_random_episode")[0].click(); } break; // div added by random episode script
             case "open_section_link": OpenSectionLink(); break;
             case "toggle_scrollbars": elem = document.getElementById(_elemsListContainers[_currListContainer].id + "_scrollshowall"); if (elem !== null) { elem.click(); } break;
             case "toggle_hiding": elem = document.getElementById(_elemsListContainers[_currListContainer].id + "_showhide"); if (elem !== null) { elem.click(); } break;
@@ -741,6 +820,7 @@ var run_command = function(command)
             case "jump_kids": window.location = "http://www.netflix.com/Kids"; break;
             case "jump_viewing_activity": window.location = "http://www.netflix.com/WiViewingActivity";  break;
             case "jump_your_ratings": window.location = "https://www.netflix.com/MoviesYouveSeen"; break;
+            case "jump_whos_watching": window.location = "https://www.netflix.com/ProfilesGate"; break;
             case "search": elem = document.getElementById("searchTab").click(); document.getElementById("searchField"); elem.focus(); elem.select(); break;
             case "your_account": window.location = "https://www.netflix.com/YourAccount"; break;
             case "help": toggle_keyboard_commands(); break;
@@ -748,6 +828,8 @@ var run_command = function(command)
                 _keyboard_commands_shown = true; toggle_keyboard_commands(); 
                 $.each($("#layerModalPanes .close"), function(index, value) { this.click() });
                 $.each($("#profiles-gate .close"), function(index, value) { this.click(); });
+                if (($(".continue-playing span").length > 0) && ($(".continue-playing span")[0].innerText.indexOf("Continue Playing") !== -1))
+                     $(".continue-playing span")[0].click();
                 break;
             case "player_mute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(true);"); break;
             case "player_unmute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(false);"); break;

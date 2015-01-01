@@ -7,6 +7,12 @@ var _ignore_tv = false;
 
 var get_history = function(start_time, page_no, authUrl, results_json, callback)
 {
+	if (authUrl === "")
+	{
+		callback({viewedItems: []});
+		return;
+	}
+
 	console.log("get_history " + start_time + " " + page_no + " " + authUrl + " " + results_json);
 	var past_start_time = false;
 

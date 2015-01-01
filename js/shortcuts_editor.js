@@ -32,6 +32,10 @@ var _shortcuts_editor = function() {
 		// look at ui
 		var keys;
 
+		console.log(keyCombo);
+		console.log(id);
+		console.log(category);
+
 		switch(category)
 		{
 			case "Misc":
@@ -64,6 +68,8 @@ var _shortcuts_editor = function() {
 				break;
 		}
 
+		console.log(keys.length);
+
 		for (i = 0; i < keys.length; i++)
 		{
 			if (keys[i].id === id)
@@ -74,6 +80,7 @@ var _shortcuts_editor = function() {
 				break;				
 			}	
 		}
+		console.log(is_duplicate);
 
 		return is_duplicate;
 	}
@@ -103,7 +110,7 @@ var _shortcuts_editor = function() {
 			node.style.innerText = "font-weight: bold";
 			shortcuts_div.appendChild(node);
 			var category_div = document.createElement("div");
-			category_div.id = "category_" + categories[category_index].replace(" ", "");
+			category_div.id = "category_" + categories[category_index].replace(new RegExp(" ", 'g'), "");
 			shortcuts_div.appendChild(category_div);
 
 			//console.log("For category '" + categories[category_index] + "'");

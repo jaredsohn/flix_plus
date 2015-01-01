@@ -14,11 +14,18 @@ var _fplib = function()
 	var _run_before = {};
 	var _profile_name = "";
 
+	// Returns zero if not able to get id
 	this.getMovieIdFromField = function(attr_str)
 	{
+		if (typeof(attr_str) === "undefined")
+			return "0";
+
 	    var parts = attr_str.split("_");
 	    var temp = parts[0].replace(/\D/g,'');
-	    return parseInt(temp, 10).toString();
+	    var id = parseInt(temp, 10).toString();
+	    if (id === "NaN")
+	    	id = "0";
+	    return id;
 	}
 
 	// the rating string here matches the keyboard code used by Flix Plus
@@ -347,7 +354,11 @@ var _fplib = function()
 	// Call this from a page that has a signout button (basically any)
 	this.getAuthUrl = function()
 	{
-		var href = document.getElementById("signout").getElementsByTagName("a")[0].href;
+		var elem = document.getElementById("signout");
+		if (elem === null)
+			return "";
+
+		var href = elem.getElementsByTagName("a")[0].href;
 		var authUrlPos = href.indexOf("authURL=");
 
 		return href.substring(authUrlPos + 8);

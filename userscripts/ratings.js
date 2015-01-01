@@ -286,7 +286,7 @@ function getRating(args, cache_only, callback) {
     var ui_data = get_ui_data(args);
 
     var $target = $(args["selector"]);
-    var spinner = "<div id='fp_rt_spinner_div'>Looking up external ratings...<br><img class='fp_button fp_rt_spinner' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'></div>";
+    var spinner = "<div id='fp_rt_spinner_div'>Looking up external ratings...<br><img class='fp_button fp_rt_spinner' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'><br><br><br></div>";
     $target.append(spinner);
 
     var cached = checkCache(ui_data["title"], ui_data["year"], ui_data["type"]);

@@ -294,7 +294,7 @@ function insertNotesInElem(elem)
 
 if (!fplib.isOldMyList())
 {
-  console.log("Script disabled since it requires old MyList.")
+    console.log("Script disabled since it requires Netflix Suggests mode.")
 } else
 {
     // this is executed when this script loads:
