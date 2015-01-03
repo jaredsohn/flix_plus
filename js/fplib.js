@@ -95,12 +95,20 @@ var _fplib = function()
 		    results["borderedElement"] = ".boxShot";
 		} else if (location.pathname.indexOf("/search") === 0)
 		{
-	    	results["elementsList"] = ".mrow";
+	        results["elements"] = ".lockup";
+	        results["elemContainerId"] = "bob-container";
+	        results["queueRemove"] = ".playListBtnText";
+	        results["queueAdd"] = ".playListBtnText";
+	        results["movieInfoSelector"] = null;
+	        results["movieIdAttribute"] = "data-titleid";
+			results["borderedElement"] = null;
+
+/*	    	results["elementsList"] = ".mrow";
 	        results["elemContainerId"] = "BobMovie";
 	        results["queueMouseOver"] = ".btnWrap";
 	        results["ratingMouseOver"] = ".stbrOl";
 		    results["borderedElement"] = ".boxShot";
-			results["bobPopup"] = "#bob";
+			results["bobPopup"] = "#bob";*/
 	    } else if ((location.pathname.indexOf("/WiRecentAdditions") === 0) || (location.pathname.indexOf("/NewReleases") === 0))  // NewReleases seems to be a rename
 	    {
 	       results["elementsList"] = ".mrow";

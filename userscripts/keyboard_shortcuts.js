@@ -19,9 +19,12 @@ var _currListItem = -1;
 var _currElem = null;
 var _keyboard_commands_shown = false;
 var _already_has_shift_chars = [ "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
+var _preventDefaultKeys = ["Home", "End", "Ctrl-Home", "Ctrl-End", "Space"];
 
 var _keyboard_shortcut_to_id_dict = {};
 var _keyboard_id_to_shortcut_dict = {};
+
+var _search_mode = false;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Scrolling to element with keyboard focus
@@ -429,6 +432,7 @@ function NextPreviousListItem(direction)
     } catch(err) {
         //ignore error
     }
+
     if (direction == 0) {
         return;
     }
@@ -460,19 +464,16 @@ function NextPreviousListItem(direction)
         NextPreviousListPage(1);
     } else {
         _currElem = _elemsNPList[_currListItem];
-
         try {
-            if ((typeof(_elemsListContainers) === 'undefined') || (_elemsListContainers.length === 0) || !(extlib.isHidden($("#" + _elemsListContainers[_currListContainer].id + " .bd"))))
+            console.log("#" + _elemsListContainers[_currListContainer].id + " .bd");
+            if ((typeof(_elemsListContainers) === 'undefined') || (_elemsListContainers.length === 0) || !(extlib.isHidden($("#" + _elemsListContainers[_currListContainer].id + " .bd")[0])))
             {
                 extlib.simulateEvent(_currElem, "mouseover");
                 scrollMiddle(_currElem);
             } else
-            {
                 scrollMiddle(_elemsListContainers[_currListContainer]);            
-            }
         } catch (ex)
         {
-
         }
 
         UpdateKeyboardSelection(_currElem, true);
@@ -480,15 +481,15 @@ function NextPreviousListItem(direction)
         var elemsLinks = _currElem.getElementsByTagName("a");
         if (elemsLinks.length == 0) {
             switch (_currListItem) {
-            case 0:
-                NextPreviousListItem(1);
-                break;
-            case lastIndex:
-                NextPreviousListItem(-1);
-                break;
-            default:
-                NextPreviousListItem(direction);
-                break;
+                case 0:
+                    NextPreviousListItem(1);
+                    break;
+                case lastIndex:
+                    NextPreviousListItem(-1);
+                    break;
+                default:
+                    NextPreviousListItem(direction);
+                    break;
             }
             //NextPreviousListItem(-direction);
         }        
@@ -666,13 +667,22 @@ var handle_keydown = function(e)
         if ((command !== null) && (command !== ""))
         {
             run_command(command);
-//            console.log("preventdefault");
-//            e.preventDefault();   
+
+            if (location.pathname.indexOf("/WiPlayer") !== 0) // don't do this for player; kind of a last minute hack in how this is organized
+            {
+                // TODO: fix logic for below for wiplayer
+                if (_preventDefaultKeys.indexOf(keyCombo) !== -1)
+                    e.preventDefault();
+            }
         }
     }
 
-    if ((typeof(keyCombo) !== "undefined") && (keyCombo !== null))
-        undo_builtin_key(keyCombo, e);    
+    if (location.pathname.indexOf("/WiPlayer") === 0)
+    {
+        // This undoes what the keys normally do
+        if ((typeof(keyCombo) !== "undefined") && (keyCombo !== null))
+            undo_builtin_key(keyCombo, e);
+    }
 }
 
 var key_lookup = function(keyCombo)
@@ -843,7 +853,13 @@ var run_command = function(command)
             case "player_playpause": console.log("player_playpause"); injectJs("setTimeout(function() {netflix.cadmium.objects.videoPlayer().getPaused() ? netflix.cadmium.objects.videoPlayer().play() : netflix.cadmium.objects.videoPlayer().pause();}, 10);"); break;
             case "player_play": injectJs("netflix.cadmium.objects.videoPlayer().play();"); break;
             case "player_pause": injectJs("netflix.cadmium.objects.videoPlayer().pause();"); break;
-            case "player_nextepisode": $("#player-menu-next-episode")[0].click(); break;
+            case "player_nextepisode": {
+                if ($("#player-menu-next-episode").length)
+                    $("#player-menu-next-episode")[0].click();
+                if ($(".postplay-still-container").length)
+                    $(".postplay-still-container")[0].click();
+                break;
+            }
             case "player_fullscreen": $(".player-fill-screen")[0].click(); break;
         }
     } catch (ex)
@@ -933,6 +949,23 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
 
     document.addEventListener('keypress', handle_keypress, false);
     document.addEventListener('keydown', handle_keydown, false);
+/*    $("#searchField")[0].addEventListener("input", function(e) { 
+        if ($("#searchField")[0].value === "")
+        {
+            if (_search_mode)
+            {
+                console.log("search mode done");
+                _search_mode = false;
+            }
+        } else
+        {
+            if (!_search_mode)
+            {
+                console.log("search mode start");
+                _search_mode = true;
+            }
+        }
+    });*/
 
     // Make borders more visible on many pages
     extlib.addGlobalStyle(".agMovieGallery {position: relative; top: 10px; left:10px}");
