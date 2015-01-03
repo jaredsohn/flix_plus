@@ -230,7 +230,7 @@ var _shortcuts_editor = function() {
 		    this.value = keyCombo;
 		}, true); })
 
-		$(".shortcuts_key").each(function() { this.addEventListener("keypress", function(e) {
+		$(".shortcuts_key").each(function() { this.addEventListener("keypress", function(e) {			
 			console.log("keypress");
 
 			if ((e.altKey) || (e.ctrlKey) || (e.metaKey))

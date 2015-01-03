@@ -121,7 +121,7 @@ var _keyboard_shortcuts_info = function(){
          order: 5 },
       zoom_into_details: 
        { 
-         default_key: 'z',
+         default_key: 'Enter',
          description: 'Zoom into details',
          category: 'Posters',
          order: 7 },

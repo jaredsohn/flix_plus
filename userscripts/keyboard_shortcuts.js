@@ -295,37 +295,28 @@ var UpdateKeyboardSelection = function(elem, selected)
     if (selectors["borderedElement"] !== null)
         border_elem = $(selectors["borderedElement"], elem)[0];
 
-/*
-    if (selected)
-        extLib.addClass(border_elem, "fp_keyboard_selected");
-    else
-        extLib.removeClass(border_elem, "fp_keyboard_selected");
-
-// TODO: use code below to define what the fp_keyboard_selected class looks like (and load it only once)
-*/
-
     if (fplib.isOldMyList()) // separated out because width is different
     {
         if (selected)
-            border_elem.setAttribute('style', 'border-style: solid !important; border-color: #b9090b !important; border-width: 5px !important');
+            border_elem.classList.add("fp_keyboard_mylist_selected");
         else
-            border_elem.setAttribute('style', 'border-style: none;');
+            border_elem.classList.remove("fp_keyboard_mylist_selected");
     }
     else if (
             (location.pathname.indexOf("/Search") === 0) || (location.pathname.indexOf("/WiSearch") === 0)
         ) 
     {
         if (selected)
-            border_elem.setAttribute('style', 'border-style: solid !important; border-color: #b9090b !important; top: 10px !important; border-width: 10px !important')
+            border_elem.classList.add("fp_keyboard_search_selected");
         else
-            border_elem.setAttribute('style', 'border-style: none !important; top: 0px !important; border-width: 0px !important')                
+            border_elem.classList.remove("fp_keyboard_search_selected");
     }    
     else
     {        
         if (selected)
-            border_elem.setAttribute('style', 'outline: 10px solid #b9090b !important; outline-offset: 0px !important;');
+            border_elem.classList.add("fp_keyboard_selected");
         else
-            border_elem.setAttribute('style', 'outline: 0px !important');            
+            border_elem.classList.remove("fp_keyboard_selected");
     }
 }
 
@@ -536,14 +527,12 @@ var toggle_keyboard_commands = function()
         var commands_div = document.createElement("div");
         commands_div.id = "flix_plus_keyboard_commands";
         commands_div.innerHTML = getKeyboardCommandsHtml();
-
-        var help_css_main = "#flix_plus_keyboard_commands { align: center; width: 60%; left: 20%; z-index: 9999; position: fixed; padding: 20px; height: 85%; top: 5%; opacity: 0.9; border-width: 5px; border-style: solid; overflow: auto;"
-        if ((enabled_scripts === null) || (enabled_scripts["id_darker_netflix"]))
-            extlib.addGlobalStyle(help_css_main + " background-color: black; color: white; border-color: white; }");
-        else
-            extlib.addGlobalStyle(help_css_main + " background-color: white; color: black; border-color: black; }");
-
         document.body.appendChild(commands_div);
+
+        if ((enabled_scripts === null) || (enabled_scripts["id_darker_netflix"]))
+            $("#flix_plus_keyboard_commands")[0].classList.add("fp_keyboard_commands_black")
+        else
+            $("#flix_plus_keyboard_commands")[0].classList.add("fp_keyboard_commands_white")
 
         $(document.body).click(function(e){
             if (_keyboard_commands_shown == true)
@@ -628,6 +617,11 @@ var determine_keydown = function(e)
         case 40: keyCombo = "Down"; break;
         case 45: keyCombo = "Insert"; break;
         case 46: keyCombo = "Delete"; break;
+        case 79:
+            if ((e.ctrlKey) && (e.altKey === false) && (e.metaKey === false))
+                keyCombo = "O";
+            break;
+
         //case 188: keyCombo = ","; break;
         //case 190: keyCombo = "."; break;
         //case 191: keyCombo = "/"; break;
@@ -846,6 +840,12 @@ var run_command = function(command)
                 if (($(".continue-playing span").length > 0) && ($(".continue-playing span")[0].innerText.indexOf("Continue Playing") !== -1))
                      $(".continue-playing span")[0].click();
                 break;
+/*            case "reset_fading":
+                delete localStorage["flix_plus " + fplib.getProfileName() + " ratingactivity_last_checked"];
+                delete localStorage["flix_plus " + fplib.getProfileName() + " ratingactivity_notinterested_last_checked"];
+                delete localStorage["flix_plus " + fplib.getProfileName() + " viewingactivity_last_checked"];
+                window.location.reload();
+                break;*/
             case "player_mute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(true);"); break;
             case "player_unmute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(false);"); break;
             case "player_toggle_mute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(!netflix.cadmium.objects.videoPlayer().getMuted());"); break;
@@ -975,5 +975,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     // Make borders more visible on many pages
     extlib.addGlobalStyle(".agMovieGallery {position: relative; top: 10px; left:10px}");
     extlib.addGlobalStyle(".instantSearchGallery .gallery {position: relative; top: 10px; left:10px}");
-
+    
+    if ((location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/Kids") === 0))
+        extlib.addGlobalStyle(".agMovieSetSlider {padding: 0px 0px 10px 0px}");
 });

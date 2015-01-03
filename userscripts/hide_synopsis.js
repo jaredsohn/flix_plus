@@ -66,10 +66,6 @@ var hideOnMovieDetails = function()
         elems2[i].classList.add("fp_spoiler");
 }
 
-// from http://davidwalsh.name/spoiler-filter
-extlib.addGlobalStyle(".fp_spoiler { -webkit-filter: blur(20px); -webkit-transition-property: -webkit-filter; -webkit-transition-duration: .4s; }");
-extlib.addGlobalStyle(".fp_spoiler:hover, .fp_spoiler:focus { -webkit-filter: blur(0px); }");
-
 if (location.pathname.indexOf("/WiPlayer") === 0)
 	hideOnPlayer();
 else if (location.pathname.indexOf("/WiMovie") === 0)

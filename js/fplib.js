@@ -47,14 +47,13 @@ var _fplib = function()
 	    } else
 	    {
 	        switch (rating) {
-	            case "rate_0": rating_class = "rv0"; break;
+	            case "rate_0": rating_class = "rvnorec"; break;
 	            case "rate_1": rating_class = "rv1"; break;
 	            case "rate_2": rating_class = "rv2"; break;
 	            case "rate_3": rating_class = "rv3"; break;
 	            case "rate_4": rating_class = "rv4"; break;
 	            case "rate_5": rating_class = "rv5"; break;                
 	            case "rate_clear": rating_class = "clear"; break;
-	            case "rate_0": rating_class = "rvnorec"; break;
 	            case "rate_1_5": rating_class = "rv1.5"; break;
 	            case "rate_2_5": rating_class = "rv2.5"; break;
 	            case "rate_3_5": rating_class = "rv3.5"; break;
@@ -289,6 +288,9 @@ var _fplib = function()
 		var num_across = _getNumAcross();
 		consolelog("num across = " + num_across);
 		$(".mrow").each(function() { 
+			if (this.id === "")
+				return true;
+
             var posters = $("#" + this.id + " .agMovie");
             var count = 0;
 
@@ -307,6 +309,7 @@ var _fplib = function()
 
         		if (!ignore)
         		{
+        			console.log(".");
         			count++;
 
 					var imgs = (posters[i].getElementsByTagName("img"));
@@ -347,7 +350,7 @@ var _fplib = function()
 					first_offset = temp;
 				else
 				{
-					num_across = Math.ceil(window.innerWidth /  Math.abs(first_offset - temp));
+					num_across = Math.ceil(window.innerWidth /  Math.abs(first_offset - temp)) + 1;
 					break;
 				}
 			}
