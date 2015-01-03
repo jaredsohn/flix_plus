@@ -96,19 +96,14 @@ var _fplib = function()
 		} else if (location.pathname.indexOf("/search") === 0)
 		{
 	        results["elements"] = ".lockup";
-	        results["elemContainerId"] = "bob-container";
+			results["borderedElement"] = null;
+			results["elemContainerId"] = "bob-container";	        	        
 	        results["queueRemove"] = ".playListBtnText";
 	        results["queueAdd"] = ".playListBtnText";
 	        results["movieInfoSelector"] = null;
 	        results["movieIdAttribute"] = "data-titleid";
-			results["borderedElement"] = null;
-
-/*	    	results["elementsList"] = ".mrow";
-	        results["elemContainerId"] = "BobMovie";
-	        results["queueMouseOver"] = ".btnWrap";
-	        results["ratingMouseOver"] = ".stbrOl";
-		    results["borderedElement"] = ".boxShot";
-			results["bobPopup"] = "#bob";*/
+			results["bobPopup"] = "#bob-container";
+	        results["posterImageIdPrefix"] = "";
 	    } else if ((location.pathname.indexOf("/WiRecentAdditions") === 0) || (location.pathname.indexOf("/NewReleases") === 0))  // NewReleases seems to be a rename
 	    {
 	       results["elementsList"] = ".mrow";
@@ -247,7 +242,7 @@ var _fplib = function()
 	    mrows = document.getElementsByClassName("mrow");
 	    for (i = 0; i < mrows.length; i++)
 	    {
-	      if (extlib.hasClass(mrows[i], "characterRow")) // skips over characters on kids page
+	      if (mrows[i].classList.contains("characterRow")) // skips over characters on kids page
 	        continue;
 
 	      // Get relevant info
@@ -301,7 +296,7 @@ var _fplib = function()
         		var ignore_len = ignore_classes_list.length;
         		for (j = 0; j < ignore_len; j++)
         		{
-        			if (extlib.hasClass(posters[i], ignore_classes_list[j]))
+        			if (posters[i].classList.contains(ignore_classes_list[j]))
         			{
         				ignore = true;
         				break;
@@ -422,10 +417,15 @@ var _fplib = function()
 		//consolelog("elem prefix is ");
 		//consolelog(elem_prefix);
 
+		var no_gp = false;
 		var count = 0;
 		var grandparent_count = 0;
 		consolelog("applyClassnameToPosters(" + class_name + "):");
 		consolelog(ids_array);
+
+		var selector = selectors["borderedElement"];
+		if (selector === null)
+			no_gp = true;
 
 		for (i = 0; i < ids_array.length; i++)
 		{
@@ -442,17 +442,18 @@ var _fplib = function()
 					//consolelog("found!");
 					var img_elem = elem.getElementsByTagName("img")[0];
 
-			     	if (!extlib.hasClass(img_elem, class_name))
+			     	if (!img_elem.classList.contains(class_name))
 					{
-						img_elem.className += " " + class_name;
+						img_elem.classList.add(class_name);
 						count += 1;		
 					}
 
-					// This grandparent node lets allows us to hide posters via CSS (We don't fade the full poster because we don't want to fade the border.)
-					var grandparentElem = img_elem.parentNode.parentNode;
-			     	if (!extlib.hasClass(grandparentElem, class_name + "_gp"))
+					// This grandparent node lets allows us to hide posters via CSS (We don't fade the full poster because we don't want to fade the border.)					
+					var grandparentElem = (no_gp) ? img_elem.parentNode : img_elem.parentNode.parentNode;
+
+			     	if (!grandparentElem.classList.contains(class_name + "_gp"))
 					{
-						grandparentElem.className += " " + class_name + "_gp";
+						grandparentElem.classList.add(class_name + "_gp");
 						grandparent_count += 1;
 					}
 
@@ -466,12 +467,20 @@ var _fplib = function()
 
 	this.applyClassnameToPostersOnArrive = function(ids_array, class_name) {
 		var data_dict = {};
+		var collapse_tree = false;
 		var len = ids_array.length;
+		var no_gp = false;
 		for (i = 0; i < len; i++)
 			data_dict[ids_array[i]] = true;
 
-		var selectors = fplib.getSelectorsForPath();		
-		document.arrive(selectors["borderedElement"], function()
+		var selectors = fplib.getSelectorsForPath();
+		var selector = selectors["borderedElement"];
+		if (selector === null)
+		{
+			no_gp = true;
+			selector = selectors["elements"];
+		}
+		document.arrive(selector, function()
 		{
 			console.log("arrive (applyClassnameToPostersOnArrive)");
 			var id = 0;
@@ -488,12 +497,15 @@ var _fplib = function()
 			//console.log(movie_id);
 			if (typeof(data_dict[movie_id]) !== "undefined")
 			{
-				this.parentNode.className += " " + class_name + "_gp";
+				var node = this;
+				if (!no_gp)
+					node = this.parentNode;
+				node.classList.add(class_name + "_gp");
 
 				console.log(this);
 				var imgs = this.getElementsByTagName("img");
 //				console.log("marking as " + class_name + " - " + movie_id);
-				imgs[0].className += " " + class_name;
+				imgs[0].classList.add(class_name);
 			}
 		});
 	}	

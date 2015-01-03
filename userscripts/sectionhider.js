@@ -31,7 +31,7 @@ fplib.syncGet(KEY_NAME, function(items)
   mrows = document.getElementsByClassName("mrow");
   for (i = 0; i < mrows.length; i++)
   {
-    if (extlib.hasClass(mrows[i], "characterRow")) // skips over characters on kids page
+    if (mrows[i].classList.contains("characterRow")) // skips over characters on kids page
       continue;
 
     var id = mrows[i].id;

@@ -1,6 +1,6 @@
 // written by jaredsohn-lifehacker
 
-// code relies on arrive.js
+// code relies on jquery, arrive.js
 
 // requires HTML5 player (not Silverlight)
 var hideOnPlayer = function()
@@ -18,38 +18,32 @@ var hideOnPlayer = function()
 
     document.body.arrive(".episode-list-image", function() {
         console.log("image found!");
-        this.style.opacity = 0;
-        showWhenMouseOver(this);
+        this.classList.add("fp_spoiler");
     });
 
     document.body.arrive(".episode-list-synopsis", function() {
         console.log("synopsis");
-        this.style.opacity = 0;
-        showWhenMouseOver(this);
+        this.classList.add("fp_spoiler");
     });
 
     document.body.arrive(".next-episode-image", function() {
         console.log("next episode image found!");
-        this.style.opacity = 0;
-        showWhenMouseOver(this);
+        this.classList.add("fp_spoiler");
     });
 
     document.body.arrive(".player-next-episode-description", function() {
         console.log("next episode desc found!");
-        this.style.opacity = 0;
-        showWhenMouseOver(this);
+        this.classList.add("fp_spoiler");
     });
         
     document.body.arrive(".playback-longpause-container", function() {
         var paragraphs = $(".playback-longpause-container .content p");
-        paragraphs[paragraphs.length - 1].style.opacity = 0;
-        showWhenMouseOver(this);
+        paragraphs[paragraphs.length - 1].classList.add("fp_spoiler");
     });
 
     document.body.arrive(".player-postplay-autoplay-still", function() {
         console.log("postplay autoplay still found");
-        this.style.opacity = 0;
-//        showWhenMouseOver(this); Don't allow mouseover here since user has to click it to proceed (and also function doesn't work here as is)
+        this.classList.add("fp_spoiler");
     });
 
     extlib.addGlobalStyle("#fp_blackscreen { display: none };")
@@ -60,36 +54,23 @@ var hideOnMovieDetails = function()
 {
     document.body.arrive(".synopsis", function() {
     	console.log("synopsis");
-        this.style.opacity = 0;
-        showWhenMouseOver(this);
+        this.classList.add("fp_spoiler");
     });
     var elems = document.getElementsByClassName("synopsis");
     for (i = 0; i < elems.length; i++)
-    {
-        elems[i].style.opacity = 0;
-        showWhenMouseOver(elems[i]);
-    }
+        elems[i].classList.add("fp_spoiler");
 
     // for 'special' shows like Orange Is The New Black
     var elems2 = document.getElementsByClassName("videoImagery");
     for (i = 0; i < elems2.length; i++)
-    {
-        elems2[i].style.opacity = 0;
-        showWhenMouseOver(elems2[i]);
-    }
+        elems2[i].classList.add("fp_spoiler");
 }
 
-var showWhenMouseOver = function(elem)
-{
-    elem.addEventListener("mouseleave", function(e) { this.style.opacity = 0; })
-    elem.addEventListener("mouseover", function(e) { this.style.opacity = 1; })
-}
+// from http://davidwalsh.name/spoiler-filter
+extlib.addGlobalStyle(".fp_spoiler { -webkit-filter: blur(20px); -webkit-transition-property: -webkit-filter; -webkit-transition-duration: .4s; }");
+extlib.addGlobalStyle(".fp_spoiler:hover, .fp_spoiler:focus { -webkit-filter: blur(0px); }");
 
 if (location.pathname.indexOf("/WiPlayer") === 0)
-{
 	hideOnPlayer();
-} else if (location.pathname.indexOf("/WiMovie") === 0)
-{
-	console.log("hide_synopsis");
+else if (location.pathname.indexOf("/WiMovie") === 0)
     hideOnMovieDetails();
-}

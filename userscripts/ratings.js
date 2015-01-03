@@ -714,7 +714,6 @@ var onPopup = function()
 
     var is_https = (window.location.protocol === "https:");
     getRating(args, is_https, function(movie_info) {
-console.log("7");
         displayRating(movie_info, is_https, args);
     });
 };
@@ -733,7 +732,6 @@ $(document).ready(function() {
         } else
         {
             getRating(args, false, function(movie_info) {
-                console.log("3");
 
                 var is_https = (window.location.protocol === "https:");
                 displayRating(movie_info, is_https, args);

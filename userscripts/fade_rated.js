@@ -114,10 +114,6 @@ fplib.syncGet(keys_dict, function(items)
 	fplib.define_poster_css("fp_rated", items[key_prefix + "fp_rated_style"]);
 	fplib.define_poster_css("fp_rated_notinterested", items[key_prefix + "fp_rated_notinterested_style"]);
 });
-//extlib.addGlobalStyle(".fp_rated { opacity: 0.2; -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
-////extlib.addGlobalStyle(".fp_rated_gp { display: none !important }");
-//extlib.addGlobalStyle(".fp_rated_notinterested_gp { display: none !important }");
-
 
 var keyname = "flix_plus " + fplib.getProfileName() + " ratingactivity";
 

@@ -34,8 +34,8 @@ for (i = 0; i < imgs.length; i++) {
   else
   {
     dupe_count++;
-    imgs[i].className += " fp_duplicate";
-    imgs[i].parentNode.parentNode.className += " fp_duplicate_gp"; 
+    imgs[i].classList.add("fp_duplicate");
+    imgs[i].parentNode.parentNode.classList.add("fp_duplicate_gp"); 
   }
 }
 

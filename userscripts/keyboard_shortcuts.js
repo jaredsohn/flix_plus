@@ -465,7 +465,6 @@ function NextPreviousListItem(direction)
     } else {
         _currElem = _elemsNPList[_currListItem];
         try {
-            console.log("#" + _elemsListContainers[_currListContainer].id + " .bd");
             if ((typeof(_elemsListContainers) === 'undefined') || (_elemsListContainers.length === 0) || !(extlib.isHidden($("#" + _elemsListContainers[_currListContainer].id + " .bd")[0])))
             {
                 extlib.simulateEvent(_currElem, "mouseover");
@@ -474,6 +473,7 @@ function NextPreviousListItem(direction)
                 scrollMiddle(_elemsListContainers[_currListContainer]);            
         } catch (ex)
         {
+            console.log(ex);
         }
 
         UpdateKeyboardSelection(_currElem, true);
@@ -838,6 +838,7 @@ var run_command = function(command)
                 _keyboard_commands_shown = true; toggle_keyboard_commands(); 
                 $.each($("#layerModalPanes .close"), function(index, value) { this.click() });
                 $.each($("#profiles-gate .close"), function(index, value) { this.click(); });
+                $.each($(".profiles-gate-container .nfdclose"), function(index, value) { this.click(); }); // saw this on /search
                 if (($(".continue-playing span").length > 0) && ($(".continue-playing span")[0].innerText.indexOf("Continue Playing") !== -1))
                      $(".continue-playing span")[0].click();
                 break;
@@ -894,7 +895,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     if (selectors["elementsList"] === ".mrow")
     {
         _elemsListContainers = document.getElementsByClassName("mrow");
-        if ((_elemsListContainers.length > 0) && (extlib.hasClass(_elemsListContainers[0], 'characterRow')))
+        if ((_elemsListContainers.length > 0) && (_elemsListContainers[0].classList.contains("characterRow")))
         {
             newList = []
             for (i = 1; i < _elemsListContainers.length; i++)
@@ -949,7 +950,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
 
     document.addEventListener('keypress', handle_keypress, false);
     document.addEventListener('keydown', handle_keydown, false);
-/*    $("#searchField")[0].addEventListener("input", function(e) { 
+    /*$("#searchField")[0].addEventListener("input", function(e) { 
         if ($("#searchField")[0].value === "")
         {
             if (_search_mode)
@@ -969,4 +970,6 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
 
     // Make borders more visible on many pages
     extlib.addGlobalStyle(".agMovieGallery {position: relative; top: 10px; left:10px}");
+    extlib.addGlobalStyle(".instantSearchGallery .gallery {position: relative; top: 10px; left:10px}");
+
 });

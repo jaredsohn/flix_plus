@@ -1,6 +1,6 @@
 // written by jaredsohn-lifehacker
 
-// code relies on arrive.js
+// code relies on arrive.js, jquery
 
 // requires HTML5 player (not Silverlight)
 hidePostPlay = function()
@@ -24,20 +24,6 @@ hidePostPlay = function()
             }
         }, 1000);
     });
-
-
-/*)
-    // issue: this won't ever trigger
-    console.log("waiting for video-ended");
-    document.body.arrive(".video-ended", function() {
-    	console.log("video ended...");
-    	$("#netflix-player").addClass("player-postplay");
-    	$(".player-postplay").show();
-
-        $(".player-postplay-background-gradient").hide();
-        $(".player-postplay-background-image").hide();
-        $(".player-postplay-show-metadata").hide();
-    });*/
 }
 
 hidePostPlay();
