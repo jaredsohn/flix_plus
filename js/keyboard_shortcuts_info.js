@@ -326,7 +326,7 @@ var _keyboard_shortcuts_info = function(){
       player_fullscreen: 
        { 
          default_key: 'f',
-         description: 'Full screen',
+         description: 'Fullscreen',
          category: 'Player',
          order: 13 }
     }
@@ -501,37 +501,45 @@ var _keyboard_shortcuts_info = function(){
       return str;
     }
 
-    // Note that the parameter here is different than the output of generate_defaults
-    this.get_help_text = function(id_to_key_dict, link_to_editor)
+    // Note that the first parameter here is different than the output of generate_defaults
+    // context should be one of {"player", "nonplayer", "all"}
+    this.get_help_text = function(id_to_key_dict, context)
     {        
         var s = id_to_key_dict; // s is for shortcut and is short to make it easy to reference the dict a lot 
         //console.log(id_to_key_dict);
 
         //console.log("get help text");
         var text = "Cursor and section are highlighted by borders (unless navigation keys are set to None).  Press '" + s["help"] + "' for list of commands or see below.  ";
-        if (link_to_editor)
+        if (context === "all")
           text += "Click 'configure' to the left to change shortcuts.";
         else
-          text += "Shortcut keys can be changed in options.";
+          text += "This list only shows the keys that work on this page.  Shortcut keys can be changed in options.";
 
-        text += "<br><br>";        
-        text += "Move around items: " + self.get_keys_string([s["move_right"], s["move_left"], s["move_home"], s["move_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Play: " + s["play"] + "<BR>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"] + "<BR>";
-        text += "&nbsp;&nbsp;&nbsp;Zoom into details: " + s["zoom_into_details"] + "<BR>&nbsp;&nbsp;&nbsp;Rate: " + s["rate_clear"] + " to clear, 0-5: " + s["rate_0"] + ", " + s["rate_1"] + ", " + s["rate_2"] + ", " + s["rate_3"] + ", " + s["rate_4"] + ", " + s["rate_5"] + "; half stars: " + s["rate_1_5"] + ", " + s["rate_2_5"] + ", " + s["rate_3_5"] + ", " + s["rate_4_5"]
-        text += "<BR>&nbsp;&nbsp;&nbsp;Open link: " + s["open_link"];
-        text += "<BR>&nbsp;&nbsp;&nbsp;Random show/episode: " + s["section_show_random"];
+        if (context !== "player")
+        {
+          text += "<br><br>";        
+          text += "Move around items: " + self.get_keys_string([s["move_right"], s["move_left"], s["move_home"], s["move_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Play: " + s["play"] + "<BR>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"] + "<BR>";
+          text += "&nbsp;&nbsp;&nbsp;Zoom into details: " + s["zoom_into_details"] + "<BR>&nbsp;&nbsp;&nbsp;Rate: " + s["rate_clear"] + " to clear, 0-5: " + s["rate_0"] + ", " + s["rate_1"] + ", " + s["rate_2"] + ", " + s["rate_3"] + ", " + s["rate_4"] + ", " + s["rate_5"] + "; half stars: " + s["rate_1_5"] + ", " + s["rate_2_5"] + ", " + s["rate_3_5"] + ", " + s["rate_4_5"]
+          text += "<BR>&nbsp;&nbsp;&nbsp;Open link: " + s["open_link"];
+          text += "<BR>&nbsp;&nbsp;&nbsp;Random show/episode: " + s["section_show_random"];
 
-        text += "<br><br>Move around sections: " + self.get_keys_string([s["next_section"], s["prev_section"], s["section_home"], s["section_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Open section link: " + s["open_section_link"] + "<br>&nbsp;&nbsp;&nbsp;Toggle scrollbars: " + s["toggle_scrollbars"] + "<br>";
-        text += "&nbsp;&nbsp;&nbsp;Toggle hiding: " + s["toggle_hiding"] + "<br>";
+          text += "<br><br>Move around sections: " + self.get_keys_string([s["next_section"], s["prev_section"], s["section_home"], s["section_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Open section link: " + s["open_section_link"] + "<br>&nbsp;&nbsp;&nbsp;Toggle scrollbars: " + s["toggle_scrollbars"] + "<br>";
+          text += "&nbsp;&nbsp;&nbsp;Toggle hiding: " + s["toggle_hiding"];
+        }
 
-        text += "<br>Player<br>";
-        text += "&nbsp;&nbsp;&nbsp;Muting: " + self.get_keys_string([s["player_toggle_mute"], s["player_mute"], s["player_unmute"]]) + "<br>";
-        text += "&nbsp;&nbsp;&nbsp;Change volume: " + self.get_keys_string([s["player_volume_up"], s["player_volume_down"]]) + "<br>";
-        text += "&nbsp;&nbsp;&nbsp;Jump to time: Right/Left (built-in), " + self.get_keys_string([s["player_fastforward"], s["player_rewind"], s["player_goto_beginning"], s["player_goto_ending"]]) + "<br>";
-        text += "&nbsp;&nbsp;&nbsp;Play/Pause: " + self.get_keys_string([s["player_playpause"], s["player_play"], s["player_pause"]])+ "<br>";
-        text += "&nbsp;&nbsp;&nbsp;Next episode: " + s["player_nextepisode"] + "<br>";
-        text += "&nbsp;&nbsp;&nbsp;Random episode: " + s["player_random_episode"] + "<br>";
+        if ((context === "player") || (context == "all"))
+        {
+          text += "<br><br>Player (Must be configured to use HTML5)<br>";
+          text += "&nbsp;&nbsp;&nbsp;Muting: " + self.get_keys_string([s["player_toggle_mute"], s["player_mute"], s["player_unmute"]]) + "<br>";
+          text += "&nbsp;&nbsp;&nbsp;Change volume: " + self.get_keys_string([s["player_volume_up"], s["player_volume_down"]]) + "<br>";
+          text += "&nbsp;&nbsp;&nbsp;Jump to time: Right/Left (built-in), " + self.get_keys_string([s["player_fastforward"], s["player_rewind"], s["player_goto_beginning"], s["player_goto_ending"]]) + "<br>";
+          text += "&nbsp;&nbsp;&nbsp;Play/Pause: " + self.get_keys_string([s["player_playpause"], s["player_play"], s["player_pause"]])+ "<br>";
+          text += "&nbsp;&nbsp;&nbsp;Next episode: " + s["player_nextepisode"] + "<br>";
+          text += "&nbsp;&nbsp;&nbsp;Fullscreen: " + s["player_fullscreen"] + "<br>";
+          text += "&nbsp;&nbsp;&nbsp;Random episode: " + s["player_random_episode"];
+        }
 
-        text += "<br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"] + "<br>&nbsp;&nbsp;&nbsp;Who's Watching: " + s["jump_whos_watching"];
+        text += "<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"] + "<br>&nbsp;&nbsp;&nbsp;Who's Watching: " + s["jump_whos_watching"];
         text += "<BR>&nbsp;&nbsp;&nbsp;Viewing activity: " + s["jump_viewing_activity"] + "<br>&nbsp;&nbsp;&nbsp;Your Ratings: " + s["jump_your_ratings"] + "<BR><br>Search: " + s["search"] + "<BR>Your Account: " + s["your_account"] + "<BR>Help: " + s["help"] + "<BR>";
 
         return text;

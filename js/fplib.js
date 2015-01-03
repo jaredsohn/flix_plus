@@ -128,9 +128,11 @@ var _fplib = function()
 	        results["movieIdAttribute"] = "data-titleid";
 	    } else if (location.pathname.indexOf("/KidsAltGenre") === 0)
 	    {
+	       results["bobPopup"] = null;
 		   results["borderedElement"] = ".boxShot";	       
 	    } else if (location.pathname.indexOf("/Kids") === 0)
 	    {
+ 	        results["bobPopup"] = null;
 	        results["elementsList"] = ".mrow";
 		    results["borderedElement"] = ".boxShot";	       
 	    } else if (location.pathname.indexOf("/WiSearch") === 0)

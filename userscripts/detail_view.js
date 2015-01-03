@@ -117,6 +117,6 @@ var onPopup = function()
 };
 
 var selectors = fplib.getSelectorsForPath();
-if (selectors !== null)
+if ((selectors !== null) && (selectors["bobPopup"] !== null))
   document.arrive(selectors["bobPopup"], onPopup);
 

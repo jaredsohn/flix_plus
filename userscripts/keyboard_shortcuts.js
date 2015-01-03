@@ -519,7 +519,11 @@ var getKeyboardCommandsHtml = function()
     html += "<h1 style='text-align: center;'>Flix Plus by Lifehacker keyboard commands</h2><br>";
     html += "<div style='font-size: 100%'; }>";
     console.log(_keyboard_id_to_shortcut_dict);
-    html += keyboard_shortcuts_info.get_help_text(_keyboard_id_to_shortcut_dict, false);
+
+    var context = "nonplayer";
+    if (location.pathname.indexOf("/WiPlayer") === 0)
+        context = "player";
+    html += keyboard_shortcuts_info.get_help_text(_keyboard_id_to_shortcut_dict, context);
     html += "</div>";
 
     return html;
