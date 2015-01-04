@@ -840,12 +840,11 @@ var run_command = function(command)
                 if (($(".continue-playing span").length > 0) && ($(".continue-playing span")[0].innerText.indexOf("Continue Playing") !== -1))
                      $(".continue-playing span")[0].click();
                 break;
-/*            case "reset_fading":
+            case "update_rated_watched":
                 delete localStorage["flix_plus " + fplib.getProfileName() + " ratingactivity_last_checked"];
                 delete localStorage["flix_plus " + fplib.getProfileName() + " ratingactivity_notinterested_last_checked"];
                 delete localStorage["flix_plus " + fplib.getProfileName() + " viewingactivity_last_checked"];
-                window.location.reload();
-                break;*/
+                alert("Rated/watched lists will be updated at next page load.");
             case "player_mute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(true);"); break;
             case "player_unmute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(false);"); break;
             case "player_toggle_mute": injectJs("netflix.cadmium.objects.videoPlayer().setMuted(!netflix.cadmium.objects.videoPlayer().getMuted());"); break;
@@ -858,6 +857,18 @@ var run_command = function(command)
             case "player_playpause": console.log("player_playpause"); injectJs("setTimeout(function() {netflix.cadmium.objects.videoPlayer().getPaused() ? netflix.cadmium.objects.videoPlayer().play() : netflix.cadmium.objects.videoPlayer().pause();}, 10);"); break;
             case "player_play": injectJs("netflix.cadmium.objects.videoPlayer().play();"); break;
             case "player_pause": injectJs("netflix.cadmium.objects.videoPlayer().pause();"); break;
+            case "player_back_to_browse": $(".player-back-to-browsing")[0].click(); break;
+            case "player_fullscreen": $(".player-fill-screen")[0].click(); break;            
+            case "player_toggle_cc":
+                if ($(".player-timed-text-tracks li").length)
+                {
+                    var next = $(".player-timed-text-tracks .player-track-selected").next();
+                    if (next.length !== 0)
+                        next.click();
+                    else
+                        $(".player-timed-text-tracks li")[0].click();
+                }
+                break;            
             case "player_nextepisode": {
                 if ($("#player-menu-next-episode").length)
                     $("#player-menu-next-episode")[0].click();
@@ -865,7 +876,6 @@ var run_command = function(command)
                     $(".postplay-still-container")[0].click();
                 break;
             }
-            case "player_fullscreen": $(".player-fill-screen")[0].click(); break;
         }
     } catch (ex)
     {

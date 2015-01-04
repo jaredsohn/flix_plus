@@ -23,6 +23,24 @@ var _keyboard_shortcuts_info = function(){
          description: 'Random show/episode',
          category: 'Posters',
          order: 101 },
+      player_toggle_cc: 
+       { 
+         default_key: 'c',
+         description: 'Toggle close captioning',
+         category: 'Player',
+         order: 102 },
+      player_back_to_browse: 
+       { 
+         default_key: 'b',
+         description: 'Back to browse',
+         category: 'Player',
+         order: 103 },
+      update_rated_watched: 
+       { 
+         default_key: 'g',
+         description: 'Update rated/watched',
+         category: 'Misc',
+         order: 101 },
       player_random_episode: 
        { 
          default_key: 'r',
@@ -536,11 +554,14 @@ var _keyboard_shortcuts_info = function(){
           text += "&nbsp;&nbsp;&nbsp;Play/Pause: " + self.get_keys_string([s["player_playpause"], s["player_play"], s["player_pause"]])+ "<br>";
           text += "&nbsp;&nbsp;&nbsp;Next episode: " + s["player_nextepisode"] + "<br>";
           text += "&nbsp;&nbsp;&nbsp;Fullscreen: " + s["player_fullscreen"] + "<br>";
-          text += "&nbsp;&nbsp;&nbsp;Random episode: " + s["player_random_episode"];
+          text += "&nbsp;&nbsp;&nbsp;Random episode: " + s["player_random_episode"] + "<br>";
+          text += "&nbsp;&nbsp;&nbsp;Toggle closed captioning: " + s["player_toggle_cc"] + "<br>";
+          text += "&nbsp;&nbsp;&nbsp;Back to browse: " + s["player_back_to_browse"];
+
         }
 
         text += "<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"] + "<br>&nbsp;&nbsp;&nbsp;Who's Watching: " + s["jump_whos_watching"];
-        text += "<BR>&nbsp;&nbsp;&nbsp;Viewing activity: " + s["jump_viewing_activity"] + "<br>&nbsp;&nbsp;&nbsp;Your Ratings: " + s["jump_your_ratings"] + "<BR><br>Search: " + s["search"] + "<BR>Your Account: " + s["your_account"] + "<BR>Help: " + s["help"] + "<BR>";
+        text += "<BR>&nbsp;&nbsp;&nbsp;Viewing activity: " + s["jump_viewing_activity"] + "<br>&nbsp;&nbsp;&nbsp;Your Ratings: " + s["jump_your_ratings"] + "<BR><br>Search: " + s["search"] + "<BR>Your Account: " + s["your_account"] + "<BR>Updated rated/watched: " + s["update_rated_watched"]  + "<BR>Help: " + s["help"] + "<BR>";
 
         return text;
     }    

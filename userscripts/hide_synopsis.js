@@ -31,6 +31,11 @@ var hideOnPlayer = function()
         this.classList.add("fp_spoiler");
     });
 
+    document.body.arrive(".episode-list-title", function() {
+        console.log("next episode desc found!");
+        this.classList.add("fp_spoiler");
+    });
+
     document.body.arrive(".player-next-episode-description", function() {
         console.log("next episode desc found!");
         this.classList.add("fp_spoiler");
@@ -39,11 +44,24 @@ var hideOnPlayer = function()
     document.body.arrive(".playback-longpause-container", function() {
         var paragraphs = $(".playback-longpause-container .content p");
         paragraphs[paragraphs.length - 1].classList.add("fp_spoiler");
+
+        var h3s = this.getElementsByTagName("h3");
+        h3s[h3s.length - 1].classList.add("fp_spoiler");
     });
 
     document.body.arrive(".player-postplay-autoplay-still", function() {
         console.log("postplay autoplay still found");
         this.classList.add("fp_spoiler");
+    });
+
+    document.body.arrive(".player-status", function() {
+        var spans = this.getElementsByTagName("span");
+        if (spans.length >= 3)
+            spans[2].classList.add("fp_spoiler");
+    });
+
+    document.body.arrive(".description h2", function() {
+        this.innerText = this.innerText.split("“")[0];
     });
 
     extlib.addGlobalStyle("#fp_blackscreen { display: none };")
@@ -56,7 +74,12 @@ var hideOnMovieDetails = function()
     	console.log("synopsis");
         this.classList.add("fp_spoiler");
     });
+
     var elems = document.getElementsByClassName("synopsis");
+    for (i = 0; i < elems.length; i++)
+        elems[i].classList.add("fp_spoiler");
+
+    var elems = document.getElementsByClassName("episodeTitle");
     for (i = 0; i < elems.length; i++)
         elems[i].classList.add("fp_spoiler");
 
