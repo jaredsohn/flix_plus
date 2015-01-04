@@ -41,6 +41,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 /*global ActiveXObject, alert, clearTimeout, confirm, document, JSON, setTimeout, window, XMLHttpRequest */   // Satisfy JSLint.
 
+// Note: For Flix Plus, we ignore linting this file.
+
 (function () {
     "use strict";
 

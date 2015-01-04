@@ -9,24 +9,24 @@
 MutationObserver2 = window.MutationObserver || window.WebKitMutationObserver;
 
 var observer2 = new MutationObserver2(function(mutations) {
-	if (document.getElementsByClassName("exitKidsContainer").length === 0)
-	{
-		if ((document.getElementById("profiles-gate")).style["display"] !== "none")
-		{
-			console.log('autoclosing dialog');
-			// autoclose it
-			setTimeout(function() {
-				var profilesGate = document.getElementById("profiles-gate");
-				var elems = profilesGate.getElementsByClassName("close");
-				var len = elems.length;
-				for (i = 0; i < len; i++)
-				{
-					elems[i].click();
-				}
-			}, 100);
-		}
-	}
+    if (document.getElementsByClassName("exitKidsContainer").length === 0)
+    {
+        if ((document.getElementById("profiles-gate")).style["display"] !== "none")
+        {
+            console.log('autoclosing dialog');
+            // autoclose it
+            setTimeout(function() {
+                var profilesGate = document.getElementById("profiles-gate");
+                var elems = profilesGate.getElementsByClassName("close");
+                var len = elems.length;
+                for (i = 0; i < len; i++)
+                {
+                    elems[i].click();
+                }
+            }, 100);
+        }
+    }
 });
 var elem = document.getElementById("profiles-gate");
 if (typeof(elem) !== "undefined")
-	observer2.observe(elem, { attributes: true });
+    observer2.observe(elem, { attributes: true });

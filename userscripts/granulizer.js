@@ -37,13 +37,9 @@ ratingWidthsLarge[4.5] = 28 * 4.5;
 
 var niOffset = 17;  /* rating width offset when not interested button is to the left */
 
-
-
-/**
- * Patches anchor elements under the containing DIV of the given class name by adding child elements
- * with half-star rating widths among the existing elements.
- */
-function patchAnchors(elem, offset, wrap_in_li)
+// Patches anchor elements under the containing DIV of the given class name by adding child elements
+//with half-star rating widths among the existing elements.
+var patchAnchors = function(elem, offset, wrap_in_li)
 {
     var anchors = elem.getElementsByTagName('a');
     if ((typeof(anchors) === "undefined") || (anchors.length === 0))
@@ -55,18 +51,18 @@ function patchAnchors(elem, offset, wrap_in_li)
     if (anchors.length < 9)
     {
         var hrefRegex = new RegExp('value=.');
-        for (var j=4; j > 0; j--)
+        for (var j = 4; j > 0; j--)
         {
-            var rating = (5-j)+0.5;
+            var rating = (5 - j) + 0.5;
             var oldAnchor = anchors[j];
 
             var newAnchor = document.createElement('a');
-            newAnchor.href = oldAnchor.href.replace(hrefRegex, 'value='+rating);
+            newAnchor.href = oldAnchor.href.replace(hrefRegex, 'value=' + rating);
             newAnchor.rel = 'nofollow';
-            newAnchor.title = 'Click to rate the movie "'+ratingStrings[rating]+'"';
-            newAnchor.innerHTML = 'Rate '+rating+' stars';
-            newAnchor.setAttribute('style', 'width:'+(rating_widths[rating]+offset)+'px');
-            newAnchor.setAttribute('class', 'rv'+rating);   /* some netflix javascript parses this class name */
+            newAnchor.title = 'Click to rate the movie "' + ratingStrings[rating] + '"';
+            newAnchor.innerHTML = 'Rate ' + rating + ' stars';
+            newAnchor.setAttribute('style', 'width:' + (rating_widths[rating] + offset) + 'px');
+            newAnchor.setAttribute('class', 'rv' + rating);   /* some netflix javascript parses this class name */
             if (wrap_in_li)
             {
                 var newli = document.createElement("li");
@@ -79,7 +75,7 @@ function patchAnchors(elem, offset, wrap_in_li)
             elem.insertBefore(newAnchor, oldAnchor);
         }
     }
-}
+};
 
 var patch_all = function(parent_elem, className, wrap_in_li)
 {
@@ -91,15 +87,15 @@ var patch_all = function(parent_elem, className, wrap_in_li)
             patchAnchors(star_bars[i], 0, wrap_in_li);
         }
     }
-}
+};
 
 // Note: First param here is a string rather than an element object
 var patch_all_arrive = function(selector_str, classname, wrap_in_li)
 {
     document.body.arrive(selector_str + " ." + classname, function() {
         patchAnchors(this, 0, wrap_in_li);
-    });    
-}
+    });
+};
 
 switch (window.location.pathname.split('/')[1])
 {
@@ -122,7 +118,7 @@ switch (window.location.pathname.split('/')[1])
             patch_all(document.body, "stbrIl", false);
         else
         {
-            patch_all_arrive("#BobMovie-content", "strbrContainer", false)
+            patch_all_arrive("#BobMovie-content", "strbrContainer", false);
         }
         break;
     case "Search": // when DVDs are enabled
@@ -138,7 +134,7 @@ switch (window.location.pathname.split('/')[1])
     case "MoviesYouveSeen":
     case "WiGenre": // page gets redirected in Flix Plus to WiAltGenre anyway
         // TODO: css is different
-        break;   
+        break;
 }
 
 // Extra logic for WiHome

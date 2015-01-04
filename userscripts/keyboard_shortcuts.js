@@ -18,7 +18,7 @@ var _elemsNPList;
 var _currListItem = -1;
 var _currElem = null;
 var _keyboard_commands_shown = false;
-var _already_has_shift_chars = [ "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
+var _already_has_shift_chars = ["~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
 var _preventDefaultKeys = ["Home", "End", "Ctrl-Home", "Ctrl-End", "Space"];
 
 var _keyboard_shortcut_to_id_dict = {};
@@ -30,8 +30,8 @@ var _search_mode = false;
 // Scrolling to element with keyboard focus
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Element.prototype.documentOffsetTop = function () {
-    return this.offsetTop + ( this.offsetParent ? this.offsetParent.documentOffsetTop() : 0 );
+Element.prototype.documentOffsetTop = function() {
+    return this.offsetTop + (this.offsetParent ? this.offsetParent.documentOffsetTop() : 0);
 };
 
 // jaredsohn-lifehacker Adapted from http://stackoverflow.com/questions/8922107/javascript-scrollintoview-middle-alignment.  Using instead of just scrollIntoView
@@ -42,10 +42,10 @@ function scrollMiddle(elem)
     if (elem === null)
         return;
     elem.scrollIntoView(true);
-    var pos = elem.documentOffsetTop() - (window.innerHeight / 2 );
+    var pos = elem.documentOffsetTop() - (window.innerHeight / 2);
     console.log("pos = ");
     console.log(pos);
-    window.scrollTo( 0, pos );
+    window.scrollTo(0, pos);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ function OpenSectionLink()
     console.log(url);
     if (url !== "")
         window.location = url;
-    
+
     return;
 }
 
@@ -129,9 +129,9 @@ function FindRandomNonhiddenInList(list)
         return -1;
     }
     var count = list.length;
-    while(true)
+    while (true)
     {
-        rnd = Math.floor(Math.random()*count);
+        rnd = Math.floor(Math.random() * count);
 
         if (!extlib.isHidden(list[rnd]))
             break;
@@ -154,7 +154,7 @@ function OpenCurrentLink()
     if (!ListHasItems(_elemsNPList)) {
         return;
     }
-    
+
     var elemsLinks = _elemsNPList[_currListItem].getElementsByTagName("a");
     if (elemsLinks.length > 0) {
         for (var i = 0; i < elemsLinks.length; i++) {
@@ -200,7 +200,7 @@ function RemoveFromQueue()
                 if ((elemButton[0].innerText.indexOf("Remove") !== -1) || (selectors["queueRemove"] === ".delbtn"))
                 {
                     extlib.simulateClick(elemButton[0]);
-                    if ((typeof(_elemsNPList) !== "undefined") && (_elemsNPList !== null) && (_elemsNPList.length > _currListItem))    
+                    if ((typeof(_elemsNPList) !== "undefined") && (_elemsNPList !== null) && (_elemsNPList.length > _currListItem))
                         UpdateKeyboardSelection(_elemsNPList[_currListItem], true);
                 }
             }
@@ -258,7 +258,7 @@ function RateMovie(rating)
         elemContainer = document.getElementById(selectors["elemContainerId"]);
 
     if (elemContainer !== null)
-    {        
+    {
         if (selectors["ratingMouseOver"] !== null)
         {
             var mouseOverContainer = $(selectors["ratingMouseOver"], elemContainer);
@@ -269,7 +269,7 @@ function RateMovie(rating)
         var elemRating = elemContainer.getElementsByClassName(rating_class);
         if (elemRating && (elemRating.length > 0)) {
             extlib.simulateClick(elemRating[0]);
-        }        
+        }
     }
 }
 
@@ -280,9 +280,9 @@ function RateMovie(rating)
 
 var UpdateKeyboardSelection = function(elem, selected)
 {
-    if ((_keyboard_id_to_shortcut_dict["move_right"] === "None") && 
-        (_keyboard_id_to_shortcut_dict["move_left"] === "None") && 
-        (_keyboard_id_to_shortcut_dict["move_home"] === "None") && 
+    if ((_keyboard_id_to_shortcut_dict["move_right"] === "None") &&
+        (_keyboard_id_to_shortcut_dict["move_left"] === "None") &&
+        (_keyboard_id_to_shortcut_dict["move_home"] === "None") &&
         (_keyboard_id_to_shortcut_dict["move_end"] === "None"))
     {
         // Don't show border if associated keys aren't set.
@@ -304,21 +304,21 @@ var UpdateKeyboardSelection = function(elem, selected)
     }
     else if (
             (location.pathname.indexOf("/Search") === 0) || (location.pathname.indexOf("/WiSearch") === 0)
-        ) 
+        )
     {
         if (selected)
             border_elem.classList.add("fp_keyboard_search_selected");
         else
             border_elem.classList.remove("fp_keyboard_search_selected");
-    }    
+    }
     else
-    {        
+    {
         if (selected)
             border_elem.classList.add("fp_keyboard_selected");
         else
             border_elem.classList.remove("fp_keyboard_selected");
     }
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Cycle through selections
@@ -354,7 +354,7 @@ function NextPreviousListContainer(direction)
         {
             if ((_elemsListContainers.length - 1 >= _currListContainer) && (_currListContainer !== -1))
             {
-                _elemsListContainers[_currListContainer].style["border-style"] = "none";   
+                _elemsListContainers[_currListContainer].style["border-style"] = "none";
             }
         }
     } catch (ex)
@@ -394,12 +394,12 @@ function NextPreviousListContainer(direction)
             if (_elemsListContainers.length - 1 >= _currListContainer)
             {
                 if ((_keyboard_id_to_shortcut_dict["prev_section"] !== "None") ||
-                    (_keyboard_id_to_shortcut_dict["next_section"] !== "None") || 
-                    (_keyboard_id_to_shortcut_dict["section_home"] !== "None") || 
+                    (_keyboard_id_to_shortcut_dict["next_section"] !== "None") ||
+                    (_keyboard_id_to_shortcut_dict["section_home"] !== "None") ||
                     (_keyboard_id_to_shortcut_dict["section_end"] !== "None"))
                 {
                     // only draw border if a section navigation-related key was set
-                    _elemsListContainers[_currListContainer].style["border-style"] = "solid";   
+                    _elemsListContainers[_currListContainer].style["border-style"] = "solid";
                 }
             }
         }
@@ -420,7 +420,7 @@ function NextPreviousListItem(direction)
     try {
         _currElem = _elemsNPList[_currListItem];
         UpdateKeyboardSelection(_currElem, false);
-    } catch(err) {
+    } catch (err) {
         //ignore error
     }
 
@@ -461,7 +461,7 @@ function NextPreviousListItem(direction)
                 extlib.simulateEvent(_currElem, "mouseover");
                 scrollMiddle(_currElem);
             } else
-                scrollMiddle(_elemsListContainers[_currListContainer]);            
+                scrollMiddle(_elemsListContainers[_currListContainer]);
         } catch (ex)
         {
             console.log(ex);
@@ -483,7 +483,7 @@ function NextPreviousListItem(direction)
                     break;
             }
             //NextPreviousListItem(-direction);
-        }        
+        }
     }
 }
 
@@ -518,7 +518,7 @@ var getKeyboardCommandsHtml = function()
     html += "</div>";
 
     return html;
-}
+};
 
 var toggle_keyboard_commands = function()
 {
@@ -530,11 +530,11 @@ var toggle_keyboard_commands = function()
         document.body.appendChild(commands_div);
 
         if ((enabled_scripts === null) || (enabled_scripts["id_darker_netflix"]))
-            $("#flix_plus_keyboard_commands")[0].classList.add("fp_keyboard_commands_dark")
+            $("#flix_plus_keyboard_commands")[0].classList.add("fp_keyboard_commands_dark");
         else
-            $("#flix_plus_keyboard_commands")[0].classList.add("fp_keyboard_commands_white")
+            $("#flix_plus_keyboard_commands")[0].classList.add("fp_keyboard_commands_white");
 
-        $(document.body).click(function(e){
+        $(document.body).click(function(e) {
             if (_keyboard_commands_shown == true)
             {
                 console.log("clicked");
@@ -549,7 +549,7 @@ var toggle_keyboard_commands = function()
     }
 
     _keyboard_commands_shown = !_keyboard_commands_shown;
-}
+};
 
 // We use this for 'normal' (a-z, 0-9, special characters) keys since we don't want to deal with repeating
 var handle_keypress = function(e)
@@ -561,7 +561,7 @@ var handle_keypress = function(e)
         return;
     }
     var override = true;
-    var keyCombo = String.fromCharCode(e.charCode||e.which).toLowerCase();
+    var keyCombo = String.fromCharCode(e.charCode || e.which).toLowerCase();
 
     var ignoreShift = (_already_has_shift_chars.indexOf(keyCombo) !== -1);
 
@@ -587,7 +587,7 @@ var handle_keypress = function(e)
 
     if ((typeof(keyCombo) !== "undefined") && (keyCombo !== null))
         undo_builtin_key(keyCombo, e);
-}
+};
 
 
 // We ignore 'normal' characters here and have handle_keypress do it for us
@@ -641,7 +641,7 @@ var determine_keydown = function(e)
     if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
 
     return keyCombo;
-}
+};
 
 
 // While this code supports ctrl, alt, and shift modifiers, most use is restricted by the shortcuts editor. (But a user could maybe get such support by modifying their shortcuts JSON in localstorage.)
@@ -666,7 +666,8 @@ var handle_keydown = function(e)
         {
             run_command(command);
 
-            if (location.pathname.indexOf("/WiPlayer") !== 0) // don't do this for player; kind of a last minute hack in how this is organized
+            // don't do this for player; but code is hacky TODO
+            if (location.pathname.indexOf("/WiPlayer") !== 0)
             {
                 // TODO: fix logic for below for wiplayer
                 if (_preventDefaultKeys.indexOf(keyCombo) !== -1)
@@ -681,7 +682,7 @@ var handle_keydown = function(e)
         if ((typeof(keyCombo) !== "undefined") && (keyCombo !== null))
             undo_builtin_key(keyCombo, e);
     }
-}
+};
 
 var key_lookup = function(keyCombo)
 {
@@ -693,7 +694,7 @@ var key_lookup = function(keyCombo)
     console.log("command found: " + command);
 
     return command;
-}
+};
 
 var undo_builtin_key = function(keyCombo, e)
 {
@@ -701,14 +702,14 @@ var undo_builtin_key = function(keyCombo, e)
     {
 
         //console.log(keyCombo);
-        var player_override_dict = { //'m': 'player_toggle_mute', 
+        var player_override_dict = { //'m': 'player_toggle_mute',
                                      'enter': 'player_playpause',
                                      'space': 'player_playpause',
                                      //'left': 'player_fastforward',
                                      //'right': 'player_rewind',
                                      'up': 'player_volume_down',
                                      'down': 'player_volume_up'
-                                 }
+                                 };
 
         if (typeof(player_override_dict[keyCombo.toLowerCase()]) !== "undefined")
         {
@@ -718,7 +719,7 @@ var undo_builtin_key = function(keyCombo, e)
             run_command(player_override_dict[keyCombo.toLowerCase()]);
         }
     }
-}
+};
 
 var run_command = function(command)
 {
@@ -730,19 +731,19 @@ var run_command = function(command)
         if ((_keyboard_commands_shown) && (command !== "help") && (command !== "close_window"))
             return;
 
-        switch(command)
+        switch (command)
         {
             case "rate_0":
             case "rate_1":
             case "rate_2":
-            case "rate_3": 
-            case "rate_4": 
+            case "rate_3":
+            case "rate_4":
             case "rate_5":
-            case "rate_1_5": 
+            case "rate_1_5":
             case "rate_2_5":
-            case "rate_3_5": 
+            case "rate_3_5":
             case "rate_4_5":
-            case "rate_clear": 
+            case "rate_clear":
                 RateMovie(command); break;
             case "move_right": NextPreviousListItem(1); break;
             case "move_left": NextPreviousListItem(-1); break;
@@ -753,8 +754,8 @@ var run_command = function(command)
             case "remove_from_my_list": RemoveFromQueue(); break;
             case "zoom_into_details": WatchOrZoomMovie(command); break;
             case "open_link": OpenCurrentLink(); break;
-            case "next_section": NextPreviousListContainer(1);  break;
-            case "prev_section": NextPreviousListContainer(-1);  break;
+            case "next_section": NextPreviousListContainer(1); break;
+            case "prev_section": NextPreviousListContainer(-1); break;
             case "section_home":
                 UpdateKeyboardSelection(_elemsNPList[_currListItem], false);
                 _currListContainer = -1;
@@ -789,7 +790,7 @@ var run_command = function(command)
 
                     _currListItem = rnd;
                     UpdateKeyboardSelection(_elemsNPList[_currListItem], true);
-                    extlib.simulateEvent(_elemsNPList[_currListItem], "mouseover");                    
+                    extlib.simulateEvent(_elemsNPList[_currListItem], "mouseover");
                     scrollMiddle(_elemsNPList[_currListItem]);
                  }*/
                 break;
@@ -797,7 +798,7 @@ var run_command = function(command)
                 if (location.pathname.indexOf("/WiMovie") === 0)
                 {
                     if ($("#random_button").length)
-                        $("#random_button")[0].click()
+                        $("#random_button")[0].click();
                 } else
                 {
                      rnd = FindRandomNonhiddenInList(_elemsNPList);
@@ -813,7 +814,7 @@ var run_command = function(command)
                         }
                         _currListItem = rnd;
                         UpdateKeyboardSelection(_elemsNPList[_currListItem], true);
-                        extlib.simulateEvent(_elemsNPList[_currListItem], "mouseover");                    
+                        extlib.simulateEvent(_elemsNPList[_currListItem], "mouseover");
                         scrollMiddle(_elemsNPList[_currListItem]);
                     }
                 }
@@ -822,18 +823,18 @@ var run_command = function(command)
             case "open_section_link": OpenSectionLink(); break;
             case "toggle_scrollbars": elem = document.getElementById(_elemsListContainers[_currListContainer].id + "_scrollshowall"); if (elem !== null) { elem.click(); } break;
             case "toggle_hiding": elem = document.getElementById(_elemsListContainers[_currListContainer].id + "_showhide"); if (elem !== null) { elem.click(); } break;
-            case "jump_instant_home": window.location = "http://www.netflix.com/WiHome";  break;
+            case "jump_instant_home": window.location = "http://www.netflix.com/WiHome"; break;
             case "jump_my_list": window.location = "http://www.netflix.com/MyList"; break;
             case "jump_new_arrivals": window.location = "http://www.netflix.com/WiRecentAdditions"; break;
             case "jump_kids": window.location = "http://www.netflix.com/Kids"; break;
-            case "jump_viewing_activity": window.location = "http://www.netflix.com/WiViewingActivity";  break;
+            case "jump_viewing_activity": window.location = "http://www.netflix.com/WiViewingActivity"; break;
             case "jump_your_ratings": window.location = "https://www.netflix.com/MoviesYouveSeen"; break;
             case "jump_whos_watching": window.location = "https://www.netflix.com/ProfilesGate"; break;
             case "search": elem = document.getElementById("searchTab").click(); document.getElementById("searchField"); elem.focus(); elem.select(); break;
             case "your_account": window.location = "https://www.netflix.com/YourAccount"; break;
             case "help": toggle_keyboard_commands(); break;
-            case "close_window": 
-                _keyboard_commands_shown = true; toggle_keyboard_commands(); 
+            case "close_window":
+                _keyboard_commands_shown = true; toggle_keyboard_commands();
                 $.each($("#layerModalPanes .close"), function(index, value) { this.click() });
                 $.each($("#profiles-gate .close"), function(index, value) { this.click(); });
                 $.each($(".profiles-gate-container .nfdclose"), function(index, value) { this.click(); }); // saw this on /search
@@ -858,7 +859,7 @@ var run_command = function(command)
             case "player_play": injectJs("netflix.cadmium.objects.videoPlayer().play();"); break;
             case "player_pause": injectJs("netflix.cadmium.objects.videoPlayer().pause();"); break;
             case "player_back_to_browse": $(".player-back-to-browsing")[0].click(); break;
-            case "player_fullscreen": $(".player-fill-screen")[0].click(); break;            
+            case "player_fullscreen": $(".player-fill-screen")[0].click(); break;
             case "player_toggle_cc":
                 if ($(".player-timed-text-tracks li").length)
                 {
@@ -868,7 +869,7 @@ var run_command = function(command)
                     else
                         $(".player-timed-text-tracks li")[0].click();
                 }
-                break;            
+                break;
             case "player_nextepisode": {
                 if ($("#player-menu-next-episode").length)
                     $("#player-menu-next-episode")[0].click();
@@ -888,7 +889,7 @@ var injectJs = function(js)
     var scriptNode = document.createElement("script");
     scriptNode.innerText = js; // "setTimeout(function() {" + js + "}, 2000);"
     document.body.appendChild(scriptNode);
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Startup
@@ -911,7 +912,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
         _elemsListContainers = document.getElementsByClassName("mrow");
         if ((_elemsListContainers.length > 0) && (_elemsListContainers[0].classList.contains("characterRow")))
         {
-            newList = []
+            newList = [];
             for (i = 1; i < _elemsListContainers.length; i++)
             {
                 newList.push(_elemsListContainers[i]);
@@ -948,7 +949,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     // Show instructions on Who's Watching
     if ($("#profiles-gate").length)
     {
-        var text = "";
+        var text = '';
         if (_keyboard_id_to_shortcut_dict["close_window"] !== "None")
             text += _keyboard_id_to_shortcut_dict["close_window"] + " to close";
         if (_keyboard_id_to_shortcut_dict["jump_whos_watching"] !== "None")
@@ -963,10 +964,10 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
             text = "";
         var elem = document.createElement("div"); elem.style.cssText = "text-align:center"; elem.innerText = text;
         $("#profiles-gate")[0].appendChild(elem);
-        text = "You can disable this dialog by enabling 'Prevent Who's Watching interruptions' in Flix Plus by Lifehacker's preferences."
-        var elem = document.createElement("div");  elem.style.cssText = "text-align:center"; elem.innerText = text;
+        text = "You can disable this dialog by enabling 'Prevent Who's Watching interruptions' in Flix Plus by Lifehacker's preferences.";
+        var elem = document.createElement("div"); elem.style.cssText = "text-align:center"; elem.innerText = text;
         $("#profiles-gate")[0].appendChild(elem);
-        var elem = document.createElement("br"); 
+        var elem = document.createElement("br");
         $("#profiles-gate")[0].appendChild(elem);
     }
 
@@ -975,21 +976,21 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     if (_elemsNPList) {
         NextPreviousListItem(1);
     }
-    if (_elemsListContainers) { 
+    if (_elemsListContainers) {
         NextPreviousListContainer(1);
     }
 
     if (location.pathname.indexOf("/WiSearch") === 0)
     {
         var elems = document.getElementsByClassName("searchResultsPrimary");
-        for (i = 0; i < elems.length; i++) { 
+        for (i = 0; i < elems.length; i++) {
             elems[i].style.width = "1000px"; // add room for borders
         }
     }
 
     document.addEventListener('keypress', handle_keypress, false);
     document.addEventListener('keydown', handle_keydown, false);
-    /*$("#searchField")[0].addEventListener("input", function(e) { 
+    /*$("#searchField")[0].addEventListener("input", function(e) {
         if ($("#searchField")[0].value === "")
         {
             if (_search_mode)
@@ -1010,7 +1011,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     // Make borders more visible on many pages
     extlib.addGlobalStyle(".agMovieGallery {position: relative; top: 10px; left:10px}");
     extlib.addGlobalStyle(".instantSearchGallery .gallery {position: relative; top: 10px; left:10px}");
-    
+
     if ((location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/Kids") === 0))
         extlib.addGlobalStyle(".agMovieSetSlider {padding: 0px 0px 10px 0px}");
 });

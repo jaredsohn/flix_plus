@@ -1,9 +1,9 @@
-// ==UserScript== 
+// ==UserScript==
 // @name          Open Netflix Movies as Detail View
 // @namespace     https://github.com/matthewpucc
 // @version       1.3
 // @updateURL     http://matthewpucc-db.s3.amazonaws.com/FTFY/NetflixFix/pwn.js
-// @description   This will rewrite the image links in the default netflix views 
+// @description   This will rewrite the image links in the default netflix views
 //                to open the information page instead of forcing the movie/show
 //                to start playing. The makes managing a queue much easier.
 // @include       http://*netflix.com/search*
@@ -24,14 +24,14 @@
 
 // jaredsohn-lifehacker: Now requires extlib.js, fplib.js, and arrive.js.
 
-var stopIt    = function (e) { e.preventDefault(); e.stopPropagation(); },
-    clickIt   = function (e) { stopIt(e); window.location.href = this.href; },
-    regex     = /^https?\:\/\/www\.netflix\.com\/WiPlayer\?movieid=([\d]+)/, // changed from movies to www lifehacker-jaredsohn
-    linkBase  = ((location.pathname.indexOf("/Kids") === 0) || (location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/KidsMovie") === 0)) ? 'http://www.netflix.com/KidsMovie/' : 'http://www.netflix.com/WiMovie/',
-    aTags     = Array.prototype.slice.call(document.getElementsByTagName('a')),
-    playClass = /(?:\s|^)playLink|hoverPlay(?:\s|$)/, // hoverPlay added lifehacker-jaredsohn
-    i         = aTags.length,
-    tag;
+var stopIt = function(e) { e.preventDefault(); e.stopPropagation(); };
+var clickIt = function(e) { stopIt(e); window.location.href = this.href; };
+var regex = /^https?\:\/\/www\.netflix\.com\/WiPlayer\?movieid=([\d]+)/; // changed from movies to www lifehacker-jaredsohn
+var linkBase = ((location.pathname.indexOf("/Kids") === 0) || (location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/KidsMovie") === 0)) ? 'http://www.netflix.com/KidsMovie/' : 'http://www.netflix.com/WiMovie/';
+var aTags = Array.prototype.slice.call(document.getElementsByTagName('a'));
+var playClass = /(?:\s|^)playLink|hoverPlay(?:\s|$)/; // hoverPlay added lifehacker-jaredsohn
+var tagIndex = aTags.length;
+var tag;
 
 
 var fixTag = function(tag)
@@ -41,13 +41,13 @@ var fixTag = function(tag)
     {
       return;
     }
-    tag.playhref     = tag.href;
-    tag.className    = tag.className.replace(playClass, ' ');
-    tag.href         = linkBase + tag.href.match(regex)[1];
-    tag.onmousedown  = stopIt;
-    tag.onclick      = clickIt;
+    tag.playhref = tag.href;
+    tag.className = tag.className.replace(playClass, ' ');
+    tag.href = linkBase + tag.href.match(regex)[1];
+    tag.onmousedown = stopIt;
+    tag.onclick = clickIt;
   }
-}
+};
 
 function createPlayLink(movie_id, link_id) {
   var elem = document.createElement('a');
@@ -79,8 +79,8 @@ elems = $("#chronology a");
 for (j = 0; j < elems.length; j++)
   elems[j].classList.add("fp_play");
 
-while (i--) {
-  tag = aTags[i];
+while (tagIndex--) {
+  tag = aTags[tagIndex];
   fixTag(tag);
 }
 
@@ -106,7 +106,7 @@ monitorPreview = function(elem_id)
     var link = createPlayLink(movie_id, "fp_play_popover");
     $(".fp_header_row")[0].appendChild(link);
   });
-}
+};
 
 monitorPreview('BobMovie-content');
 // for wiGenre, would use monitorPreview('bob-container'), but that page now redirects to wiAltGenre

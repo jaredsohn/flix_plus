@@ -4,26 +4,26 @@
 
 if (!($(".yourListRow")[0] === $(".mrow:first")[0]))
 {
-	console.log("moving MyList to top...");
+    console.log("moving MyList to top...");
 
-	//remove titles/sliders
-	var orig_first_row_title = $(".mrow:first .hd h3:last").detach()
-	var orig_first_row_contents = $(".mrow:first .bd .slider").detach()
-	var orig_last_row_title = $(".yourListRow .hd h3").detach();
-	var orig_last_row_contents = $(".yourListRow .bd .slider").detach();
+    //remove titles/sliders
+    var orig_first_row_title = $(".mrow:first .hd h3:last").detach();
+    var orig_first_row_contents = $(".mrow:first .bd .slider").detach();
+    var orig_last_row_title = $(".yourListRow .hd h3").detach();
+    var orig_last_row_contents = $(".yourListRow .bd .slider").detach();
 
-	// Do a swap
-	$(".mrow:first .bd").append(orig_last_row_contents)
-	$(".mrow:first .hd").append(orig_last_row_title)
-	$(".yourListRow .bd").append(orig_first_row_contents);
-	$(".yourListRow .hd").append(orig_first_row_title)
+    // Do a swap
+    $(".mrow:first .bd").append(orig_last_row_contents);
+    $(".mrow:first .hd").append(orig_last_row_title);
+    $(".yourListRow .bd").append(orig_first_row_contents);
+    $(".yourListRow .hd").append(orig_first_row_title);
 
-	// Move MyList to the second row
-	$(".yourListRow").detach().insertAfter($(".mrow:first"));
+    // Move MyList to the second row
+    $(".yourListRow").detach().insertAfter($(".mrow:first"));
 
-	// Clean up the classnames
-	$(".mrow:first .hd h3:last").addClass("rowTitle");
-	$(".yourListRow .hd h3").removeClass("rowTitle");
-	$(".yourListRow").removeClass("yourListRow");
-	$(".mrow:first").addClass("yourListRow");
+    // Clean up the classnames
+    $(".mrow:first .hd h3:last").addClass("rowTitle");
+    $(".yourListRow .hd h3").removeClass("rowTitle");
+    $(".yourListRow").removeClass("yourListRow");
+    $(".mrow:first").addClass("yourListRow");
 }

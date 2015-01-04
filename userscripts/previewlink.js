@@ -30,7 +30,7 @@ function monitorPreview(id) {
 
     var movieName = $('#' + id + ' .mdpLink .title').text().trim();
     var linkElem = createTrailerElem(movieName, 'trailer-popover');
-    linkElem.style.cssText += " margin-left: 20px;"
+    linkElem.style.cssText += " margin-left: 20px;";
 
     $(".fp_header_row")[0].appendChild(linkElem);
 

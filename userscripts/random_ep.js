@@ -47,7 +47,7 @@ if (location.pathname.indexOf("/WiPlayer") === 0)
         //_auto_random_mode = true; // functionality disabled for now.  Still need: lots more testing, disable if user configured to not automatically play another episode, integrate with random ep on wimovie, have it start episodes from beginning
 
         // TODO: update localstorage so that future episodes are also random.  also set this from wimovie page.
-        var seasonElems = $(".season")
+        var seasonElems = $(".season");
         var episodeCount = 0;
         var seasonEpisodeCounts = [];
         for (i = 0; i < seasonElems.length; i++)
@@ -59,7 +59,7 @@ if (location.pathname.indexOf("/WiPlayer") === 0)
         }
         if (episodeCount <= 1)
             return;
-        var rnd = Math.floor(Math.random()*episodeCount);
+        var rnd = Math.floor(Math.random() * episodeCount);
         for (i = 0; i < seasonElems.length; i++)
         {
             if (rnd >= seasonEpisodeCounts[i])
@@ -78,13 +78,13 @@ if (location.pathname.indexOf("/WiPlayer") === 0)
                     } catch (ex)
                     {
                     }
-                    _random_in_progress = false;                  
+                    _random_in_progress = false;
 
                 }, 1500);
                 break;
             }
         }
-    }
+    };
 }
 else if (location.pathname.indexOf("/WiMovie") === 0)
 {
@@ -155,7 +155,7 @@ else if (location.pathname.indexOf("/WiMovie") === 0)
         // search the page for each handler and insert if applicable
         $.each(handlers, function(i, v) {
             if ($(v.selector).length > 0) {
-                v.insert()
+                v.insert();
             }
         });
     });

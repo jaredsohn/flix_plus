@@ -27,7 +27,7 @@
 //
 // Para usar este script, é preciso usar o navegador Google Chrome, ou
 // o navegador Firefox com o add-on Greasemonkey: http://www.greasespot.net/
-// 
+//
 // --------------------------------------------------------------------
 //
 // History:
@@ -37,6 +37,8 @@
 // 2011.09.30  [1.1] Acrescentado include p/ /Movie/*
 // 2011.09.28  [1.0] 1ª versão
 //}
+
+// Note: For Flix Plus, we ignore linting this file.
 
 (function() {
 
@@ -51,10 +53,10 @@
       }
       return result;
    }
-   
+
    function newLink(name, addr, icon)
-      { return '<a target="_blank" href="'+addr+'"><img src="'+icon+'" title="Find on '+name+'" border="0"></a> &nbsp;'; } //jaredsohn-lifehacker added target=_blank to preserve netflix tab
-   
+      { return '<a target="_blank" href="' + addr + '"><img src="' + icon + '" title="Find on ' + name + '" border="0"></a> &nbsp;'; } //jaredsohn-lifehacker added target=_blank to preserve netflix tab
+
    tw = document.getElementsByClassName("title-wrapper");
    if (tw && tw.length) {
       tw = tw[0];
@@ -67,10 +69,10 @@
       orig    = encodeURIComponent(orig);
       search  = (orig || title);
       searchY = (orig || title) + ' ('+year+')';
-      
+
       // http://www.greywyvern.com/code/php/binary2base64
       // http://www.motobit.com/util/base64-decoder-encoder.asp
-      newHTML  = '<br />';
+      newHTML = '<br />';
 //      newHTML += newLink('IMDb.pt',         'http://www.imdb.pt/find?q='+searchY,                         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAIAAABiEdh4AAAACXBIWXMAAA7DAAAOwwHHb6hkAAABRUlEQVR4nGPsrhFjIAWwAHFqPO+/vwwQ9BfGgLH/IwvuOPGFoSJXEKhn5RQpICnAx/TqsjLEpCnN4hCGsQ7H9b1KQMalzUpA5zAhW/fh078bt38jiwANOnvlx7TF70Gc/wx2etwsf/4gpIE2JBY+B5JAnTDjOeGyExe/u/f4F4oNwoLMdx/+BpJoHv0LtpWdjXH/iW8oGiwMOeHkX7DNv//+h8u6WPIASaa/SG4WEmCGkxBw6twPNNtQbPBx4lWWZ0UWiS99BgwliNkJ5U+BJOOba8r/0MMePfiR2SzAwAKi//8ZpIzvwg2uyhJum/YW2apz65T+g5UxQaj/YL+lRgo8OAqKOCDv5h6l9dNkgOw5rZIXNijBzWVasOLzfzAHCGYv/6BgDbYHyRQ4G4gOXf0CSkvINlRmCcM9AFUP1wDmMpKaWgGvBsmIXC3/SgAAAABJRU5ErkJggg==');
       newHTML += newLink('IMDb.com',        'http://www.imdb.com/find?q='+searchY,                        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAIAAABiEdh4AAAACXBIWXMAAA7EAAAOxAGVKw4bAAABQklEQVR42pWSu0oDURRF1zyiCWicSQoxKEqmsEkjaXx0Yuk/qB9gYSHaih9gE/wBbdJbCRGbNEJsDESIEi1UEMEQApnXzVjcZJxEJLqLw73n7LPPvg/l8nyO/0AHVtfG5EYIAOEB+D6A7/V4Tgeg3nD1n9Tf2BJKu2GNFO6JyuThrgkUCxnASKrvd5YsF46n5SKfi9dKWeDh2qqVsmr0QM1W977uRTPFQqZStU/PPgFPBIAuPUgYSXVn781Iqs1Wty+fCKtHJx/1J3dgQtrUHp+9tKkNXaV0n5rSKlV7oGF5KRFG4RPakNhYmQBUEfGcMrQwStzc2kPTBiZsrk9a87FoZmv/NZ+LS+3tgxdAaZSt0KU0IByl/5oB4Lvf/U4HbXYmtrgwPsQWIggComyng/Ap19r6SOHoY/c+38VV+++/9Qswi5SSSNxmuwAAAABJRU5ErkJggg==');
       newHTML += newLink('Rotten Tomatoes', 'http://www.rottentomatoes.com/search/?search='+searchY,      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAABnRSTlMAAAAAAABupgeRAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB3UlEQVR42nWSIWgcQRSG/7uuGLHQJ5YwhIqlHGXFUSKOsiJiKRERFSciTpyojIyoKKWiMqIiVEVWRkScCGVFxVGOEsqJo4SylBMjjrJiKY8wlJ8wouKOXJomTzxm4Pvm/QMPuKv2PgxxT7Vv3Zvfi/mvC9tw8v3sTqF1ffJ/fFXPyumJW1SudPmgyNJs+PzVvcLky+nR5MgIqguaSqUn1kohWd7d7Tx7cVtofkyPy0MuXG0NxNSeNja20tTRWSPdbL//Lt7srAT/bVK+3d+qKTFmqTkpJC911hMIXr+vDaEG5z3bP/wYP+60wqXXogDUpeY8NVVisoaDqWqD44EdfNZ0zlWaLJNyFPH0BF7RMVlistggAAFIjHj2S6W58d+q4nj84M3DjdA4sxnBxkjFJBKuCI9wyWQRfDuIXytB4ggkgNXDBEEEAKsYab1CCRAwnhFEQFBhlHCKCFBSAQ+ENUpAA0WkjZ0CBBrSEU7hlAuiJnRFK1CDLtAFym7RCldBd3bhHCIgXo9nWNLUAAVqUrbz4aezFoDwc657AzR6M+4yQ73sJNL0YDyON5I2gOhJR8qR2c7/z+ColVfb7x9MxvFG8s8uAfBfpzoa1dOZq50GwIrN863hy0dPu9fMX6BuBKLFtX0fAAAAAElFTkSuQmCC'); // http://images.rottentomatoescdn.com/images/icons/favicon.ico
@@ -82,6 +84,6 @@
  //     newHTML += newLink('Filmow',          'http://filmow.com/buscar/?q='+search,                        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAD FUlEQVR4nFVTWU8TURQ+s3Sblu4ICKRpY8ISlorUkLAIj+KjT5qY+CdM9MXw5A/gEd7E8GQwcUPD IlKIJiyiIYUEgaE0tLQ00E6nlM50xnNv2TzJzb333POd853lMnBNhoeHTU6nM9jc0jLIcVxnhc3W IAiCU1GUoiRlY2pJW08cHIRjsRhZ0aGhoSJzAR4bG6vp7Ox87vF6H52eFtySJLEoDDoC3IFhGd1i NoPRaFTQ/PD4+Hj659LSG+pgfHy8qq+vb6Soqg92d3a5k+MT0FHPcTwYDDwgCzCZTHg2gNmMu9EI lV4PxOPxZR5pmDs6Ol6eFs4GP3z8xGmaBgYE8gg0WyzgdrtBlmVQVBUYhgEux4HNZgWnw146Sqe/ sMFgMOT2eB7PfZ/ns9ks5OU8FM4KwLEcmDEqocjxPFjQmVWwAgmgaTpJJRtZX3/P+/z+h/uxmAPp lIuBiLa2Vgi2t4NFsEA8kYDpqRlQkYHf74e6+nqwV9j0RCK+nEqlNlijge8Vd0VG13WKDwT80Nvb A06XE/M1QwBBAwP9kJWysLAQhnA4TPRa/CA+jenLvMPh9GWQOoGTHAOBAPBImTikTnHV1t4Eu91B jpDJZAA7RGw1EpAts2aoYdlev5wL4pDKlYrqmKsrsOhRdDjs58Y6bP/dpvlegBmcgej+Psi5HL2b TEYQrIKaTKcPCIBVisV5LI5+AdgVRZid/QbpdBpyORk2NzdhBu+qVqLsqm5UkRpk9nZ2fhN7XhTF t909PU/r6+pc4t4eNVr9tQaRjU06OHJeBq1E06VDdafjtp5MpaYLhcI2TSEaja4kDw9f3+vvU8nQ XLQSDWixdK1cADLOd0MhqKysjP1YXBzGDhSInpucnCx1dXWt+ny+hqamxlv5/CkrSTk6MLRguFwu F/T2dAO+J5dWV168m5j4GolE9PNYZRkdHa0KhULPqmtqnuDoeo6O0qyiKuCw28Hr9Z7lJOnPytra q9mpqc8jIyPKZVeuf2ekZayurm5rbG6+bxWEVl3TLPiVEzuiOLe9tTWD74f/NxXgHxVWbp9ZcHXF AAAAAElFTkSuQmCC');
       tw.innerHTML += newHTML;
    }
-})()
+})();
 
 ////////////////////////////////////////////////////////////////////////////////

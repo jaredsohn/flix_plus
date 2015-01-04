@@ -5,8 +5,8 @@
 
 var KEY_NAME = "flix_plus " + fplib.getProfileName() + " sectionhider";
 
-var show_template = "#MROWID .bd { display:block }"
-var hide_template = "#MROWID .bd { display:none }"
+var show_template = "#MROWID .bd { display:block }";
+var hide_template = "#MROWID .bd { display:none }";
 
 var _hide_image_html = "<img class='flix_plus_hiddensectionbutton' src='" + chrome.extension.getURL("src/img/hide.png") + "' width=24 title='Section hidden; click to show.'>";
 var _show_image_html = "<img class='flix_plus_shownsectionbutton' src='" + chrome.extension.getURL("src/img/show.png") + "' width=24 title='Section shown; click to hide.'>";
@@ -15,7 +15,7 @@ var _show_image_html = "<img class='flix_plus_shownsectionbutton' src='" + chrom
 // Try to fix Recently Watched.  Might not do desired thing for all users.
 try
 {
-  $(".controlTitle")[0].style["font-size"] = "125%"
+  $(".controlTitle")[0].style["font-size"] = "125%";
 } catch (ex)
 {
   console.log(ex);
@@ -47,7 +47,7 @@ fplib.syncGet(KEY_NAME, function(items)
     var show_hide_text = _show_image_html;
     if ((mrow_name in defaults) && (defaults[mrow_name] === true))
     {
-      extlib.addGlobalStyle(hideCssCode);      
+      extlib.addGlobalStyle(hideCssCode);
       show_hide_text = _hide_image_html;
     }
 
@@ -83,7 +83,7 @@ fplib.syncGet(KEY_NAME, function(items)
           });
         });
       };
-    }(), false)
+    }(), false);
   }
 
 /*
@@ -93,16 +93,16 @@ fplib.syncGet(KEY_NAME, function(items)
     var button = document.createElement("a");
     button.id = id;
     button.innerHTML = button_text;
-    button.className = "extlib_button";  
-    document.getElementsByClassName("mrows")[0].insertBefore(button, document.getElementById("mrow_id_0")); 
+    button.className = "extlib_button";
+    document.getElementsByClassName("mrows")[0].insertBefore(button, document.getElementById("mrow_id_0"));
     document.getElementById(id).addEventListener('click', function() {
       var _class_name = class_name;
 
-      return function() 
+      return function()
       {
         var elems = document.getElementsByClassName(_class_name);
         var elems_array = [];
-        
+
         Array.prototype.forEach.call(elems, function(el) {
           elems_array.push(el);
         });

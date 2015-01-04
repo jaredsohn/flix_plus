@@ -55,18 +55,18 @@ var all_notes = {};
     getElementsByClassName:
     Developed by Robert Nyman, http://www.robertnyman.com
     Code/licensing: http://code.google.com/p/getelementsbyclassname/
-*/    
-var getElementsByClassName = function (className, tag, elm){
+*/
+var getElementsByClassName = function(className, tag, elm) {
     if (document.getElementsByClassName) {
-        getElementsByClassName = function (className, tag, elm) {
+        getElementsByClassName = function(className, tag, elm) {
             elm = elm || document;
             var elements = elm.getElementsByClassName(className),
-                nodeName = (tag)? new RegExp("\\b" + tag + "\\b", "i") : null,
+                nodeName = (tag) ? new RegExp("\\b" + tag + "\\b", "i") : null,
                 returnElements = [],
                 current;
-            for(var i=0, il=elements.length; i<il; i+=1){
+            for (var i = 0, il = elements.length; i < il; i += 1) {
                 current = elements[i];
-                if(!nodeName || nodeName.test(current.nodeName)) {
+                if (!nodeName || nodeName.test(current.nodeName)) {
                     returnElements.push(current);
                 }
             }
@@ -74,20 +74,20 @@ var getElementsByClassName = function (className, tag, elm){
         };
     }
     else if (document.evaluate) {
-        getElementsByClassName = function (className, tag, elm) {
+        getElementsByClassName = function(className, tag, elm) {
             tag = tag || "*";
             elm = elm || document;
             var classes = className.split(" "),
                 classesToCheck = "",
                 xhtmlNamespace = "http://www.w3.org/1999/xhtml",
-                namespaceResolver = (document.documentElement.namespaceURI === xhtmlNamespace)? xhtmlNamespace : null,
+                namespaceResolver = (document.documentElement.namespaceURI === xhtmlNamespace) ? xhtmlNamespace : null,
                 returnElements = [],
                 elements,
                 node;
-            for(var j=0, jl=classes.length; j<jl; j+=1){
+            for (var j = 0, jl = classes.length; j < jl; j += 1) {
                 classesToCheck += "[contains(concat(' ', @class, ' '), ' " + classes[j] + " ')]";
             }
-            try    {
+            try {
                 elements = document.evaluate(".//" + tag + classesToCheck, elm, namespaceResolver, 0, null);
             }
             catch (e) {
@@ -100,22 +100,22 @@ var getElementsByClassName = function (className, tag, elm){
         };
     }
     else {
-        getElementsByClassName = function (className, tag, elm) {
+        getElementsByClassName = function(className, tag, elm) {
             tag = tag || "*";
             elm = elm || document;
             var classes = className.split(" "),
                 classesToCheck = [],
-                elements = (tag === "*" && elm.all)? elm.all : elm.getElementsByTagName(tag),
+                elements = (tag === "*" && elm.all) ? elm.all : elm.getElementsByTagName(tag),
                 current,
                 returnElements = [],
                 match;
-            for(var k=0, kl=classes.length; k<kl; k+=1){
+            for (var k = 0, kl = classes.length; k < kl; k += 1) {
                 classesToCheck.push(new RegExp("(^|\\s)" + classes[k] + "(\\s|$)"));
             }
-            for(var l=0, ll=elements.length; l<ll; l+=1){
+            for (var l = 0, ll = elements.length; l < ll; l += 1) {
                 current = elements[l];
                 match = false;
-                for(var m=0, ml=classesToCheck.length; m<ml; m+=1){
+                for (var m = 0, ml = classesToCheck.length; m < ml; m += 1) {
                     match = classesToCheck[m].test(current.className);
                     if (!match) {
                         break;
@@ -147,8 +147,8 @@ function onEditMovieNote(event)
 
     // If the user presses Return, he is done editing:
     input.addEventListener('keydown',
-        function(event) { 
-            if (event.keyCode==13) 
+        function(event) {
+            if (event.keyCode == 13)
                 onDoneEditingMovieNote(event);
         }, true);
 
@@ -267,7 +267,7 @@ function insertNotesInElem(elem)
     // Each movie is inside <span class="title">
     var spans = elem.getElementsByTagName('span');
     var foundTitle = false;
-    for (var s=0; s<spans.length; ++s)
+    for (var s = 0; s < spans.length; ++s)
     {
         if (spans[s].className.match(/\btitle\b/))
         {
@@ -294,7 +294,7 @@ function insertNotesInElem(elem)
 
 if (!fplib.isOldMyList())
 {
-    console.log("Script disabled since it requires Netflix Suggests mode.")
+    console.log("Script disabled since it requires Netflix Suggests mode.");
 } else
 {
     // this is executed when this script loads:

@@ -11,7 +11,7 @@
 (function()
 {
     var fb = document.getElementsByClassName('fb');
-    for (i=0; i<fb.length; i++)
+    for (i = 0; i < fb.length; i++)
     {
         var fbEl = fb[i];
         fbEl.style.display = "none";

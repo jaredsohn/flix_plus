@@ -14,7 +14,7 @@
 // -- various UI improvements
 //    -- add empty text under each poster so that the layout looks less funky
 //    -- make sure the horizontal alignment is okay when undone
-//    -- remove the vertical bar, 
+//    -- remove the vertical bar,
 
 
 // Now requires extlib.js, fplib.js (jaredsohn-lifehacker)
@@ -28,8 +28,8 @@ if (location.pathname.indexOf("/Kids") === 0) //hacky
   collapse_height = 242;
 
 // How this css works: is four statements; first two make it show everything instead of scrolling; next two remove arrows and dividers
-var expand_template   = "#MROWID .slider { height: auto !important; overflow: visible !important; } #MROWID .slider .agMovieSetSlider { position: relative !important; width: auto !important;   } #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton, #MROWID .boxShotDivider { display: none !important; }"
-var collapse_template = "#MROWID .slider { height: " + collapse_height + "px !important; overflow: hidden !important; } #MROWID .slider .agMovieSetSlider { position: absolute !important; width: 2000px !important; } #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton, #MROWID .boxShotDivider { display: block !important; }"
+var expand_template = "#MROWID .slider { height: auto !important; overflow: visible !important; } #MROWID .slider .agMovieSetSlider { position: relative !important; width: auto !important;   } #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton, #MROWID .boxShotDivider { display: none !important; }";
+var collapse_template = "#MROWID .slider { height: " + collapse_height + "px !important; overflow: hidden !important; } #MROWID .slider .agMovieSetSlider { position: absolute !important; width: 2000px !important; } #MROWID .triangleBtns .sliderButton, #MROWID .sliderButton, #MROWID .boxShotDivider { display: block !important; }";
 
 var _scrolls_active_image_html = "<img class='flix_plus_scrolls_shown_button' src='" + chrome.extension.getURL("src/img/right.png") + "' width=24 title='Scrollbars shown; click to remove'>";
 var _all_image_html = "<img class='flix_plus_all_shown_button' src='" + chrome.extension.getURL("src/img/down.png") + "' width=24 title='Scrollbars removed; click to add back'>";
@@ -38,7 +38,7 @@ var _all_image_html = "<img class='flix_plus_all_shown_button' src='" + chrome.e
 // Try to fix Recently Watched.  Might not do desired thing for all users.
 try
 {
-  $(".controlTitle")[0].style["font-size"] = "125%"
+  $(".controlTitle")[0].style["font-size"] = "125%";
 } catch (ex)
 {
   console.log(ex);
@@ -59,7 +59,7 @@ fplib.syncGet(KEY_NAME, function(items)
 
     var id = mrows[i].id;
 
-    // Get relevant info  
+    // Get relevant info
     showall_css_code = expand_template.replace(new RegExp("MROWID", 'g'), id);
     scroll_css_code = collapse_template.replace(new RegExp("MROWID", 'g'), id);
 
@@ -111,7 +111,7 @@ fplib.syncGet(KEY_NAME, function(items)
           });
         });
       };
-    }(), false)
+    }(), false);
   }
 
   fplib.addEmptyVideoAnnotations(); // clean up the DOM
@@ -124,15 +124,15 @@ fplib.syncGet(KEY_NAME, function(items)
     button.id = id;
     button.innerHTML = button_text;
     button.className = "extlib_button";
-    document.getElementsByClassName("mrows")[0].insertBefore(button, document.getElementById("mrow_id_0")); 
+    document.getElementsByClassName("mrows")[0].insertBefore(button, document.getElementById("mrow_id_0"));
     document.getElementById(id).addEventListener('click', function() {
       var _class_name = class_name;
 
-      return function() 
+      return function()
       {
         var elems = document.getElementsByClassName(_class_name);
         var elems_array = [];
-        
+
         Array.prototype.forEach.call(elems, function(el) {
           elems_array.push(el);
         });

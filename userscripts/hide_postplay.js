@@ -24,6 +24,6 @@ hidePostPlay = function()
             }
         }, 1000);
     });
-}
+};
 
 hidePostPlay();

@@ -1,5 +1,5 @@
 // remove_dupes
-// 
+//
 // Written by jaredsohn/lifehacker
 //
 // Hide duplicate titles.  Requires fplib.js
@@ -16,9 +16,9 @@ fplib.syncGet(keys_dict, function(items)
 });
 
 // Mark 'Rate what you've seen' and 'because you like' elements so that they do not get hidden as duplicates
-$(".mrow-rating .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);})
-$(".supportVideos .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);})
-$(".recentlyWatched .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);})
+$(".mrow-rating .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);});
+$(".supportVideos .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);});
+$(".recentlyWatched .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);});
 
 var dupe_count = 0;
 var already_shown = {};
@@ -35,7 +35,7 @@ for (i = 0; i < imgs.length; i++) {
   {
     dupe_count++;
     imgs[i].classList.add("fp_duplicate");
-    imgs[i].parentNode.parentNode.classList.add("fp_duplicate_gp"); 
+    imgs[i].parentNode.parentNode.classList.add("fp_duplicate_gp");
   }
 }
 

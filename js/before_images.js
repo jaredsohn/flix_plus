@@ -20,7 +20,7 @@ load_enabled_scripts = function(profile_name, default_scripts, callback)
 {
   consolelog("load_enabled_scripts");
   var keyname = "flix_plus " + profile_name + " prefs";
-  consolelog(keyname);  
+  consolelog(keyname);
   var _callback = callback;
 
   fplib.syncGet(keyname, function(items)
@@ -32,7 +32,7 @@ load_enabled_scripts = function(profile_name, default_scripts, callback)
     if (typeof(all_prefs) === 'undefined')
       all_prefs = default_scripts;
     var enabled_scripts = {};
-  
+
     var all_prefs_array = all_prefs.split(",");
     for (i = 0; i < all_prefs_array.length; i++)
     {
@@ -43,7 +43,7 @@ load_enabled_scripts = function(profile_name, default_scripts, callback)
 
     callback(enabled_scripts);
   });
-}
+};
 
 function consolelog(msg)
 {
@@ -64,14 +64,14 @@ function consolelog(level, msg)
 main = function(callback)
 {
    __debug_level = localStorage["flix_plus debug_level"];
-  if(typeof(__debug_level) === "undefined")
+  if (typeof(__debug_level) === "undefined")
     __debug_level = 0;
 
   var profile_name = fplib.getProfileName();
   consolelog(1, "profile name is " + profile_name);
-  
+
   var default_scripts = "id_export_ratings,id_queue_sorter,id_ratings,id_random_ep,id_fade_rated,id_links,id_granulizer,id_scrollbuster,id_sectionhider,id_fade_watched,id_removefb,id_previewlink,id_hide_postplay,id_keyboard_shortcuts,id_netflixnotes,id_boximages_in_queue,id_remove_dupes,id_hide_synopsis,id_detail_view,id_expiring";
-  consolelog(2,"Loading prefs");
+  consolelog(2, "Loading prefs");
   consolelog(default_scripts);
   load_enabled_scripts(profile_name, default_scripts, function(enabled_scripts_param)
   {
@@ -81,11 +81,11 @@ main = function(callback)
     enabled_scripts = enabled_scripts_param;
 
     var settings_loaded_time = new Date();
-    consolelog(1, 'settings loaded time = ' + (settings_loaded_time-startTime) + 'ms');
+    consolelog(1, 'settings loaded time = ' + (settings_loaded_time - startTime) + 'ms');
 
     callback();
   });
-}
+};
 
 
 run_scripts = function()
@@ -98,34 +98,34 @@ var ___contentscript_id = "id_hide_synopsis";
 
 //console.log(enabled_scripts["id_hide_synopsis"]);
 
-if ( (enabled_scripts !== null) && (((typeof(enabled_scripts["id_hide_synopsis"]) === 'undefined')) || (enabled_scripts["id_hide_synopsis"] !== "true")) 	)
-	return;
+if ((enabled_scripts !== null) && (((typeof(enabled_scripts["id_hide_synopsis"]) === 'undefined')) || (enabled_scripts["id_hide_synopsis"] !== "true")))
+    return;
 
 //console.log(enabled_scripts);
 
 if (location.pathname.indexOf("/WiPlayer") === 0)
 {
-	var div = document.createElement("div");
-	div.id = "fp_blackscreen";
-	div.style.height = "100%";
-	div.style.width = "100%";
-	div.style["background"] = "black";
-	div.style["z-index"] = "99999";
-	div.style["position"] = "fixed";
-	div.style["top"] = "0px";
-	div.style["left"] = "0px";
-	div.style["opacity"] = 1;
-	div.style["visibility"] = "visible";
+    var div = document.createElement("div");
+    div.id = "fp_blackscreen";
+    div.style.height = "100%";
+    div.style.width = "100%";
+    div.style["background"] = "black";
+    div.style["z-index"] = "99999";
+    div.style["position"] = "fixed";
+    div.style["top"] = "0px";
+    div.style["left"] = "0px";
+    div.style["opacity"] = 1;
+    div.style["visibility"] = "visible";
   div.style["text-align"] = "center";
   div.style["vertical-align"] = "middle";
 
   div.innerText = "Potential spoiler image hidden.  If video doesn't show click here.";
-	document.body.appendChild(div);
+    document.body.appendChild(div);
   div.addEventListener("click", function() {
     //console.log('clicked');
-    document.getElementById("fp_blackscreen").style.display = "none"
+    document.getElementById("fp_blackscreen").style.display = "none";
   });
-	consolelog("made black screen");
+    consolelog("made black screen");
 }
 
 
@@ -135,10 +135,10 @@ if (location.pathname.indexOf("/WiPlayer") === 0)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Beginning of file-level footer
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-}  // main
+};  // main
 
   main(run_scripts);
   var endTime = new Date();
-  consolelog(1, 'full load time = ' + (endTime-startTime) + 'ms');
+  consolelog(1, 'full load time = ' + (endTime - startTime) + 'ms');
 
 }(); // global scope

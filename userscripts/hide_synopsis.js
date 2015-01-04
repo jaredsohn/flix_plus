@@ -7,10 +7,10 @@ var hideOnPlayer = function()
 {
     try
     {
-        document.getElementsByClassName("player-loading-background")[0].style["background-image"] = "";
+        $(".player-loading-background")[0].style["background-image"] = "";
     } catch (ex)
     {
-        console.log("background image wasn't in dom yet")   
+        console.log("background image wasn't in dom yet");
     }
     document.body.arrive(".player-loading-background", function() {
         this.style.opacity = 0;
@@ -40,7 +40,7 @@ var hideOnPlayer = function()
         console.log("next episode desc found!");
         this.classList.add("fp_spoiler");
     });
-        
+
     document.body.arrive(".playback-longpause-container", function() {
         var paragraphs = $(".playback-longpause-container .content p");
         paragraphs[paragraphs.length - 1].classList.add("fp_spoiler");
@@ -64,14 +64,14 @@ var hideOnPlayer = function()
         this.innerText = this.innerText.split("“")[0];
     });
 
-    extlib.addGlobalStyle("#fp_blackscreen { display: none };")
+    extlib.addGlobalStyle("#fp_blackscreen { display: none };");
     console.log("restoring from black screen");
-}
+};
 
 var hideOnMovieDetails = function()
 {
     document.body.arrive(".synopsis", function() {
-    	console.log("synopsis");
+        console.log("synopsis");
         this.classList.add("fp_spoiler");
     });
 
@@ -87,9 +87,9 @@ var hideOnMovieDetails = function()
     var elems2 = document.getElementsByClassName("videoImagery");
     for (i = 0; i < elems2.length; i++)
         elems2[i].classList.add("fp_spoiler");
-}
+};
 
 if (location.pathname.indexOf("/WiPlayer") === 0)
-	hideOnPlayer();
+    hideOnPlayer();
 else if (location.pathname.indexOf("/WiMovie") === 0)
     hideOnMovieDetails();

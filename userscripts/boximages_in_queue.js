@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Netflix boximages in queue
-// @namespace 
+// @namespace
 // @description    Display DVD box images in your Netflix queue.
 // @include        http://www.netflix.com/Queue*
 // @include        http://www.netflix.com/ReturnedRentals*
@@ -22,7 +22,7 @@ var DEBUG = 0;
 function main() {
    if (!fplib.isOldMyList())
    {
-      console.log("Script disabled since it requires Netflix Suggests mode.")
+      console.log("Script disabled since it requires Netflix Suggests mode.");
       return;
    }
 
@@ -41,7 +41,7 @@ function main() {
 
    DEBUG ? console.log(allResults.snapshotLength) : {};
 
-   for (var i=0; i< allResults.snapshotLength; i++) {
+   for (var i = 0; i < allResults.snapshotLength; i++) {
       var boximg = null;
       thisRow = allResults.snapshotItem(i);
 
@@ -72,7 +72,7 @@ function main() {
             thisHref = thisRow;
          }
          thisHref.insertBefore(newImg, thisHref.firstChild);
-         thisHref.style.textDecoration="none";
+         thisHref.style.textDecoration = "none";
       }
    }
 }

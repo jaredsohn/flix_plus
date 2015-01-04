@@ -1,5 +1,5 @@
 // Original source: https://github.com/joshblum/netflix-rate-chrome-ext/blob/master/js/ratings.js
-// Heavily rewritten by jaredsohn-lifehacker to: 
+// Heavily rewritten by jaredsohn-lifehacker to:
 //
 //  1. prevent displaying wrong rating by comparing title/year with ui before updating
 //  2. improve accuracy of matches by
@@ -18,7 +18,7 @@
 // does not include metacritic URLs, so to include links additional code would be needed.
 
 var key_name = "flix_plus " + fplib.getProfileName() + " ratings2";
-var IMDB_API =  "http://www.omdbapi.com/?tomatoes=true";
+var IMDB_API = "http://www.omdbapi.com/?tomatoes=true";
 var TOMATO_LINK = "http://www.rottentomatoes.com/alias?type=imdbid&s=";
 var IMDB_LINK = "http://www.imdb.com/title/";
 
@@ -28,7 +28,7 @@ if (typeof(CACHE) === "undefined")
 else
     CACHE = JSON.parse(CACHE);
 
-var CACHE_LIFE = 1000*60*60*24*7*2; //two weeks in milliseconds
+var CACHE_LIFE = 1000 * 60 * 60 * 24 * 7 * 2; //two weeks in milliseconds
 
 //////////// CACHE //////////////
 
@@ -55,7 +55,7 @@ function checkCache(title, year, type) {
     console.log("checking cache");
     console.log(key);
 
-    if(!(key in CACHE))
+    if (!(key in CACHE))
         return null;
 
     console.log("is in cache:");
@@ -73,7 +73,7 @@ function getIMDBAPI(title, year) {
         url += '&y=' + year;
     }
     console.log(url);
-    return url
+    return url;
 }
 
 function getSearchIMDBAPI(title) {
@@ -89,12 +89,12 @@ function getForIdIMDBAPI(id) {
 }
 
 function getIMDBLink(title) {
-    return IMDB_LINK + title.trim()
+    return IMDB_LINK + title.trim();
 }
 
 function getTomatoLink(imdbID) {
-    imdbID = imdbID.slice(2) //convert tt123456 -> 123456
-    return TOMATO_LINK + imdbID
+    imdbID = imdbID.slice(2); //convert tt123456 -> 123456
+    return TOMATO_LINK + imdbID;
 }
 
 
@@ -107,8 +107,8 @@ function parseTitle(args) {
 function parseType(args) {
     var $target = $(args["info_section"] + " .duration");
     var text = $target.text();
-    if ((text.indexOf("Season") !== -1) || (text.indexOf("Series") !== -1) || (text.indexOf("Episode")    !== -1) || 
-        (text.indexOf("Part") !== -1)   || (text.indexOf("Volume") !== -1) || (text.indexOf("Collection") !== -1))
+    if ((text.indexOf("Season") !== -1) || (text.indexOf("Series") !== -1) || (text.indexOf("Episode") !== -1) ||
+        (text.indexOf("Part") !== -1) || (text.indexOf("Volume") !== -1) || (text.indexOf("Collection") !== -1))
         return "series";
     else
         return "movie";
@@ -149,7 +149,7 @@ function parseRoles(args) {
                     roles[dict[dt]][elems[j].innerText.trim()] = true;
         }
     }
-    catch(ex)
+    catch (ex)
     {
         console.log(ex);
     }
@@ -163,12 +163,12 @@ function get_movie_info(url, callback)
     console.log(url);
     var movie_info = {};
 
-    $.get(url, function(res) 
+    $.get(url, function(res)
     {
         try {
             var omdb_json = JSON.parse(res);
             movie_info = parse_movie_info(omdb_json);
-        } catch(ex) {
+        } catch (ex) {
             console.log(ex);
         }
         callback(movie_info);
@@ -301,7 +301,7 @@ function getRating(args, cache_only, callback) {
     {
         console.log("quitting since cache-only mode is in effect");
         callback(null);
-        return
+        return;
     }
     if (ui_data["type"] !== "series")
     {
@@ -360,7 +360,7 @@ var parse_movie_info = function(omdb_json)
         return null;
     if ((omdb_json["Type"] === "episode") || (omdb_json["Type"] === "game") || (omdb_json["Type"] === "N/A"))
         return null;
-    
+
     var info = {};
     info.title = omdb_json["Title"] || null;
     info.year = omdb_json["Year"] || null;
@@ -368,7 +368,7 @@ var parse_movie_info = function(omdb_json)
     info.imdbScore = parseFloat(omdb_json["imdbRating"]);
     info.tomatoMeter = getTomatoScore(omdb_json, "tomatoMeter");
     info.tomatoUserMeter = getTomatoScore(omdb_json, "tomatoUserMeter");
-    info.metacriticScore = getTomatoScore(omdb_json, "Metascore")
+    info.metacriticScore = getTomatoScore(omdb_json, "Metascore");
     info.date = new Date().getTime();
     info.type = omdb_json["Type"];
     info.roles = {};
@@ -381,11 +381,11 @@ var parse_movie_info = function(omdb_json)
     console.log(info);
 
     return info;
-}
+};
 
 // parse tomato rating from api response object
 function getTomatoScore(res, meterType) {
-    return ((typeof(res[meterType]) === "undefined") || res[meterType] === "N/A") ? null : parseInt(res[meterType])
+    return ((typeof(res[meterType]) === "undefined") || res[meterType] === "N/A") ? null : parseInt(res[meterType]);
 }
 
 function getRolesArray(json_obj, field)
@@ -432,16 +432,16 @@ function simplify_title(title)
     title = title.replace("(original series)", "");
 
     if (extlib.endsWith(title, "collection"))
-        title = title.substring(0, title.length - 11)
+        title = title.substring(0, title.length - 11);
 
     if (extlib.endsWith(title, ": the series"))
-        title = title.substring(0, title.length - 12)
+        title = title.substring(0, title.length - 12);
 
 
     title = title.trim();
 
-    var punctuationless = title.replace(/[^\w ]/g,"");
-    return punctuationless.replace(/\s{2,}/g," ").trim();
+    var punctuationless = title.replace(/[^\w ]/g, "");
+    return punctuationless.replace(/\s{2,}/g, " ").trim();
 }
 
 function simplify_title_for_search(title)
@@ -490,7 +490,7 @@ function info_match_ui_roles_count(movie_info, args) {
         {
             var dict = {};
 
-            var keys = Object.keys(ui_roles[role_names[i]]);;
+            var keys = Object.keys(ui_roles[role_names[i]]);
             var len = keys.length;
             for (j = 0; j < len; j++)
             {
@@ -558,8 +558,8 @@ function info_match_ui(movie_info, args) {
             var ajax_year = parseInt(ajax_year_str);
             var ui_year_str = parseYear(args);
 
-            if ((ui_year_str !== ((ajax_year).toString())) && 
-                (ui_year_str !== ((ajax_year - 1).toString())) && 
+            if ((ui_year_str !== ((ajax_year).toString())) &&
+                (ui_year_str !== ((ajax_year - 1).toString())) &&
                 (ui_year_str !== ((ajax_year + 1).toString())))
             {
                 console.log("years don't match");
@@ -568,13 +568,13 @@ function info_match_ui(movie_info, args) {
         } else
         {
             console.log("years don't match");
-            return false;        
+            return false;
         }
     } catch (ex)
     {
         console.log(ex);
         console.log("years don't match");
-        return false;                
+        return false;
     }
 
     return true;
@@ -605,7 +605,7 @@ function displayRating(movie_info, is_https, args) {
 }
 
 // Clear old ratings and unused content.
-function clearOld(args){
+function clearOld(args) {
     var $target = $(args["info_section"]);
     if (args["hide_labels"] === true)
         $target.find('.label').contents().remove();
@@ -620,7 +620,7 @@ function clearOld(args){
         // Fix alignment issues by removing stbrLeftAlign class so rotten/imdb ratings appear on same line as user star ratings)
         var elems = $target.find('.bobMovieRatings')[0].getElementsByClassName("stbrLeftAlign");
         for (i = 0; i < elems.length; i++)
-            elems[i].className = elems[i].className.replace(new RegExp(" ?\\b"+"stbrLeftAlign"+"\\b"),'');
+            elems[i].className = elems[i].className.replace(new RegExp(" ?\\b" + "stbrLeftAlign" + "\\b"), '');
     }
 }
 
@@ -645,11 +645,11 @@ function getIMDBHtml(movie_info, klass) {
         html.css('visibility', 'hidden');
     } else {
         if (!score)
-            html.find('.fp_rt_imdb').addClass(klass).append("N/A");            
+            html.find('.fp_rt_imdb').addClass(klass).append("N/A");
         else
             html.find('.fp_rt_imdb').addClass(klass).append(score.toFixed(1));
     }
-    return html
+    return html;
 }
 
 function getTomatoHtml(movie_info, klass) {
@@ -666,12 +666,12 @@ function getTomatoHtml(movie_info, klass) {
 
     if ((!movie_info.tomatoMeter) && (!movie_info.tomatoUserMeter)) {
         html.css('visibility', 'hidden');
-        return html
+        return html;
     }
     if (movie_info.tomatoMeter)
     {
         html.find('.fp_rt_tomato_icon').addClass(getTomatoClass(movie_info.tomatoMeter)).addClass(klass);
-        html.find('.fp_rt_tomato_score').append(movie_info.tomatoMeter + '%');    
+        html.find('.fp_rt_tomato_score').append(movie_info.tomatoMeter + '%');
     }
     if (movie_info.tomatoUserMeter)
     {
@@ -679,7 +679,7 @@ function getTomatoHtml(movie_info, klass) {
         html.find('.fp_rt_audience_score').append(movie_info.tomatoUserMeter + '%');
     }
 
-    return html
+    return html;
 }
 
 function getMetatcriticHtml(movie_info, klass) {
@@ -703,7 +703,7 @@ var onPopup = function()
     $("#BobMovie-content").width(347); // Match the width
     $(".bobMovieHeader").width(329);   // Match the width
 
-    var args = {"info_section" : "#BobMovie", "roles_section" : ".info", "selector" : ".midBob", "hide_labels" : true, "fix_alignment": true }
+    var args = {"info_section" : "#BobMovie", "roles_section" : ".info", "selector" : ".midBob", "hide_labels" : true, "fix_alignment": true };
     if (location.pathname.indexOf("/search") === 0)
     {
         console.log("fix alignment set to false");
@@ -724,7 +724,7 @@ $(document).ready(function() {
     // Show ratings on movie details page
     if (location.pathname.indexOf("/WiMovie") === 0)
     {
-        var args = {"info_section" : "#displaypage-overview-details", "roles_section" : "#displaypage-details", "selector" : ".ratingsInfo", "hide_labels" : false, "fix_alignment": false }
+        var args = {"info_section" : "#displaypage-overview-details", "roles_section" : "#displaypage-details", "selector" : ".ratingsInfo", "hide_labels" : false, "fix_alignment": false };
 
         if (window.location.protocol === "https:")
         {
