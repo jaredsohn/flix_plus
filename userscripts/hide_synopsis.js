@@ -7,7 +7,8 @@ var hideOnPlayer = function()
 {
     try
     {
-        $(".player-loading-background")[0].style["background-image"] = "";
+        if ($(".player-loading-background").length)
+            $(".player-loading-background")[0].style["background-image"] = "";
     } catch (ex)
     {
         console.log("background image wasn't in dom yet");

@@ -964,7 +964,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
             text = "";
         var elem = document.createElement("div"); elem.style.cssText = "text-align:center"; elem.innerText = text;
         $("#profiles-gate")[0].appendChild(elem);
-        text = "You can disable this dialog by enabling 'Prevent Who's Watching interruptions' in Flix Plus by Lifehacker's preferences.";
+        text = "You can disable this dialog by enabling 'Prevent Who's Watching interruptions' in Flix Plus preferences.";
         var elem = document.createElement("div"); elem.style.cssText = "text-align:center"; elem.innerText = text;
         $("#profiles-gate")[0].appendChild(elem);
         var elem = document.createElement("br");

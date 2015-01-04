@@ -20,61 +20,61 @@
 var DEBUG = 0;
 
 function main() {
-   if (!fplib.isOldMyList())
-   {
-      console.log("Script disabled since it requires Netflix Suggests mode.");
-      return;
-   }
+    if (!fplib.isOldMyList())
+    {
+        console.log("Script disabled since it requires Netflix Suggests mode.");
+        return;
+    }
 
-   var search_rows = "";
-   //list-inactve was added 9/25/2009
-   search_rows = "//td[contains(@class, 'tt')]";
-   search_rows += " | //td[contains(@class, 'firstcol')]";
-   search_rows += " | //td[contains(@class, 'list-inactive')]";
+    var search_rows = "";
+    //list-inactve was added 9/25/2009
+    search_rows = "//td[contains(@class, 'tt')]";
+    search_rows += " | //td[contains(@class, 'firstcol')]";
+    search_rows += " | //td[contains(@class, 'list-inactive')]";
 
-   allResults = document.evaluate(
-      search_rows,
-      document,
-      null,
-      XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
-      null);
+    allResults = document.evaluate(
+        search_rows,
+        document,
+        null,
+        XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
+        null);
 
-   DEBUG ? console.log(allResults.snapshotLength) : {};
+    DEBUG ? console.log(allResults.snapshotLength) : {};
 
-   for (var i = 0; i < allResults.snapshotLength; i++) {
-      var boximg = null;
-      thisRow = allResults.snapshotItem(i);
+    for (var i = 0; i < allResults.snapshotLength; i++) {
+        var boximg = null;
+        thisRow = allResults.snapshotItem(i);
 
-      //in this row, find Movie ID number
-      var id = thisRow.innerHTML.match('\/\(\[0-9\]\+\)\\?');
-      if (id && id[1]) {
-         var id = id[1];
-         DEBUG ? console.log(id) : {};
+        //in this row, find Movie ID number
+        var id = thisRow.innerHTML.match('\/\(\[0-9\]\+\)\\?');
+        if (id && id[1]) {
+            var id = id[1];
+            DEBUG ? console.log(id) : {};
 
-         // create image src
-         boximg = "http://cdn-4.nflximg.com/us/boxshots/small/" + id + ".jpg";
+            // create image src
+            boximg = "http://cdn-4.nflximg.com/us/boxshots/small/" + id + ".jpg";
 
-         // create img element
-         var newImg = document.createElement('img');
-         newImg.src = boximg;
-         newImg.height = "90";
-         newImg.border = "0";
-         newImg.width = "65";
-         newImg.vspace = "2";
-         newImg.hspace = "2";
-         newImg.align = "middle";
-         newImg.alt = "";
+            // create img element
+            var newImg = document.createElement('img');
+            newImg.src = boximg;
+            newImg.height = "90";
+            newImg.border = "0";
+            newImg.width = "65";
+            newImg.vspace = "2";
+            newImg.hspace = "2";
+            newImg.align = "middle";
+            newImg.alt = "";
 
-         // finally insert image into document
-         var thisHref = thisRow.firstChild.firstChild;
-         if (thisHref == null) {
-            // this is for the recent returns page
-            thisHref = thisRow;
-         }
-         thisHref.insertBefore(newImg, thisHref.firstChild);
-         thisHref.style.textDecoration = "none";
-      }
-   }
+            // finally insert image into document
+            var thisHref = thisRow.firstChild.firstChild;
+            if (thisHref == null) {
+                // this is for the recent returns page
+                thisHref = thisRow;
+            }
+            thisHref.insertBefore(newImg, thisHref.firstChild);
+            thisHref.style.textDecoration = "none";
+        }
+    }
 }
 
 main();

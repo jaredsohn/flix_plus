@@ -36,30 +36,30 @@ var tag;
 
 var fixTag = function(tag)
 {
-  if (regex.test(tag.href)) {
-    if ((tag.id === "fp_play_popover") || (tag.classList.contains("fp_play")))
-    {
-      return;
+    if (regex.test(tag.href)) {
+        if ((tag.id === "fp_play_popover") || (tag.classList.contains("fp_play")))
+        {
+            return;
+        }
+        tag.playhref = tag.href;
+        tag.className = tag.className.replace(playClass, ' ');
+        tag.href = linkBase + tag.href.match(regex)[1];
+        tag.onmousedown = stopIt;
+        tag.onclick = clickIt;
     }
-    tag.playhref = tag.href;
-    tag.className = tag.className.replace(playClass, ' ');
-    tag.href = linkBase + tag.href.match(regex)[1];
-    tag.onmousedown = stopIt;
-    tag.onclick = clickIt;
-  }
 };
 
 function createPlayLink(movie_id, link_id) {
-  var elem = document.createElement('a');
+    var elem = document.createElement('a');
 
-  elem.href = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movie_id;
-  elem.innerHTML = "<img alt='Play' width=32px src='" + chrome.extension.getURL('../src/img/play.png') + "'>";
-  elem.style.cssText = "margin-left: 20px; display:inline-block";
-  elem.id = link_id;
-  elem.title = "Play";
-  elem.className = "fp_play fp_button";
+    elem.href = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movie_id;
+    elem.innerHTML = "<img alt='Play' width=32px src='" + chrome.extension.getURL('../src/img/play.png') + "'>";
+    elem.style.cssText = "margin-left: 20px; display:inline-block";
+    elem.id = link_id;
+    elem.title = "Play";
+    elem.className = "fp_play fp_button";
 
-  return elem;
+    return elem;
 }
 
 extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important"); // jaredsohn-Lifehacker...so it doesn't show 'Play' on genre pages
@@ -67,45 +67,45 @@ extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !imp
 // Don't affect play button on wimovie
 var elems = $(".displayPagePlayable a");
 if (elems.length)
-  elems[0].classList.add("fp_play");
+    elems[0].classList.add("fp_play");
 
 // Don't affect play buttons for episodes on wimovie
 elems = $(".episodeList .playBtn a");
 for (j = 0; j < elems.length; j++)
-  elems[j].classList.add("fp_play");
+    elems[j].classList.add("fp_play");
 
 // for kidsmovie pages
 elems = $("#chronology a");
 for (j = 0; j < elems.length; j++)
-  elems[j].classList.add("fp_play");
+    elems[j].classList.add("fp_play");
 
 while (tagIndex--) {
-  tag = aTags[tagIndex];
-  fixTag(tag);
+    tag = aTags[tagIndex];
+    fixTag(tag);
 }
 
 
 // added by jaredsohn-lifehacker so that it fixes links that later are added to the page (such as when you add something to My List).
 document.arrive("a", function()
 {
-  fixTag(this);
+    fixTag(this);
 });
 
 
 monitorPreview = function(elem_id)
 {
-  // Add a play button to the popup.  mark as fp_play_popover so URL isn't rewritten.
-  document.body.arrive("#" + elem_id + " .readMore", function()
-  {
-    console.log("arrive");
+    // Add a play button to the popup.  mark as fp_play_popover so URL isn't rewritten.
+    document.body.arrive("#" + elem_id + " .readMore", function()
+    {
+        console.log("arrive");
 
-    fplib.create_popup_header_row();
+        fplib.create_popup_header_row();
 
-    var parts = $("#" + elem_id + " .mdpLink")[0].href.split("/");
-    var movie_id = parts[parts.length - 1];
-    var link = createPlayLink(movie_id, "fp_play_popover");
-    $(".fp_header_row")[0].appendChild(link);
-  });
+        var parts = $("#" + elem_id + " .mdpLink")[0].href.split("/");
+        var movie_id = parts[parts.length - 1];
+        var link = createPlayLink(movie_id, "fp_play_popover");
+        $(".fp_header_row")[0].appendChild(link);
+    });
 };
 
 monitorPreview('BobMovie-content');
@@ -125,6 +125,6 @@ var onPopup = function()
 
 var selectors = fplib.getSelectorsForPath();
 if ((selectors !== null) && (selectors["bobPopup"] !== null))
-  document.arrive(selectors["bobPopup"], onPopup);
+    document.arrive(selectors["bobPopup"], onPopup);
 
 
