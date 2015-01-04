@@ -129,6 +129,10 @@ var _fplib = function()
 	    {
 	       results["bobPopup"] = null;
 		   results["borderedElement"] = ".boxShot";	       
+	    } else if (location.pathname.indexOf("/KidsMovie") === 0)
+	    {
+			results["elements"] = null;
+ 	        results["bobPopup"] = null;
 	    } else if (location.pathname.indexOf("/Kids") === 0)
 	    {
  	        results["bobPopup"] = null;

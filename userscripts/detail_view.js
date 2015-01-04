@@ -27,7 +27,7 @@
 var stopIt    = function (e) { e.preventDefault(); e.stopPropagation(); },
     clickIt   = function (e) { stopIt(e); window.location.href = this.href; },
     regex     = /^https?\:\/\/www\.netflix\.com\/WiPlayer\?movieid=([\d]+)/, // changed from movies to www lifehacker-jaredsohn
-    linkBase  = 'http://www.netflix.com/WiMovie/',
+    linkBase  = ((location.pathname.indexOf("/Kids") === 0) || (location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/KidsMovie") === 0)) ? 'http://www.netflix.com/KidsMovie/' : 'http://www.netflix.com/WiMovie/',
     aTags     = Array.prototype.slice.call(document.getElementsByTagName('a')),
     playClass = /(?:\s|^)playLink|hoverPlay(?:\s|$)/, // hoverPlay added lifehacker-jaredsohn
     i         = aTags.length,
@@ -37,7 +37,7 @@ var stopIt    = function (e) { e.preventDefault(); e.stopPropagation(); },
 var fixTag = function(tag)
 {
   if (regex.test(tag.href)) {
-    if ((tag.id === "fp_play_popover") || tag.classList.contains("fp_play"))
+    if ((tag.id === "fp_play_popover") || (tag.classList.contains("fp_play")))
     {
       return;
     }
@@ -61,6 +61,7 @@ function createPlayLink(movie_id, link_id) {
 
   return elem;
 }
+
 extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important"); // jaredsohn-Lifehacker...so it doesn't show 'Play' on genre pages
 
 // Don't affect play button on wimovie
@@ -69,14 +70,20 @@ if (elems.length)
   elems[0].classList.add("fp_play");
 
 // Don't affect play buttons for episodes on wimovie
-elems = $(".episodeList .playBtn");
+elems = $(".episodeList .playBtn a");
 for (j = 0; j < elems.length; j++)
-  elems[i].classList.add("fp_play");
+  elems[j].classList.add("fp_play");
+
+// for kidsmovie pages
+elems = $("#chronology a");
+for (j = 0; j < elems.length; j++)
+  elems[j].classList.add("fp_play");
 
 while (i--) {
   tag = aTags[i];
   fixTag(tag);
 }
+
 
 // added by jaredsohn-lifehacker so that it fixes links that later are added to the page (such as when you add something to My List).
 document.arrive("a", function()
@@ -119,4 +126,5 @@ var onPopup = function()
 var selectors = fplib.getSelectorsForPath();
 if ((selectors !== null) && (selectors["bobPopup"] !== null))
   document.arrive(selectors["bobPopup"], onPopup);
+
 
