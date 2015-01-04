@@ -530,7 +530,7 @@ var toggle_keyboard_commands = function()
         document.body.appendChild(commands_div);
 
         if ((enabled_scripts === null) || (enabled_scripts["id_darker_netflix"]))
-            $("#flix_plus_keyboard_commands")[0].classList.add("fp_keyboard_commands_black")
+            $("#flix_plus_keyboard_commands")[0].classList.add("fp_keyboard_commands_dark")
         else
             $("#flix_plus_keyboard_commands")[0].classList.add("fp_keyboard_commands_white")
 
