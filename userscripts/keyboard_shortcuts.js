@@ -945,6 +945,31 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
         });
     }
 
+    // Show instructions on Who's Watching
+    if ($("#profiles-gate").length)
+    {
+        var text = "";
+        if (_keyboard_id_to_shortcut_dict["close_window"] !== "None")
+            text += _keyboard_id_to_shortcut_dict["close_window"] + " to close";
+        if (_keyboard_id_to_shortcut_dict["jump_whos_watching"] !== "None")
+        {
+            if (text !== "")
+                text += " or ";
+            text += _keyboard_id_to_shortcut_dict["jump_whos_watching"] + " for navigation controls";
+        }
+        if (text !== "")
+            text = "Press " + text + ".";
+        else
+            text = "";
+        var elem = document.createElement("div"); elem.style.cssText = "text-align:center"; elem.innerText = text;
+        $("#profiles-gate")[0].appendChild(elem);
+        text = "You can disable this dialog by enabling 'Prevent Who's Watching interruptions' in Flix Plus by Lifehacker's preferences."
+        var elem = document.createElement("div");  elem.style.cssText = "text-align:center"; elem.innerText = text;
+        $("#profiles-gate")[0].appendChild(elem);
+        var elem = document.createElement("br"); 
+        $("#profiles-gate")[0].appendChild(elem);
+    }
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if (_elemsNPList) {
