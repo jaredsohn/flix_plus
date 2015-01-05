@@ -1,0 +1,57 @@
+#flix_plus_keyboard_commands {
+	align: center;
+	width: 60%;
+	left: 20%;
+	z-index: 9999;
+	position: fixed;
+	padding: 20px;
+	height: 85%;
+	top: 5%;
+	opacity: 0.9;
+	border-width: 5px;
+	border-style: solid;
+	overflow: auto;
+}
+
+.fp_keyboard_commands_white {
+	color: black;
+	background-color: white;
+	border-color: black;
+}
+
+.fp_keyboard_commands_dark {
+	color: white;
+	background-color: black;
+	border-color: white;
+}
+
+.fp_keyboard_selected {
+	outline: 10px solid #b9090b !important;
+	outline-offset: 0px !important
+}
+
+.fp_keyboard_mylist_selected {
+	border-style: solid !important;
+	border-color: #b9090b !important;
+	border-width: 5px !important
+}
+
+.fp_keyboard_search_selected {
+	border-style: solid !important;
+	border-color: #b9090b !important;
+	top: 10px !important;
+	border-width: 10px !important
+}
+
+/* from http://davidwalsh.name/spoiler-filter */
+.fp_spoiler {
+	-webkit-filter: blur(20px);
+	-webkit-transition-property:
+	-webkit-filter;
+	-webkit-transition-duration: .4s !important;
+}
+.fp_spoiler:hover, .fp_spoiler:focus {
+	-webkit-filter: blur(0px) !important;
+}
+
+
