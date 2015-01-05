@@ -13,7 +13,8 @@
 //
 // Now requires jquery, arrive.js, extlib.js, fplib.js
 
-var elemsInfo_ = { elemsListContainers: [], currListContainer: -1, elemsNPList: [], currListItem: -1, currElem: null };
+var elemsInfo_ = null;
+var savedElemsInfo_ = null;
 
 var keyboardCommandsShown_ = false;
 var alreadyHasShiftChars_ = ["~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
@@ -22,6 +23,8 @@ var preventDefaultKeys_ = ["Home", "End", "Ctrl-Home", "Ctrl-End", "Space"];
 var keyboardShortcutToIdDict_ = {};
 var keyboardIdToShortcutDict_ = {};
 
+var searchMode_ = false;
+var selectors_ = {};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Scrolling to element with keyboard focus
@@ -50,18 +53,17 @@ var scrollMiddle = function(elem)
 // Open a link based on selection
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-var watchOrZoomMovie = function(command)
+var playOrZoomMovie = function(command)
 {
-    var selectors = fplib.getSelectorsForPath();
-    if (selectors === null)
+    if (selectors_ === null)
         return;
 
     var attrElem;
 
     if ((location.pathname.indexOf("/WiMovie") === 0) && (command === "play"))
     {
-        attrElem = $(selectors["movieInfoSelector"])[0];
-        var fullStr = ($(attrElem)).attr(selectors["movieIdAttribute"]);
+        attrElem = $(selectors_["movieInfoSelector"])[0];
+        var fullStr = ($(attrElem)).attr(selectors_["movieIdAttribute"]);
         var movieId = fplib.getMovieIdFromField(fullStr);
         if (movieId === "0")
             return;
@@ -72,12 +74,12 @@ var watchOrZoomMovie = function(command)
     if (elemsInfo_.currElem === null)
         return;
 
-    if (selectors["movieInfoSelector"] !== null)
-        attrElem = $(selectors["movieInfoSelector"], elemsInfo_.currElem);
+    if (selectors_["movieInfoSelector"] !== null)
+        attrElem = $(selectors_["movieInfoSelector"], elemsInfo_.currElem);
     else
         attrElem = $(elemsInfo_.currElem);
 
-    var fullStr = attrElem.attr(selectors["movieIdAttribute"]);
+    var fullStr = attrElem.attr(selectors_["movieIdAttribute"]);
     var movieId = fplib.getMovieIdFromField(fullStr);
     if (movieId === "0")
         return;
@@ -169,30 +171,28 @@ var openCurrentLink = function()
 
 var removeFromQueue = function()
 {
-    var selectors = fplib.getSelectorsForPath();
-
-    if (selectors["elemContainerId"] === "[selected]")
+    if (selectors_["elemContainerId"] === "[selected]")
         elemContainer = elemsInfo_.elemsNPList[elemsInfo_.currListItem];
-    else if (selectors["elemContainerId"] === "[document")
+    else if (selectors_["elemContainerId"] === "[document")
         elemContainer = document;
     else
-        elemContainer = document.getElementById(selectors["elemContainerId"]);
+        elemContainer = document.getElementById(selectors_["elemContainerId"]);
 
     if (elemContainer !== null)
     {
-        if (selectors["queueMouseOver"] !== null)
+        if (selectors_["queueMouseOver"] !== null)
         {
-            var mouseOverContainer = $(selectors["queueMouseOver"], elemContainer);
+            var mouseOverContainer = $(selectors_["queueMouseOver"], elemContainer);
             extlib.simulateEvent(mouseOverContainer[0], "mouseover");
         }
 
-        if (selectors["queueRemove"] !== null)
+        if (selectors_["queueRemove"] !== null)
         {
-            var elemButton = $(selectors["queueRemove"], elemContainer);
+            var elemButton = $(selectors_["queueRemove"], elemContainer);
 
             //console.log(elemButton);
             if (elemButton && (elemButton.length > 0)) {
-                if ((elemButton[0].innerText.indexOf("Remove") !== -1) || (selectors["queueRemove"] === ".delbtn"))
+                if ((elemButton[0].innerText.indexOf("Remove") !== -1) || (selectors_["queueRemove"] === ".delbtn"))
                 {
                     extlib.simulateClick(elemButton[0]);
                     if ((typeof(elemsInfo_.elemsNPList) !== "undefined") && (elemsInfo_.elemsNPList !== null) && (elemsInfo_.elemsNPList.length > elemsInfo_.currListItem))
@@ -205,26 +205,24 @@ var removeFromQueue = function()
 
 var addToQueue = function()
 {
-    var selectors = fplib.getSelectorsForPath();
-
-    if (selectors["elemContainerId"] === "[selected]")
+    if (selectors_["elemContainerId"] === "[selected]")
         elemContainer = elemsInfo_.elemsNPList[elemsInfo_.currListItem];
-    else if (selectors["elemContainerId"] === "[document")
+    else if (selectors_["elemContainerId"] === "[document")
         elemContainer = document;
     else
-        elemContainer = document.getElementById(selectors["elemContainerId"]);
+        elemContainer = document.getElementById(selectors_["elemContainerId"]);
 
     if (elemContainer !== null)
     {
-        if (selectors["queueMouseOver"] !== null)
+        if (selectors_["queueMouseOver"] !== null)
         {
-            var mouseOverContainer = $(selectors["queueMouseOver"], elemContainer);
+            var mouseOverContainer = $(selectors_["queueMouseOver"], elemContainer);
             extlib.simulateEvent(mouseOverContainer[0], "mouseover");
         }
 
-        if (selectors["queueAdd"] !== null)
+        if (selectors_["queueAdd"] !== null)
         {
-            var elemButton = $(selectors["queueAdd"], elemContainer);
+            var elemButton = $(selectors_["queueAdd"], elemContainer);
 
             if (elemButton && (elemButton.length > 0)) {
                 if ((elemButton[0].innerText.indexOf("In My List") === -1) && (elemButton[0].innerText.indexOf("My List") !== -1))
@@ -242,20 +240,18 @@ var addToQueue = function()
 
 var rateMovie = function(rating)
 {
-    var selectors = fplib.getSelectorsForPath();
-
-    if (selectors["elemContainerId"] === "[selected]")
+    if (selectors_["elemContainerId"] === "[selected]")
         elemContainer = elemsInfo_.elemsNPList[elemsInfo_.currListItem];
-    else if (selectors["elemContainerId"] === "[document")
+    else if (selectors_["elemContainerId"] === "[document")
         elemContainer = document;
     else
-        elemContainer = document.getElementById(selectors["elemContainerId"]);
+        elemContainer = document.getElementById(selectors_["elemContainerId"]);
 
     if (elemContainer !== null)
     {
-        if (selectors["ratingMouseOver"] !== null)
+        if (selectors_["ratingMouseOver"] !== null)
         {
-            var mouseOverContainer = $(selectors["ratingMouseOver"], elemContainer);
+            var mouseOverContainer = $(selectors_["ratingMouseOver"], elemContainer);
             extlib.simulateEvent(mouseOverContainer[0], "mouseover");
         }
 
@@ -283,11 +279,9 @@ var updateKeyboardSelection = function(elem, selected)
         return;
     }
 
-    var selectors = fplib.getSelectorsForPath();
-
     var borderElem = elem;
-    if (selectors["borderedElement"] !== null)
-        borderElem = $(selectors["borderedElement"], elem)[0];
+    if (selectors_["borderedElement"] !== null)
+        borderElem = $(selectors_["borderedElement"], elem)[0];
 
     if (fplib.isOldMyList()) // separated out because width is different
     {
@@ -740,10 +734,10 @@ var runCommand = function(command)
             case "move_left": nextPreviousListItem(-1); break;
             case "move_home": updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], false); elemsInfo_.currListItem = -1; nextPreviousListItem(1); break;
             case "move_end": updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], false); elemsInfo_.currListItem = elemsInfo_.elemsNPList.length; nextPreviousListItem(-1); break;
-            case "play": watchOrZoomMovie(command); break;
+            case "play": playOrZoomMovie(command); break;
             case "to_my_list": addToQueue(); break;
             case "remove_from_my_list": removeFromQueue(); break;
-            case "zoom_into_details": watchOrZoomMovie(command); break;
+            case "zoom_into_details": playOrZoomMovie(command); break;
             case "open_link": openCurrentLink(); break;
             case "next_section": nextPreviousListContainer(1); break;
             case "prev_section": nextPreviousListContainer(-1); break;
@@ -821,7 +815,16 @@ var runCommand = function(command)
             case "jump_viewing_activity": window.location = "http://www.netflix.com/WiViewingActivity"; break;
             case "jump_your_ratings": window.location = "https://www.netflix.com/MoviesYouveSeen"; break;
             case "jump_whos_watching": window.location = "https://www.netflix.com/ProfilesGate"; break;
-            case "search": elem = document.getElementById("searchTab").click(); document.getElementById("searchField"); elem.focus(); elem.select(); break;
+            case "search":
+                elem = document.getElementById("searchTab");
+                if (elem !== null)
+                    elem.click();
+                else
+                    elem = document.getElementById("searchField");
+
+                elem.focus();
+                elem.select();
+                break;
             case "your_account": window.location = "https://www.netflix.com/YourAccount"; break;
             case "help": toggleKeyboardCommands(); break;
             case "close_window":
@@ -885,23 +888,11 @@ var injectJs = function(js)
     document.body.appendChild(scriptNode);
 };
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Startup
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName() + " keyboard_shortcuts", function(keyboardShortcutToIdDict, keyboardIdToShortcutDict)
+var initForSelectors = function(selectors)
 {
-    //console.log(keyboardShortcutToIdDict);
-    //console.log(keyboardIdToShortcutDict);
-    keyboardShortcutToIdDict_ = keyboardShortcutToIdDict;
-    keyboardIdToShortcutDict_ = keyboardIdToShortcutDict;
-
-    fplib.addEmptyVideoAnnotations(); // clean up DOM
-    fplib.idMrows();
-
-    var selectors = fplib.getSelectorsForPath();
     console.log(selectors);
+
+    elemsInfo_ = { elemsListContainers: [], currListContainer: -1, elemsNPList: [], currListItem: -1, currElem: null };
     if (selectors["elementsList"] === ".mrow")
     {
         elemsInfo_.elemsListContainers = document.getElementsByClassName("mrow");
@@ -936,6 +927,30 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
             elemsInfo_.elemsNPList.push(this);
         });
     }
+    if (elemsInfo_.elemsNPList) {
+        nextPreviousListItem(1);
+    }
+    if (elemsInfo_.elemsListContainers) {
+        nextPreviousListContainer(1);
+    }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Startup
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName() + " keyboard_shortcuts", function(keyboardShortcutToIdDict, keyboardIdToShortcutDict)
+{
+    //console.log(keyboardShortcutToIdDict);
+    //console.log(keyboardIdToShortcutDict);
+    keyboardShortcutToIdDict_ = keyboardShortcutToIdDict;
+    keyboardIdToShortcutDict_ = keyboardIdToShortcutDict;
+
+    fplib.addEmptyVideoAnnotations(); // clean up DOM
+    fplib.idMrows();
+
+    selectors_ = fplib.getSelectorsForPath();
+    initForSelectors(selectors_);
 
     // Show instructions on Who's Watching
     if ($("#profiles-gate").length)
@@ -964,13 +979,6 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (elemsInfo_.elemsNPList) {
-        nextPreviousListItem(1);
-    }
-    if (elemsInfo_.elemsListContainers) {
-        nextPreviousListContainer(1);
-    }
-
     if (location.pathname.indexOf("/WiSearch") === 0)
     {
         var elems = document.getElementsByClassName("searchResultsPrimary");
@@ -981,28 +989,35 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
 
     document.addEventListener('keypress', handleKeypress, false);
     document.addEventListener('keydown', handleKeydown, false);
-    /*$("#searchField")[0].addEventListener("input", function(e) {
-        if ($("#searchField")[0].value === "")
-        {
-            if (_search_mode)
+
+    if ($("#searchField").length)
+    {
+        $("#searchField")[0].addEventListener("input", function(e) {
+            if ($("#searchField")[0].value === "")
             {
-                console.log("search mode done");
-                _search_mode = false;
-            }
-        } else
-        {
-            if (!_search_mode)
+                if (searchMode_)
+                {
+                    console.log("search mode done");
+                    searchMode_ = false;
+                    elemsInfo_ = savedElemsInfo_;
+                }
+            } else
             {
-                console.log("search mode start");
-                _search_mode = true;
+                if (!searchMode_)
+                {
+                    console.log("search mode start");
+                    searchMode_ = true;
+                    savedElemsInfo_ = elemsInfo_;
+                    selectors_["elementsList"] = null;
+                    initForSelectors(selectors_);
+                }
             }
-        }
-    });*/
+        });
+    }
 
     // Make borders more visible on many pages
     extlib.addGlobalStyle(".agMovieGallery {position: relative; top: 10px; left:10px}");
     extlib.addGlobalStyle(".instantSearchGallery .gallery {position: relative; top: 10px; left:10px}");
-
     if ((location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/Kids") === 0))
         extlib.addGlobalStyle(".agMovieSetSlider {padding: 0px 0px 10px 0px}");
 });

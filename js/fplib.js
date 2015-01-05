@@ -85,7 +85,7 @@ var _fplib = function()
 
         if (location.pathname.indexOf("/WiHome") === 0)
         {
-            results["elementsList"] = ".mrow"; //TODO: for search, get rid of this.
+            results["elementsList"] = ".mrow"; // We get rid of this for keyboard shortcuts when /search is loaded
             results["elemContainerId"] = "BobMovie";
             results["queueMouseOver"] = ".btnWrap";
             results["ratingMouseOver"] = ".stbrOl";
