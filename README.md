@@ -21,6 +21,9 @@ The source code uses a couple of frameworks:
 3. Clone this project as openforge-greasemonkey-multi-script-compiler/_inputs/flix_plus and continue following the compiler instructions.
 
 
+###Contributing
+   Feel free to submit a pull request.  Most code should follow [Google's Javascript coding standards](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml) (with the exceptions of fade_rated.js, fade_watched.js, netflixnotes.js, queue_sorter.js, ratings.js, links.js, keyboard_shortcuts_info.js, expiring.js, and shortcuts_editor.js; some already conform to slightly-different styles while other files have barely been changed for Flix Plus).  The code is linted with [Closure Linter](https://developers.google.com/closure/utilities/) with rules {131,110,220} excluded.
+
 
 ###Building
    See the openforge-greasemonkey-multi-script compiler documentation for build instructions.

@@ -38,11 +38,11 @@
 // 2011.09.28  [1.0] 1ª versão
 //}
 
-// Note: For Flix Plus, we ignore linting this file.
+// Note: For Flix Plus, we ignore linting this file for formatting reasons
 
 (function() {
 
-    function getData(src, className, regex) {
+    var getData = function(src, className, regex) {
         result = "";
         objs = src.getElementsByClassName(className);
         if (objs && objs.length) {
@@ -54,7 +54,7 @@
         return result;
     }
 
-    function newLink(name, addr, icon)
+    var newLink = function(name, addr, icon)
         { return '<a target="_blank" href="' + addr + '"><img src="' + icon + '" title="Find on ' + name + '" border="0"></a> &nbsp;'; } //jaredsohn-lifehacker added target=_blank to preserve netflix tab
 
     tw = document.getElementsByClassName("title-wrapper");

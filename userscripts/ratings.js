@@ -16,13 +16,17 @@
 //
 // Note: The metacritic code here came from a newer version of joshblum's script and has not been tested yet.  One issue is that omdbapi
 // does not include metacritic URLs, so to include links additional code would be needed.
+//
+// Note that this file has slightly different coding standards than others in Flix Plus by Lifehacker
+// (functions are declarative rather than expressions, local vars are camelcase)
+// and this was done to match the origin script's style and also my own style when I did a lot of work on this.
 
-var key_name = "flix_plus " + fplib.getProfileName() + " ratings2";
+var key_name_ = "flix_plus " + fplib.getProfileName() + " ratings2";
 var IMDB_API = "http://www.omdbapi.com/?tomatoes=true";
 var TOMATO_LINK = "http://www.rottentomatoes.com/alias?type=imdbid&s=";
 var IMDB_LINK = "http://www.imdb.com/title/";
 
-var CACHE = localStorage[key_name]; // storing all settings into a single local Storage key (Jared Sohn/Lifehacker)
+var CACHE = localStorage[key_name_]; // storing all settings into a single local Storage key (Jared Sohn/Lifehacker)
 if (typeof(CACHE) === "undefined")
     CACHE = {};
 else
@@ -45,7 +49,7 @@ function addCache(ui_data, movie_info) {
     var key = ui_data["title"] + "_" + ui_data["year"] + "_" + ui_data["type"];
 
     CACHE[key] = compact_movie_info;
-    localStorage[key_name] = JSON.stringify(CACHE);
+    localStorage[key_name_] = JSON.stringify(CACHE);
 
     return movie_info;
 }
@@ -158,7 +162,7 @@ function parseRoles(args) {
 
 ///////////////// AJAX ////////////////
 
-function get_movie_info(url, callback)
+function getMovieInfo(url, callback)
 {
     console.log(url);
     var movie_info = {};
@@ -167,7 +171,7 @@ function get_movie_info(url, callback)
     {
         try {
             var omdb_json = JSON.parse(res);
-            movie_info = parse_movie_info(omdb_json);
+            movie_info = parseMovieInfo(omdb_json);
         } catch (ex) {
             console.log(ex);
         }
@@ -175,7 +179,7 @@ function get_movie_info(url, callback)
     });
 }
 
-function get_all_movie_infos(title, args, callback)
+function getAllMovieInfos(title, args, callback)
 {
     var url;
 
@@ -187,7 +191,7 @@ function get_all_movie_infos(title, args, callback)
                     callback2(null, res);
                 });
             }, function(callback2) {
-                var simplified = simplify_title_for_search(title);
+                var simplified = simplifyTitleForSearch(title);
                 if (simplified.toLowerCase() === title.toLowerCase())
                 {
                     callback2(null, null);
@@ -245,15 +249,15 @@ function get_all_movie_infos(title, args, callback)
                 async.map(search_request_datas, function(search_request_data, callback3)
                 {
                     search_request_data["type"] = search_request_data["Type"];
-                    if (!info_match_ui_type(search_request_data, args)) // don't bother if not of appopriate type
+                    if (!infoMatchUiType(search_request_data, args)) // don't bother if not of appopriate type
                         callback3(0, null);
                     else
                     {
-                        get_movie_info(getForIdIMDBAPI(search_request_data["imdbID"]), function(movie_info)
+                        getMovieInfo(getForIdIMDBAPI(search_request_data["imdbID"]), function(movie_info)
                         {
-                            if (info_match_ui(movie_info, args) === false)
+                            if (infoMatchUi(movie_info, args) === false)
                                 callback3(0, null);
-                            else if (info_match_ui_roles_count(movie_info, args) === 0)
+                            else if (infoMatchUiRolesCount(movie_info, args) === 0)
                                 callback3(0, null);
                             else
                                 callback3(0, movie_info);
@@ -283,7 +287,7 @@ function get_all_movie_infos(title, args, callback)
 // Search for the title, first in the CACHE and then through the API
 function getRating(args, cache_only, callback) {
 
-    var ui_data = get_ui_data(args);
+    var ui_data = getUiData(args);
 
     var $target = $(args["selector"]);
     var spinner = "<div id='fp_rt_spinner_div'>Looking up external ratings...<br><img class='fp_button fp_rt_spinner' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'><br><br><br></div>";
@@ -305,10 +309,10 @@ function getRating(args, cache_only, callback) {
     }
     if (ui_data["type"] !== "series")
     {
-        get_movie_info(getIMDBAPI(simplify_title_for_search(ui_data["title"]), ui_data["year"]), function(movie_info) {
+        getMovieInfo(getIMDBAPI(simplifyTitleForSearch(ui_data["title"]), ui_data["year"]), function(movie_info) {
             console.log(movie_info);
 
-            if ((movie_info !== null) && info_match_ui(movie_info, args))
+            if ((movie_info !== null) && infoMatchUi(movie_info, args))
             {
                 addCache(ui_data, movie_info);
                 callback(movie_info);
@@ -324,7 +328,7 @@ function getRating(args, cache_only, callback) {
 function getRatingWithSearch(ui_data, args, callback)
 {
     // If not a good match doing a naive lookup, then find all similar titles and find the best match
-    get_all_movie_infos(ui_data["title"], args, function(movie_infos) {
+    getAllMovieInfos(ui_data["title"], args, function(movie_infos) {
         console.log(movie_infos);
 
         var best_info = null;
@@ -354,7 +358,7 @@ function getRatingWithSearch(ui_data, args, callback)
     });
 }
 
-var parse_movie_info = function(omdb_json)
+function parseMovieInfo(omdb_json)
 {
     if ((omdb_json === null) || (omdb_json["Response"] === "False"))
         return null;
@@ -381,7 +385,7 @@ var parse_movie_info = function(omdb_json)
     console.log(info);
 
     return info;
-};
+}
 
 // parse tomato rating from api response object
 function getTomatoScore(res, meterType) {
@@ -399,7 +403,7 @@ function getRolesArray(json_obj, field)
     return roles_array;
 }
 
-function get_ui_data(args) {
+function getUiData(args) {
     var ui_data = {};
     ui_data["title"] = parseTitle(args);
     ui_data["year"] = parseYear(args);
@@ -410,7 +414,7 @@ function get_ui_data(args) {
 }
 
 // Remove initial 'the', 'the movie', punctuation symbols and double spaces.  Also, convert & to and.
-function simplify_title(title)
+function simplifyTitle(title)
 {
     if ((typeof(title) === "undefined") || (title === null))
         return "";
@@ -444,15 +448,15 @@ function simplify_title(title)
     return punctuationless.replace(/\s{2,}/g, " ").trim();
 }
 
-function simplify_title_for_search(title)
+function simplifyTitleForSearch(title)
 {
-    var simple = simplify_title(title);
+    var simple = simplifyTitle(title);
     return simple.replace(" and ", " ");
 }
 
 ///////////////// DISPLAY RATINGS ////////////////
 
-function info_match_ui_type(movie_info, args) {
+function infoMatchUiType(movie_info, args) {
     var type = parseType(args);
     if (type !== movie_info["type"])
     {
@@ -462,7 +466,7 @@ function info_match_ui_type(movie_info, args) {
     return true;
 }
 
-function info_match_ui_roles_count(movie_info, args) {
+function infoMatchUiRolesCount(movie_info, args) {
     if (typeof(movie_info["roles"]) === "undefined")
         return 1;
 
@@ -516,20 +520,20 @@ function info_match_ui_roles_count(movie_info, args) {
 }
 
 
-function info_match_ui(movie_info, args) {
+function infoMatchUi(movie_info, args) {
     if ((typeof(movie_info) === "undefined") || (movie_info === null))
     {
         console.log("No data returned to compare.");
         return false;
     }
 
-    if (!info_match_ui_type(movie_info, args))
+    if (!infoMatchUiType(movie_info, args))
     {
         //message already shown by method console.log("types don't match");
         return false;
     }
 
-    var roles_match_count = info_match_ui_roles_count(movie_info, args);
+    var roles_match_count = infoMatchUiRolesCount(movie_info, args);
     console.log("~~~");
     console.log(movie_info);
     console.log(roles_match_count);
@@ -539,7 +543,7 @@ function info_match_ui(movie_info, args) {
         return false;
     }
 
-    if (simplify_title(movie_info["title"]) !== simplify_title(parseTitle(args)))
+    if (simplifyTitle(movie_info["title"]) !== simplifyTitle(parseTitle(args)))
     {
         console.log("titles don't match");
         return false;
@@ -584,7 +588,7 @@ function info_match_ui(movie_info, args) {
 function displayRating(movie_info, is_https, args) {
     console.log(movie_info);
     clearOld(args);
-    if ((movie_info === null) || (movie_info.nodata === true) || (!info_match_ui(movie_info, args)))
+    if ((movie_info === null) || (movie_info.nodata === true) || (!infoMatchUi(movie_info, args)))
     {
         if (is_https)
             $(args["selector"]).append("<div class='fp_rt_no_https'><br>No HTTPS support for external ratings.</div>");
@@ -694,7 +698,7 @@ function getMetatcriticHtml(movie_info, klass) {
 
 ///////// MAIN /////////////
 
-var onPopup = function()
+function onPopup()
 {
     console.log("arrive-ratings-onPopup");
 
@@ -716,7 +720,7 @@ var onPopup = function()
     getRating(args, is_https, function(movie_info) {
         displayRating(movie_info, is_https, args);
     });
-};
+}
 
 $(document).ready(function() {
     extlib.addStyle("fp_rt_rating_overlay", chrome.extension.getURL('../src/css/ratings.css'));

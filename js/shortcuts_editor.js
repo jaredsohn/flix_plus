@@ -1,20 +1,12 @@
+// Note that this module uses snakecase for variable and function names.
+
 var shortcuts_editor = shortcuts_editor || {};
 var _shortcuts_editor = function() {
     var self = this;
-    var _profilename = "undefined";
+    var profile_name_ = "undefined";
 
     var _keyboard_id_to_shortcut_dict = {};
     var _keyboard_shortcut_to_id_dict = {};
-
-    this.init = function(profilename)
-    {
-        console.log("init");
-        _profilename = profilename;
-        document.getElementById("save").addEventListener("click", self.onSave);
-        document.getElementById("clearall").addEventListener("click", self.onClearAll);
-        document.getElementById("defaults").addEventListener("click", self.onRestoreDefaultShortcuts);
-        keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + _profilename + " keyboard_shortcuts", self.show_shortcuts);
-    };
 
     this.clear_shortcuts = function()
     {
@@ -301,7 +293,7 @@ var _shortcuts_editor = function() {
         }
     };
 
-    this.onClearAll = function(e)
+    this.on_clear_all = function(e)
     {
         e.preventDefault();
         var clear = keyboard_shortcuts_info.generate_clear();
@@ -310,7 +302,7 @@ var _shortcuts_editor = function() {
         self.show_shortcuts(dicts[0], dicts[1]);
     };
 
-    this.onSave = function(e)
+    this.on_save = function(e)
     {
         e.preventDefault();
 
@@ -321,16 +313,16 @@ var _shortcuts_editor = function() {
             obj[this.id] = this.value;
             keyboard_shortcuts.push(obj);
         });
-        console.log("OnSave");
+        console.log("on_save");
         console.log(keyboard_shortcuts);
 
-        fplib.syncSet("flix_plus " + _profilename + " keyboard_shortcuts", keyboard_shortcuts, function() {
+        fplib.syncSet("flix_plus " + profile_name_ + " keyboard_shortcuts", keyboard_shortcuts, function() {
             console.log("saved");
             alert("Saved!");
         });
     };
 
-    this.onRestoreDefaultShortcuts = function(e)
+    this.on_restore_default_shortcuts = function(e)
     {
         e.preventDefault();
 
@@ -339,16 +331,26 @@ var _shortcuts_editor = function() {
         self.clear_shortcuts();
         self.show_shortcuts(dicts[0], dicts[1]);
     };
+
+    this.init = function(profile_name)
+    {
+        console.log("init");
+        profile_name_ = profile_name;
+        document.getElementById("save").addEventListener("click", self.on_save);
+        document.getElementById("clearall").addEventListener("click", self.on_clear_all);
+        document.getElementById("defaults").addEventListener("click", self.on_restore_default_shortcuts);
+        keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + profile_name_ + " keyboard_shortcuts", self.show_shortcuts);
+    };
 };
 
 $(document).ready(function()
 {
     chrome.storage.local.get("flix_plus profilename", function(items)
     {
-        _profilename = items["flix_plus profilename"];
-        console.log(_profilename);
+        profile_name_ = items["flix_plus profilename"];
+        console.log(profile_name_);
         _shortcuts_editor.call(shortcuts_editor);
 
-        shortcuts_editor.init(_profilename);
+        shortcuts_editor.init(profile_name_);
     });
 });

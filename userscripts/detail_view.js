@@ -22,34 +22,36 @@
  * ----------------------------------------------------------------------------
  */
 
-// jaredsohn-lifehacker: Now requires extlib.js, fplib.js, and arrive.js.
+// Changes made by jaredsohn-lifehacker for Flix Plus:
+// -- Now requires extlib.js, fplib.js, and arrive.js.
+// -- avoids updating certain links
+// -- adds an icon for playing from the popup
+// -- changes links that are created dynamically
+
+var regex_ = /^https?\:\/\/www\.netflix\.com\/WiPlayer\?movieid=([\d]+)/; // changed from movies to www lifehacker-jaredsohn
+var linkBase_ = ((location.pathname.indexOf("/Kids") === 0) || (location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/KidsMovie") === 0)) ? 'http://www.netflix.com/KidsMovie/' : 'http://www.netflix.com/WiMovie/';
+var aTags_ = Array.prototype.slice.call(document.getElementsByTagName('a'));
+var playClass_ = /(?:\s|^)playLink|hoverPlay(?:\s|$)/; // hoverPlay added lifehacker-jaredsohn
+var tagIndex_ = aTags_.length;
 
 var stopIt = function(e) { e.preventDefault(); e.stopPropagation(); };
 var clickIt = function(e) { stopIt(e); window.location.href = this.href; };
-var regex = /^https?\:\/\/www\.netflix\.com\/WiPlayer\?movieid=([\d]+)/; // changed from movies to www lifehacker-jaredsohn
-var linkBase = ((location.pathname.indexOf("/Kids") === 0) || (location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/KidsMovie") === 0)) ? 'http://www.netflix.com/KidsMovie/' : 'http://www.netflix.com/WiMovie/';
-var aTags = Array.prototype.slice.call(document.getElementsByTagName('a'));
-var playClass = /(?:\s|^)playLink|hoverPlay(?:\s|$)/; // hoverPlay added lifehacker-jaredsohn
-var tagIndex = aTags.length;
-var tag;
 
 
 var fixTag = function(tag)
 {
-    if (regex.test(tag.href)) {
+    if (regex_.test(tag.href)) {
         if ((tag.id === "fp_play_popover") || (tag.classList.contains("fp_play")))
-        {
             return;
-        }
         tag.playhref = tag.href;
-        tag.className = tag.className.replace(playClass, ' ');
-        tag.href = linkBase + tag.href.match(regex)[1];
+        tag.className = tag.className.replace(playClass_, ' ');
+        tag.href = linkBase_ + tag.href.match(regex_)[1];
         tag.onmousedown = stopIt;
         tag.onclick = clickIt;
     }
 };
 
-function createPlayLink(movie_id, link_id) {
+var createPlayLink = function(movie_id, link_id) {
     var elem = document.createElement('a');
 
     elem.href = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movie_id;
@@ -60,46 +62,16 @@ function createPlayLink(movie_id, link_id) {
     elem.className = "fp_play fp_button";
 
     return elem;
-}
+};
 
-extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important"); // jaredsohn-Lifehacker...so it doesn't show 'Play' on genre pages
-
-// Don't affect play button on wimovie
-var elems = $(".displayPagePlayable a");
-if (elems.length)
-    elems[0].classList.add("fp_play");
-
-// Don't affect play buttons for episodes on wimovie
-elems = $(".episodeList .playBtn a");
-for (j = 0; j < elems.length; j++)
-    elems[j].classList.add("fp_play");
-
-// for kidsmovie pages
-elems = $("#chronology a");
-for (j = 0; j < elems.length; j++)
-    elems[j].classList.add("fp_play");
-
-while (tagIndex--) {
-    tag = aTags[tagIndex];
-    fixTag(tag);
-}
-
-
-// added by jaredsohn-lifehacker so that it fixes links that later are added to the page (such as when you add something to My List).
-document.arrive("a", function()
-{
-    fixTag(this);
-});
-
-
-monitorPreview = function(elem_id)
+var monitorPreview = function(elem_id)
 {
     // Add a play button to the popup.  mark as fp_play_popover so URL isn't rewritten.
     document.body.arrive("#" + elem_id + " .readMore", function()
     {
         console.log("arrive");
 
-        fplib.create_popup_header_row();
+        fplib.createPopupHeaderRow();
 
         var parts = $("#" + elem_id + " .mdpLink")[0].href.split("/");
         var movie_id = parts[parts.length - 1];
@@ -107,10 +79,6 @@ monitorPreview = function(elem_id)
         $(".fp_header_row")[0].appendChild(link);
     });
 };
-
-monitorPreview('BobMovie-content');
-// for wiGenre, would use monitorPreview('bob-container'), but that page now redirects to wiAltGenre
-
 
 // Make window bigger so there is room for button
 var onPopup = function()
@@ -122,6 +90,34 @@ var onPopup = function()
     $("#BobMovie-content").width(347); // Match the width
     $(".bobMovieHeader").width(329);   // Match the width
 };
+
+var ignoreElems = function(elems)
+{
+    if (elems.length)
+    {
+        for (i = 0; i < elems.length; i++)
+            elems[i].classList.add("fp_play");
+    }
+};
+
+// Remove the Play hover buttons on posters on genre pages
+extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important");
+
+ignoreElems($(".displayPagePlayable a")); // play button on wimovie
+ignoreElems($(".episodeList .playBtn a")); // play buttons for episodes on wimovie
+ignoreElems($("#chronology a")); // play buttons for episodes on kidsmovie
+
+while (tagIndex_--)
+    fixTag(aTags_[tagIndex_]);
+
+// Fixes links that are added to the page (such as when you add something to My List).
+document.arrive("a", function()
+{
+    fixTag(this);
+});
+
+monitorPreview('BobMovie-content');
+// for wiGenre, would use monitorPreview('bob-container'), but that page now redirects to wiAltGenre
 
 var selectors = fplib.getSelectorsForPath();
 if ((selectors !== null) && (selectors["bobPopup"] !== null))

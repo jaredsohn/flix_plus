@@ -12,7 +12,7 @@ keys_dict[key_prefix + " fpduplicate_style"] = "hide";
 
 fplib.syncGet(keys_dict, function(items)
 {
-    fplib.define_poster_css("fp_duplicate", items[key_prefix + " fpduplicate_style"]);
+    fplib.definePosterCss("fp_duplicate", items[key_prefix + " fpduplicate_style"]);
 });
 
 // Mark 'Rate what you've seen' and 'because you like' elements so that they do not get hidden as duplicates

@@ -1,3 +1,5 @@
+// Note that this module uses snakecase for variable and function names.
+
 var keyboard_shortcuts_info = _keyboard_shortcuts_info || {};
 var _keyboard_shortcuts_info = function() {
     var self = this;

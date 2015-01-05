@@ -1,22 +1,22 @@
-var fade_editor = fade_editor || {};
-var _fade_editor = function() {
+var fadeEditor = fadeEditor || {};
+var _fadeEditor = function() {
     var self = this;
-    var _profilename = "undefined";
+    var _profileName = "undefined";
 
-    this.init = function(profilename, config_items)
+    this.init = function(profileName, configItems)
     {
-        console.log("config_items");
-        console.log(config_items);
+        console.log("configItems");
+        console.log(configItems);
         console.log("init");
-        _profilename = profilename;
+        _profileName = profileName;
         document.getElementById("save").addEventListener("click", self.onSave);
         document.getElementById("defaults").addEventListener("click", self.onRestoreDefaults);
 
-        $("#fade_rated_select")[0].value = config_items["flix_plus " + _profilename + " fp_rated_style"];
-        $("#fade_rated_notinterested_select")[0].value = config_items["flix_plus " + _profilename + " fp_rated_notinterested_style"];
-        $("#fade_watched_select")[0].value = config_items["flix_plus " + _profilename + " fp_watched_style"];
-        $("#fade_duplicates_select")[0].value = config_items["flix_plus " + _profilename + " fp_duplicates_style"];
-        $("#notv")[0].checked = config_items["flix_plus " + _profilename + " fp_ignore_tv"];
+        $("#fade_rated_select")[0].value = configItems["flix_plus " + _profileName + " fp_rated_style"];
+        $("#fade_rated_notinterested_select")[0].value = configItems["flix_plus " + _profileName + " fp_rated_notinterested_style"];
+        $("#fade_watched_select")[0].value = configItems["flix_plus " + _profileName + " fp_watched_style"];
+        $("#fade_duplicates_select")[0].value = configItems["flix_plus " + _profileName + " fp_duplicates_style"];
+        $("#notv")[0].checked = configItems["flix_plus " + _profileName + " fp_ignore_tv"];
     };
 
     this.onSave = function(e)
@@ -24,11 +24,11 @@ var _fade_editor = function() {
         e.preventDefault();
 
         var dict = {};
-        dict["flix_plus " + _profilename + " fp_rated_style"] = $("#fade_rated_select")[0].value;
-        dict["flix_plus " + _profilename + " fp_rated_notinterested_style"] = $("#fade_rated_notinterested_select")[0].value;
-        dict["flix_plus " + _profilename + " fp_watched_style"] = $("#fade_watched_select")[0].value;
-        dict["flix_plus " + _profilename + " fp_duplicates_style"] = $("#fade_duplicates_select")[0].value;
-        dict["flix_plus " + _profilename + " fp_ignore_tv"] = $("#notv")[0].checked;
+        dict["flix_plus " + _profileName + " fp_rated_style"] = $("#fade_rated_select")[0].value;
+        dict["flix_plus " + _profileName + " fp_rated_notinterested_style"] = $("#fade_rated_notinterested_select")[0].value;
+        dict["flix_plus " + _profileName + " fp_watched_style"] = $("#fade_watched_select")[0].value;
+        dict["flix_plus " + _profileName + " fp_duplicates_style"] = $("#fade_duplicates_select")[0].value;
+        dict["flix_plus " + _profileName + " fp_ignore_tv"] = $("#notv")[0].checked;
 
         chrome.storage.sync.set(dict, function() {
             alert("Saved");
@@ -46,17 +46,17 @@ var _fade_editor = function() {
         e.preventDefault();
     };
 };
-_fade_editor.call(fade_editor);
+_fadeEditor.call(fadeEditor);
 
 
 $(document).ready(function()
 {
     chrome.storage.local.get("flix_plus profilename", function(items)
     {
-        _profilename = items["flix_plus profilename"];
-        console.log(_profilename);
+        _profileName = items["flix_plus profilename"];
+        console.log(_profileName);
 
-        key_prefix = "flix_plus " + _profilename + " ";
+        key_prefix = "flix_plus " + _profileName + " ";
 
         var keys_dict = {};
         keys_dict[key_prefix + "fp_rated_style"] = "fade";
@@ -67,7 +67,7 @@ $(document).ready(function()
 
         chrome.storage.sync.get(keys_dict, function(items)
         {
-            fade_editor.init(_profilename, items);
+            fadeEditor.init(_profileName, items);
         });
     });
 });

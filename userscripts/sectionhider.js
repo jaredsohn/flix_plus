@@ -2,7 +2,6 @@
 // Derived from Scrollbuster, but with different behavior (hides/shows sections instead of removing/adding scrollbars)
 // Requires extlib.js, fplib.js
 
-
 var KEY_NAME = "flix_plus " + fplib.getProfileName() + " sectionhider";
 
 var show_template = "#MROWID .bd { display:block }";
@@ -11,8 +10,7 @@ var hide_template = "#MROWID .bd { display:none }";
 var _hide_image_html = "<img class='flix_plus_hiddensectionbutton' src='" + chrome.extension.getURL("src/img/hide.png") + "' width=24 title='Section hidden; click to show.'>";
 var _show_image_html = "<img class='flix_plus_shownsectionbutton' src='" + chrome.extension.getURL("src/img/show.png") + "' width=24 title='Section shown; click to hide.'>";
 
-
-// Try to fix Recently Watched.  Might not do desired thing for all users.
+// Try to fix Recently Watched.  Might not do desired thing for all users (but no complaints so far...)
 try
 {
     $(".controlTitle")[0].style["font-size"] = "125%";

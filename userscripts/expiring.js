@@ -26,6 +26,8 @@
  ** Chrome: http://www.chromium.org/developers/design-documents/user-scripts
  **/
 
+// This file has very minimal changes for Flix Plus.
+
 (function()
 {
     if (!fplib.isOldMyList())

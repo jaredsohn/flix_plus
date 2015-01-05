@@ -4,11 +4,11 @@
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
 // YouTube URL for trailer
-function trailerURL(movieName) {
+var trailerURL = function(movieName) {
     return 'https://youtube.com/results?search_query=' + encodeURIComponent(movieName + ' trailer');
-}
+};
 
-function createTrailerElem(movieName, id) {
+var createTrailerElem = function(movieName, id) {
     var elem = document.createElement("a");
     elem.className = "fp_preview_link fp_button";
     elem.href = trailerURL(movieName);
@@ -19,14 +19,14 @@ function createTrailerElem(movieName, id) {
     elem.title = "Watch trailer";
 
     return elem;
-}
+};
 
 // Detect movie popover and add trailer link
-function monitorPreview(id) {
+var monitorPreview = function(id) {
     var target = document.querySelector('#' + id);
     var observer = new MutationObserver(function(mutations) {
 
-        fplib.create_popup_header_row();
+        fplib.createPopupHeaderRow();
 
         var movieName = $('#' + id + ' .mdpLink .title').text().trim();
         var linkElem = createTrailerElem(movieName, 'trailer-popover');
@@ -36,27 +36,27 @@ function monitorPreview(id) {
 
     });
     observer.observe(target, { childList: true });
-}
+};
 
 // Add trailer link to movie detail page
-function movieInfo() {
+var movieInfo = function() {
     var header$ = $('h1.title');
     var movieName = header$.text().trim();
     var link$ = $('<span>', {
         class: 'year'
     }).append(createTrailerElem(movieName, 'trailer-detail'));
     header$.parent().after(link$);
-}
+};
 
 // Make window bigger so there is room for button
 var onPopup = function()
 {
-        console.log("arrive");
+    console.log("arrive");
 
-        $(".bobMovieContent").height(250); // jaredsohn-lifehacker: Added to make room for ratings buttons (after recommend button was added)
-        $(".bobMovieContent").width(325);  // Sometimes the code below wouldn't fit within the popup; make it bigger to accomodate it
-        $("#BobMovie-content").width(347); // Match the width
-        $(".bobMovieHeader").width(329);   // Match the width
+    $(".bobMovieContent").height(250); // jaredsohn-lifehacker: Added to make room for ratings buttons (after recommend button was added)
+    $(".bobMovieContent").width(325);  // Sometimes the code below wouldn't fit within the popup; make it bigger to accomodate it
+    $("#BobMovie-content").width(347); // Match the width
+    $(".bobMovieHeader").width(329);   // Match the width
 };
 
 var selectors = fplib.getSelectorsForPath();
@@ -65,6 +65,6 @@ if (selectors !== null)
 
 monitorPreview('BobMovie-content'); // should work everywhere except for wigenre; redirect those pages to wialtgenre
 if ((window.location.pathname.split('/')[1]) === "WiMovie")
-        movieInfo();
+    movieInfo();
 
 

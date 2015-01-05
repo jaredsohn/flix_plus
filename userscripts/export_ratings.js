@@ -3,37 +3,7 @@
 // Written by Jared Sohn for Lifehacker as a part of Flix Plus.
 // August 2014
 
-
-// Add a button
-var createA = document.createElement("a");
-var createAText = document.createTextNode("Export as JSON");
-createA.setAttribute("href", 'javascript:var div = document.createElement("div"); div.className="fp_export_ratings_cmd"; div.style="display:none"; document.body.appendChild(div);');
-createA.appendChild(createAText);
-createA.className = "extlib_button";
-createA.style = "align:right;";
-
-var header = document.getElementsByClassName("account-header")[0];
-if ($(".account-header br").length === 0)
-    header.appendChild(document.createElement("br"));
-
-header.appendChild(createA);
-
-extlib.initButtonCss();
-
-document.body.arrive(" .fp_export_ratings_cmd", function() {
-    var ratingsHistory = document.getElementById("ratingHistorySection");
-    var elems = ratingsHistory.getElementsByTagName("li");
-    if (elems.length === 100)
-    {
-        if (confirm("This only exports ratings that can be found on the page.  Because exactly 100 ratings were found, you probably need to scroll down if you want to export all ratings.\n\nAre you sure you want to export just these 100 ratings?"))
-            export_ratings();
-    } else
-    {
-        export_ratings();
-    }
-});
-
-var export_ratings = function()
+var exportRatings = function()
 {
     var rated_data = [];
 
@@ -52,7 +22,7 @@ var export_ratings = function()
     }
     console.log(rated_data.append);
 
- // from stackoverflow
+    // from stackoverflow
     var saveData = (function() {
         var a = document.createElement("a");
         document.body.appendChild(a);
@@ -70,3 +40,31 @@ var export_ratings = function()
 
     saveData(rated_data, "netflix_ratings.json");
 };
+
+// Add a button
+var header = document.getElementsByClassName("account-header")[0];
+if ($(".account-header br").length === 0)
+    header.appendChild(document.createElement("br"));
+
+var createA = document.createElement("a");
+var createAText = document.createTextNode("Export as JSON");
+createA.setAttribute("href", 'javascript:var div = document.createElement("div"); div.className="fp_export_ratings_cmd"; div.style="display:none"; document.body.appendChild(div);');
+createA.appendChild(createAText);
+createA.className = "extlib_button";
+createA.style = "align:right;";
+header.appendChild(createA);
+
+extlib.initButtonCss();
+
+document.body.arrive(" .fp_export_ratings_cmd", function() {
+    var ratingsHistory = document.getElementById("ratingHistorySection");
+    var elems = ratingsHistory.getElementsByTagName("li");
+    if (elems.length === 100)
+    {
+        if (confirm("This only exports ratings that can be found on the page.  Because exactly 100 ratings were found, you probably need to scroll down if you want to export all ratings.\n\nAre you sure you want to export just these 100 ratings?"))
+            exportRatings();
+    } else
+    {
+        exportRatings();
+    }
+});

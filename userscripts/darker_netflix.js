@@ -13,7 +13,7 @@
 // @run-at        document-start
 // ==/UserScript==
 
-// Changes made for Flix Plus by Lifehacker:
+// Changes made by jaredsohn-lifehacker for Flix Plus:
 // * fix subtitles by not running on WiPlayer
 // * image folders
 // * modifying a margin

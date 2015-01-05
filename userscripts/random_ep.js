@@ -10,41 +10,20 @@
 // @match       http://movies.netflix.com/WiMovie/*
 // ==/UserScript==
 
-var _random_in_progress = false;
-var _auto_random_mode = false;
+var random_in_progress_ = false;
+var auto_random_mode_ = false;
 
 if (location.pathname.indexOf("/WiPlayer") === 0)
 {
     // TODO-BONUS: have it not repeat episodes and maybe also not show episodes already watched.  also maybe have it start new episode from beginning
 
-    document.body.arrive(".player-postplay", function() {
-        var autoRandom = setInterval(function() {
-            if (_auto_random_mode)
-            {
-                if ($("#netflix-player")[0].classList.contains("video-ended"))
-                {
-                    clearInterval(_auto_random_mode);
-                    playRandomFromPlayer();
-                }
-            }
-        }, 1000);
-    });
-
-    // Support to WiPlayer added for Flix Plus by Lifehacker
-    var elem = document.createElement('div');
-    elem.id = "fp_random_episode";
-    document.body.appendChild(elem);
-    $(elem).on('click', function() {
-        playRandomFromPlayer();
-    });
-
     var playRandomFromPlayer = function()
     {
-        if (_random_in_progress)
+        if (random_in_progress_)
             return;
 
-        _random_in_progress = true;
-        //_auto_random_mode = true; // functionality disabled for now.  Still need: lots more testing, disable if user configured to not automatically play another episode, integrate with random ep on wimovie, have it start episodes from beginning
+        random_in_progress_ = true;
+        //auto_random_mode_ = true; // functionality disabled for now.  Still need: lots more testing, disable if user configured to not automatically play another episode, integrate with random ep on wimovie, have it start episodes from beginning
 
         // TODO: update localstorage so that future episodes are also random.  also set this from wimovie page.
         var seasonElems = $(".season");
@@ -78,13 +57,34 @@ if (location.pathname.indexOf("/WiPlayer") === 0)
                     } catch (ex)
                     {
                     }
-                    _random_in_progress = false;
+                    random_in_progress_ = false;
 
                 }, 1500);
                 break;
             }
         }
     };
+
+    // Support to WiPlayer added for Flix Plus by Lifehacker
+    var elem = document.createElement('div');
+    elem.id = "fp_random_episode";
+    document.body.appendChild(elem);
+    $(elem).on('click', function() {
+        playRandomFromPlayer();
+    });
+
+    document.body.arrive(".player-postplay", function() {
+        var autoRandom = setInterval(function() {
+            if (auto_random_mode_)
+            {
+                if ($("#netflix-player")[0].classList.contains("video-ended"))
+                {
+                    clearInterval(auto_random_mode_);
+                    playRandomFromPlayer();
+                }
+            }
+        }, 1000);
+    });
 }
 else if (location.pathname.indexOf("/WiMovie") === 0)
 {

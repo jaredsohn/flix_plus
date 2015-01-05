@@ -1,2 +1,2 @@
-// Written by jaredsohn-lifehacker
+// Written by jaredsohn-lifehacker :)
 ($("#billboard").hide());

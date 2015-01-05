@@ -9,8 +9,7 @@
 //
 // -- cleaned up profanity in rating strings
 // -- patches stars in many more places (Netflix pages tend to not have consistent HTML)
-// -- now requires arrive.js
-
+// -- now requires arrive.js, fplib.js
 
 var unsafeWindow = this['unsafeWindow'] || window;
 var document = unsafeWindow.document;
@@ -38,16 +37,16 @@ ratingWidthsLarge[4.5] = 28 * 4.5;
 var niOffset = 17;  /* rating width offset when not interested button is to the left */
 
 // Patches anchor elements under the containing DIV of the given class name by adding child elements
-//with half-star rating widths among the existing elements.
-var patchAnchors = function(elem, offset, wrap_in_li)
+// with half-star rating widths among the existing elements.
+var patchAnchors = function(elem, offset, wrapInLi)
 {
     var anchors = elem.getElementsByTagName('a');
     if ((typeof(anchors) === "undefined") || (anchors.length === 0))
         return;
     if (anchors[0].offsetWidth > 100)
-        rating_widths = ratingWidthsLarge;
+        ratingWidths = ratingWidthsLarge;
     else
-        rating_widths = ratingWidthsNormal;
+        ratingWidths = ratingWidthsNormal;
     if (anchors.length < 9)
     {
         var hrefRegex = new RegExp('value=.');
@@ -61,9 +60,9 @@ var patchAnchors = function(elem, offset, wrap_in_li)
             newAnchor.rel = 'nofollow';
             newAnchor.title = 'Click to rate the movie "' + ratingStrings[rating] + '"';
             newAnchor.innerHTML = 'Rate ' + rating + ' stars';
-            newAnchor.setAttribute('style', 'width:' + (rating_widths[rating] + offset) + 'px');
+            newAnchor.setAttribute('style', 'width:' + (ratingWidths[rating] + offset) + 'px');
             newAnchor.setAttribute('class', 'rv' + rating);   /* some netflix javascript parses this class name */
-            if (wrap_in_li)
+            if (wrapInLi)
             {
                 var newli = document.createElement("li");
                 newli.appendChild(newAnchor);
@@ -77,23 +76,23 @@ var patchAnchors = function(elem, offset, wrap_in_li)
     }
 };
 
-var patch_all = function(parent_elem, className, wrap_in_li)
+var patchAll = function(parentElem, className, wrapInLi)
 {
-    var star_bars = parent_elem.getElementsByClassName(className);
-    if (typeof(star_bars) !== 'undefined')
+    var starBars = parentElem.getElementsByClassName(className);
+    if (typeof(starBars) !== 'undefined')
     {
-        for (i = 0; i < star_bars.length; i++)
+        for (i = 0; i < starBars.length; i++)
         {
-            patchAnchors(star_bars[i], 0, wrap_in_li);
+            patchAnchors(starBars[i], 0, wrapInLi);
         }
     }
 };
 
 // Note: First param here is a string rather than an element object
-var patch_all_arrive = function(selector_str, classname, wrap_in_li)
+var patchAllArrive = function(selectorStr, classname, wrapInLi)
 {
-    document.body.arrive(selector_str + " ." + classname, function() {
-        patchAnchors(this, 0, wrap_in_li);
+    document.body.arrive(selectorStr + " ." + classname, function() {
+        patchAnchors(this, 0, wrapInLi);
     });
 };
 
@@ -107,33 +106,31 @@ switch (window.location.pathname.split('/')[1])
     case "WiAltGenre":
     case "RoleDisplay":
     case "WiRoleDisplay":
-        patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
+        patchAllArrive("#BobMovie-content", "strbrContainer", false); // popups
         break;
     case "WiMovie":
-        patch_all($("#displaypage-overview-details")[0], "strbrContainer", false);
-        patch_all_arrive("#BobMovie-content", "strbrContainer", false); // popups
+        patchAll($("#displaypage-overview-details")[0], "strbrContainer", false);
+        patchAllArrive("#BobMovie-content", "strbrContainer", false); // popups
         break;
     case "MyList":
         if (fplib.isOldMyList())
-            patch_all(document.body, "stbrIl", false);
+            patchAll(document.body, "stbrIl", false);
         else
-        {
-            patch_all_arrive("#BobMovie-content", "strbrContainer", false);
-        }
+            patchAllArrive("#BobMovie-content", "strbrContainer", false);
         break;
     case "Search": // when DVDs are enabled
-        patch_all(document.body, "stbrIl", true);
+        patchAll(document.body, "stbrIl", true);
         break;
     case "WiSearch": // When DVDs are not enabled; likely deprecated with newer search page
-        patch_all(document.body, "stbrIl", false);
+        patchAll(document.body, "stbrIl", false);
         break;
     case "RateMovies":
-        patch_all(document.body, "strbrContainer", false);
-        patch_all_arrive("", "strbrContainer", false);
+        patchAll(document.body, "strbrContainer", false);
+        patchAllArrive("", "strbrContainer", false);
         break;
     case "MoviesYouveSeen":
     case "WiGenre": // page gets redirected in Flix Plus to WiAltGenre anyway
-        // TODO: css is different
+        // not implemented; css is different
         break;
 }
 
@@ -141,15 +138,15 @@ switch (window.location.pathname.split('/')[1])
 if ((window.location.pathname.split('/')[1]) === "WiHome")
 {
     // handle rating viewed content at bottom of page (initial and arrivals)
-    var rating_rows = document.getElementsByClassName("mrow-rating");
-    if ((typeof(rating_rows) !== "undefined") && (rating_rows.length > 0))
-        patch_all(rating_rows[0], "strbrContainer", false);
-    patch_all_arrive(".mrow-rating", "strbrContainer", false);
+    var ratingRows = document.getElementsByClassName("mrow-rating");
+    if ((typeof(ratingRows) !== "undefined") && (ratingRows.length > 0))
+        patchAll(ratingRows[0], "strbrContainer", false);
+    patchAllArrive(".mrow-rating", "strbrContainer", false);
 
-    patch_all_arrive("#layerModalPanes", "strbrContainer", false); // related movies dialog
+    patchAllArrive("#layerModalPanes", "strbrContainer", false); // related movies dialog
 
     // big stars to rate what you just watched
     var headerRow = document.getElementById("headerRow");
     if (headerRow !== null)
-        patch_all(headerRow, "strbrContainer", false);
+        patchAll(headerRow, "strbrContainer", false);
 }

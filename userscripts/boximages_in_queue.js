@@ -19,7 +19,7 @@
 
 var DEBUG = 0;
 
-function main() {
+var main = function() {
     if (!fplib.isOldMyList())
     {
         console.log("Script disabled since it requires Netflix Suggests mode.");
@@ -75,6 +75,6 @@ function main() {
             thisHref.style.textDecoration = "none";
         }
     }
-}
+};
 
 main();

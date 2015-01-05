@@ -1,6 +1,6 @@
 // written by jaredsohn-lifehacker
 
-// This script will make AJAX requests to import a Netflix user's rating history.
+// This script will make AJAX requests to import a Netflix user's My List history.
 
 // Add a button
 /*
@@ -12,12 +12,12 @@ import_button.className = "extlib_button";
 import_button.style = "align:right;"
 */
 
-var export_button = document.createElement("a");
+var exportButton = document.createElement("a");
 var createAText = document.createTextNode("Export JSON");
-export_button.setAttribute("href", 'javascript:var div = document.createElement("div"); div.className="fp_export_cmd"; div.style="display:none"; document.body.appendChild(div);');
-export_button.appendChild(createAText);
-export_button.className = "extlib_button";
-export_button.style = "align:right;";
+exportButton.setAttribute("href", 'javascript:var div = document.createElement("div"); div.className="fp_export_cmd"; div.style="display:none"; document.body.appendChild(div);');
+exportButton.appendChild(createAText);
+exportButton.className = "extlib_button";
+exportButton.style = "align:right;";
 
 if (fplib.isOldMyList())
 {
@@ -25,11 +25,11 @@ if (fplib.isOldMyList())
     if ($(".listQueueHead br").length === 0)
         header.appendChild(document.createElement("br"));
 // header.appendChild(import_button);
-    header.appendChild(export_button);
+    header.appendChild(exportButton);
 
 } else if (fplib.isNewMyList())
 {
-    $(".main-content").prepend(export_button);
+    $(".main-content").prepend(exportButton);
 // $(".main-content").prepend(import_button);
     $(".main-content").prepend(document.createElement("br"));
 }
@@ -52,7 +52,7 @@ document.body.arrive(" .fp_import_cmd", function() {
         {
             console.log(e.target);
             var ratings = JSON.parse(e.target.result);
-            set_ratings(ratings, 0, getAuthUrl(), function() {
+            setRatings(ratings, 0, getAuthUrl(), function() {
                 alert("Done!")
             });
         }
@@ -62,14 +62,14 @@ document.body.arrive(" .fp_import_cmd", function() {
     $("#fp_import_file_chooser").remove();
 });
 */
-document.body.arrive(" .fp_export_cmd", function() {
+document.body.arrive(".fp_export_cmd", function() {
     console.log("export clicked");
-    var export_data = {};
+    var exportData = {};
 
     if (fplib.isOldMyList())
-        export_data = get_list_old_mylist();
+        exportData = getListOldMyList();
     else
-        export_data = get_list_new_mylist();
+        exportData = getListNewMyList();
 
     // from stackoverflow
     var saveData = (function() {
@@ -87,12 +87,12 @@ document.body.arrive(" .fp_export_cmd", function() {
         };
     }());
 
-    saveData(export_data, "mylist_" + fplib.getProfileName() + ".json");
+    saveData(exportData, "mylist_" + fplib.getProfileName() + ".json");
 });
 
-var get_list_old_mylist = function()
+var getListOldMyList = function()
 {
-    var export_data = [];
+    var exportData = [];
     var titles = ($("#queue .qtbl tr .mdpLink"));
     var len = titles.length;
     for (i = 0; i < len; i++)
@@ -102,15 +102,15 @@ var get_list_old_mylist = function()
         obj.title = titles[i].innerText;
         obj.yourrating = "";
         obj.ratedate = "";
-        export_data.push(obj);
+        exportData.push(obj);
     }
 
-    return export_data;
+    return exportData;
 };
 
-var get_list_new_mylist = function()
+var getListNewMyList = function()
 {
-    var export_data = [];
+    var exportData = [];
 
     var titles = $(".agMovie .boxShot");
     var len = titles.length;
@@ -121,13 +121,13 @@ var get_list_new_mylist = function()
         obj.title = $("img", titles[i])[0].alt;
         obj.yourrating = "";
         obj.ratedate = "";
-        export_data.push(obj);
+        exportData.push(obj);
     }
 
-    return export_data;
+    return exportData;
 };
 /*
-var set_ratings = function(ratings, index, authURL, callback)
+var setRatings = function(ratings, index, authURL, callback)
 {
     if ((index < 0) || (index >= ratings.length))
     {

@@ -9,10 +9,8 @@
 var fplib = fplib || {};
 var _fplib = function()
 {
-    var _made_visible_dict = {};
     var self = this;
-    var _run_before = {};
-    var _profile_name = "";
+    var profile_name_ = "";
 
     // Returns zero if not able to get id
     this.getMovieIdFromField = function(attr_str)
@@ -87,7 +85,7 @@ var _fplib = function()
 
         if (location.pathname.indexOf("/WiHome") === 0)
         {
-            results["elementsList"] = ".mrow";
+            results["elementsList"] = ".mrow"; //TODO: for search, get rid of this.
             results["elemContainerId"] = "BobMovie";
             results["queueMouseOver"] = ".btnWrap";
             results["ratingMouseOver"] = ".stbrOl";
@@ -382,8 +380,8 @@ var _fplib = function()
     // This will actually reload the webpage if the profile name is different than before (in case some userscripts ran before they could detect the current profile name)
     this.getProfileName = function()
     {
-        if ((self._profile_name !== "") && (typeof(self._profile_name) !== "undefined"))
-            return self._profile_name;
+        if ((self.profile_name_ !== "") && (typeof(self.profile_name_) !== "undefined"))
+            return self.profile_name_;
 
         var stored_profile_name = localStorage["flix_plus profilename"];
 
@@ -391,7 +389,7 @@ var _fplib = function()
         if (elems.length)
         {
             profile_name = elems[0].innerText;
-            self._profile_name = profile_name;
+            self.profile_name_ = profile_name;
         }
         else
             profile_name = "_unknown";
@@ -578,7 +576,7 @@ var _fplib = function()
     };
 
     // Used for placing play and trailer buttons
-    this.create_popup_header_row = function()
+    this.createPopupHeaderRow = function()
     {
         // Create Flix Plus header row if it doesn't exist (TODO: move to fplib?)
         if ($(".midBob .fp_header_row").length === 0)
@@ -590,7 +588,7 @@ var _fplib = function()
         }
     };
 
-    this.define_poster_css = function(className, behavior)
+    this.definePosterCss = function(className, behavior)
     {
         if (behavior === "hide")
         {

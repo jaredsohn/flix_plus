@@ -39,6 +39,8 @@
 // Updated by jaredsohn-lifehacker to use a single localstorage key so as to not pollute it as much.  Also, uses Chrome's sync storage.
 // Originally found at http://userscripts.org:8080/scripts/review/30744
 
+// Note: We do not update to match style guidelines for this script since we are including it mostly unchanged.
+
 var KEY_NAME = "flix_plus " + fplib.getProfileName() + " notes";
 
 ////////////////////////////////////////////////////////////////////////////////

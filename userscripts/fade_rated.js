@@ -1,6 +1,9 @@
 // written by jaredsohn-lifehacker
 
 // This script will make AJAX requests to get a Netflix user's rating history.
+// When making changes to this code, also look at fade_watched.js
+
+// Note: this file is written in snakecase for legacy reasons.
 
 if (fplib.isOldMyList())
 {
@@ -8,7 +11,7 @@ if (fplib.isOldMyList())
     return;
 }
 
-var key_prefix = "flix_plus " + fplib.getProfileName() + " ";
+var key_prefix_ = "flix_plus " + fplib.getProfileName() + " ";
 
 var get_history = function(start_time, page_no, netflix_api_base, authUrl, results_json, callback)
 {
@@ -105,14 +108,14 @@ var update_history = function(keyname, results, callback)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var keys_dict = {};
-keys_dict[key_prefix + "fp_rated_style"] = "fade";
-keys_dict[key_prefix + "fp_rated_notinterested_style"] = "hide";
+keys_dict[key_prefix_ + "fp_rated_style"] = "fade";
+keys_dict[key_prefix_ + "fp_rated_notinterested_style"] = "hide";
 
 fplib.syncGet(keys_dict, function(items)
 {
     console.log(items);
-    fplib.define_poster_css("fp_rated", items[key_prefix + "fp_rated_style"]);
-    fplib.define_poster_css("fp_rated_notinterested", items[key_prefix + "fp_rated_notinterested_style"]);
+    fplib.definePosterCss("fp_rated", items[key_prefix_ + "fp_rated_style"]);
+    fplib.definePosterCss("fp_rated_notinterested", items[key_prefix_ + "fp_rated_notinterested_style"]);
 });
 
 var keyname = "flix_plus " + fplib.getProfileName() + " ratingactivity";
