@@ -3,7 +3,7 @@ flixplus
 
 ###About
 
-Flix Plus is a Chrome extension built by Jared Sohn for Lifehacker that helps you customize Netflix.  Read more [here](http://lifehacker.com/preview/flixc-plus-customizes-netflix-to-your-hearts-desire-1640968001).
+Flix Plus by Lifehacker is a Chrome extension built by Jared Sohn that helps you customize Netflix.  Read more [here](http://lifehacker.com/preview/flixc-plus-customizes-netflix-to-your-hearts-desire-1640968001).
 
 The source code uses a couple of frameworks:
 
@@ -22,7 +22,7 @@ The source code uses a couple of frameworks:
 
 
 ###Contributing
-   Feel free to submit a pull request.  Most code should follow [Google's Javascript coding standards](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml) (with the exceptions of fade_rated.js, fade_watched.js, netflixnotes.js, queue_sorter.js, ratings.js, links.js, keyboard_shortcuts_info.js, expiring.js, and shortcuts_editor.js; some already conform to slightly-different styles while other files have barely been changed for Flix Plus).  The code is linted with [Closure Linter](https://developers.google.com/closure/utilities/) with rules {131,110,220} excluded.
+   Feel free to submit a pull request.  Most code should follow [Google's Javascript coding standards](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml) (with the exceptions of fade_rated.js, fade_watched.js, netflixnotes.js, queue_sorter.js, ratings.js, links.js, keyboard_shortcuts_info.js, expiring.js, and shortcuts_editor.js; some already conform to slightly-different styles while other files have barely been changed for this extension).  The code is linted with [Closure Linter](https://developers.google.com/closure/utilities/) with rules {131,110,220} excluded.
 
 
 ###Building

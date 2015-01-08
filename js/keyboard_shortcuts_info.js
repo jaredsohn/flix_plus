@@ -7,6 +7,13 @@ var _keyboard_shortcuts_info = function() {
     var _categories_in_order = ["Posters", "Sections", "Player", "Jump to page", "Misc"];
 
     var _keyboard_shortcuts_defs = {
+        reveal_spoilers:
+        {
+             default_key: 'e',
+             description: 'Reveal Spoilers',
+             category: 'Misc',
+             order: 200 },
+
         jump_kids:
         {
              default_key: 'd',
@@ -65,7 +72,7 @@ var _keyboard_shortcuts_info = function() {
         {
              default_key: 'y',
              description: 'Your Account',
-             category: 'Misc',
+             category: 'Jump to page',
              order: 1 },
         move_right:
         {
@@ -90,7 +97,7 @@ var _keyboard_shortcuts_info = function() {
              default_key: '?',
              description: 'Help',
              category: 'Misc',
-             order: 3 },
+             order: 500 },
         rate_1:
         {
              default_key: '1',
@@ -533,18 +540,33 @@ var _keyboard_shortcuts_info = function() {
         if (context === "all")
             text += "Click 'configure' to the left to change shortcuts.";
         else
-            text += "This list only shows the keys that work on this page.  Shortcut keys can be changed in options.";
+            text += "<br><br>This list only shows the keys that work on this page (selection pages, show details, and the player are different.)  The complete list of shortcut keys can be viewed and changed in options.";
 
-        if (context !== "player")
+        if ((context !== "player") && (context !== "nonplayer-no-navigation") && (context !== "show_details"))
         {
             text += "<br><br>";
-            text += "Move around items: " + self.get_keys_string([s["move_right"], s["move_left"], s["move_home"], s["move_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Play: " + s["play"] + "<BR>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"] + "<BR>";
-            text += "&nbsp;&nbsp;&nbsp;Zoom into details: " + s["zoom_into_details"] + "<BR>&nbsp;&nbsp;&nbsp;Rate: " + s["rate_clear"] + " to clear, 0-5: " + s["rate_0"] + ", " + s["rate_1"] + ", " + s["rate_2"] + ", " + s["rate_3"] + ", " + s["rate_4"] + ", " + s["rate_5"] + "; half stars: " + s["rate_1_5"] + ", " + s["rate_2_5"] + ", " + s["rate_3_5"] + ", " + s["rate_4_5"];
-            text += "<BR>&nbsp;&nbsp;&nbsp;Open link: " + s["open_link"];
-            text += "<BR>&nbsp;&nbsp;&nbsp;Random show/episode: " + s["section_show_random"];
+            text += "Move around items: " + self.get_keys_string([s["move_right"], s["move_left"], s["move_home"], s["move_end"]]);
+            text += "<br>&nbsp;&nbsp;&nbsp;Play: " + s["play"];
+            text += "<br>&nbsp;&nbsp;&nbsp;Zoom into details: " + s["zoom_into_details"];
+            text += "<br>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"];
+            text += "<br>&nbsp;&nbsp;&nbsp;Rate: " + s["rate_clear"] + " to clear, 0-5: " + s["rate_0"] + ", " + s["rate_1"] + ", " + s["rate_2"] + ", " + s["rate_3"] + ", " + s["rate_4"] + ", " + s["rate_5"] + "; half stars: " + s["rate_1_5"] + ", " + s["rate_2_5"] + ", " + s["rate_3_5"] + ", " + s["rate_4_5"];
+            text += "<br>&nbsp;&nbsp;&nbsp;Open link: " + s["open_link"];
+            text += "<br>&nbsp;&nbsp;&nbsp;Random show/episode: " + s["section_show_random"];
 
             text += "<br><br>Move around sections: " + self.get_keys_string([s["next_section"], s["prev_section"], s["section_home"], s["section_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Open section link: " + s["open_section_link"] + "<br>&nbsp;&nbsp;&nbsp;Toggle scrollbars: " + s["toggle_scrollbars"] + "<br>";
             text += "&nbsp;&nbsp;&nbsp;Toggle hiding: " + s["toggle_hiding"];
+        } else if (context === "nonplayer-no-navigation")
+        {
+            text += "<br><br>Many commands are not shown here because navigation is disabled.";
+        }
+
+        if (context === "show_details")
+        {
+            text += "<br><br>Show details";
+            text += "<br>&nbsp;&nbsp;&nbsp;Play: " + s["play"];
+            text += "<br>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"];
+            text += "<br>&nbsp;&nbsp;&nbsp;Rate: " + s["rate_clear"] + " to clear, 0-5: " + s["rate_0"] + ", " + s["rate_1"] + ", " + s["rate_2"] + ", " + s["rate_3"] + ", " + s["rate_4"] + ", " + s["rate_5"] + "; half stars: " + s["rate_1_5"] + ", " + s["rate_2_5"] + ", " + s["rate_3_5"] + ", " + s["rate_4_5"];
+            text += "<br>&nbsp;&nbsp;&nbsp;Random episode: " + s["section_show_random"];
         }
 
         if ((context === "player") || (context == "all"))
@@ -561,8 +583,8 @@ var _keyboard_shortcuts_info = function() {
             text += "&nbsp;&nbsp;&nbsp;Back to browse: " + s["player_back_to_browse"];
         }
 
-        text += "<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"] + "<br>&nbsp;&nbsp;&nbsp;Who's Watching: " + s["jump_whos_watching"];
-        text += "<BR>&nbsp;&nbsp;&nbsp;Viewing activity: " + s["jump_viewing_activity"] + "<br>&nbsp;&nbsp;&nbsp;Your Ratings: " + s["jump_your_ratings"] + "<BR><br>Search: " + s["search"] + "<BR>Your Account: " + s["your_account"] + "<BR>Updated rated/watched: " + s["update_rated_watched"] + "<BR>Help: " + s["help"] + "<BR>";
+        text += "<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"] + "<br>&nbsp;&nbsp;&nbsp;Who's Watching: " + s["jump_whos_watching"] + "<br>&nbsp;&nbsp;&nbsp;Your Account: " + s["your_account"];
+        text += "<BR>&nbsp;&nbsp;&nbsp;Viewing activity: " + s["jump_viewing_activity"] + "<br>&nbsp;&nbsp;&nbsp;Your Ratings: " + s["jump_your_ratings"] + "<BR><br>Search: " + s["search"] + "<BR>Updated rated/watched: " + s["update_rated_watched"] + "<BR>Reveal spoilers: " + s["reveal_spoilers"] + "<BR>Close window: " + s["close_window"] + "<BR>"; + "<BR>Help: " + s["help"] + "<BR>";
 
         return text;
     };

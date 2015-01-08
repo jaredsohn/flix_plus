@@ -38,7 +38,8 @@ var _all_image_html = "<img class='flix_plus_all_shown_button' src='" + chrome.e
 // Try to fix Recently Watched.  Might not do desired thing for all users.
 try
 {
-    $(".controlTitle")[0].style["font-size"] = "125%";
+    if ($(".controlTitle").length)
+        $(".controlTitle")[0].style["font-size"] = "125%";
 } catch (ex)
 {
     console.log(ex);

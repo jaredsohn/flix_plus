@@ -5,8 +5,8 @@ var _shortcuts_editor = function() {
     var self = this;
     var profile_name_ = "undefined";
 
-    var _keyboard_id_to_shortcut_dict = {};
-    var _keyboard_shortcut_to_id_dict = {};
+    var keyboard_id_to_shortcut_dict_ = {};
+    var keyboard_shortcut_to_id_dict_ = {};
 
     this.clear_shortcuts = function()
     {
@@ -79,8 +79,8 @@ var _shortcuts_editor = function() {
 
     this.show_shortcuts = function(keyboard_shortcut_to_id_dict, keyboard_id_to_shortcut_dict)
     {
-        _keyboard_id_to_shortcut_dict = keyboard_id_to_shortcut_dict;
-        _keyboard_shortcut_to_id_dict = keyboard_shortcut_to_id_dict;
+        keyboard_id_to_shortcut_dict_ = keyboard_id_to_shortcut_dict;
+        keyboard_shortcut_to_id_dict_ = keyboard_shortcut_to_id_dict;
 
         var shortcuts_div = document.getElementById("shortcuts");
 
@@ -212,12 +212,12 @@ var _shortcuts_editor = function() {
 
             // Remove old key
             var old_shortcut = _keyboard_id_to_shortcut_dict[id];
-            delete _keyboard_id_to_shortcut_dict[id];
-            delete _keyboard_shortcut_to_id_dict[old_shortcut];
+            delete keyboard_id_to_shortcut_dict_[id];
+            delete keyboard_shortcut_to_id_dict_[old_shortcut];
 
             // Save new key
-            _keyboard_shortcut_to_id_dict[keyCombo] = id;
-            _keyboard_id_to_shortcut_dict[id] = keyCombo;
+            keyboard_shortcut_to_id_dict_[keyCombo] = id;
+            keyboard_id_to_shortcut_dict_[id] = keyCombo;
 
             this.value = keyCombo;
         }, true); });
@@ -258,17 +258,17 @@ var _shortcuts_editor = function() {
             }
 
             // Don't allow duplicating key
-            //if (typeof(_keyboard_shortcut_to_id_dict[keyCombo]) !== "undefined")
+            //if (typeof(keyboard_shortcut_to_id_dict_[keyCombo]) !== "undefined")
             //  return;
 
             // Remove old key
             var old_shortcut = _keyboard_id_to_shortcut_dict[id];
-            delete _keyboard_id_to_shortcut_dict[id];
-            delete _keyboard_shortcut_to_id_dict[old_shortcut];
+            delete keyboard_id_to_shortcut_dict_[id];
+            delete keyboard_shortcut_to_id_dict_[old_shortcut];
 
             // Save new key
-            _keyboard_shortcut_to_id_dict[keyCombo] = id;
-            _keyboard_id_to_shortcut_dict[id] = keyCombo;
+            keyboard_shortcut_to_id_dict_[keyCombo] = id;
+            keyboard_id_to_shortcut_dict_[id] = keyCombo;
 
             this.value = keyCombo;
 
@@ -281,10 +281,10 @@ var _shortcuts_editor = function() {
 
     this.verify_shortcut_is_unique = function(shortcut_id, shortcut_key)
     {
-        var existing_id = _keyboard_shortcut_to_id_dict[shortcut_key];
+        var existing_id = keyboard_shortcut_to_id_dict_[shortcut_key];
         if ((typeof(existing_id) !== "undefined") || (existing_id === shortcut_id))
         {
-            _keyboard_shortcut_to_id_dict[shortcut_key] = shortcut_id; // just for during use of editor.  We rebuild data from scratch later.
+            keyboard_shortcut_to_id_dict_[shortcut_key] = shortcut_id; // just for during use of editor.  We rebuild data from scratch later.
             return true;
         } else
         {
@@ -332,6 +332,26 @@ var _shortcuts_editor = function() {
         self.show_shortcuts(dicts[0], dicts[1]);
     };
 
+    this.on_clear_navigation = function(e)
+    {
+        e.preventDefault();
+
+        if (window.confirm("If you clear the navigation keys (left, right, section beginning, section ending, next section, prev section, first section, last section) then borders will be removed and page load time will speed up.\n\nDo you want to do this?") === true)
+        {
+            var commands = ["prev_section", "next_section", "section_home", "section_end", "move_right", "move_left", "move_home", "move_end"];
+            for (i = 0; i < commands.length; i++)
+            {
+                var keyName = $("#" + commands[i])[0].value;
+                console.log(keyName);
+                delete keyboard_id_to_shortcut_dict_[commands[i]];
+                delete keyboard_shortcut_to_id_dict_[keyName];
+                $("#" + commands[i])[0].value = "None";
+                keyboard_id_to_shortcut_dict_[commands[i]] = 'None';
+            }
+            alert("Changes made.  Click save after reviewing.");
+        }
+    };
+
     this.init = function(profile_name)
     {
         console.log("init");
@@ -339,6 +359,7 @@ var _shortcuts_editor = function() {
         document.getElementById("save").addEventListener("click", self.on_save);
         document.getElementById("clearall").addEventListener("click", self.on_clear_all);
         document.getElementById("defaults").addEventListener("click", self.on_restore_default_shortcuts);
+        document.getElementById("clearnavigation").addEventListener("click", self.on_clear_navigation);
         keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + profile_name_ + " keyboard_shortcuts", self.show_shortcuts);
     };
 };

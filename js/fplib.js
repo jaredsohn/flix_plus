@@ -4,7 +4,7 @@
 //
 // Requires extlib.js
 //
-// License: Apache
+// License: MIT, GPL
 
 var fplib = fplib || {};
 var _fplib = function()
@@ -62,179 +62,123 @@ var _fplib = function()
         return rating_class;
     };
 
-    // Returns a dict that mostly contains selectors that are useful for keyboard commands.
-    // elemContainerId is simply a string to do a getElementById on; [selected] and [document]
-    // should be interpreted separately.
     this.getSelectorsForPath = function()
     {
-        var results = {};
-        results["elemContainerId"] = "[selected]"; // This field is not a jquery selector and can also be [selected] or [document]
-        results["queueMouseOver"] = null;
-        results["queueRemove"] = ".inr";
-        results["queueAdd"] = ".inr";
-        results["ratingMouseOver"] = ".stbrOl";
-        results["elements"] = ".agMovie";
-        results["elementsList"] = null;
-        results["movieInfoSelector"] = ".boxShot";
-        results["movieIdAttribute"] = "id";
-        results["borderedElement"] = ".boxShot"; // This selects the part of the DOM that gets the keyboard focus CSS
-        results["posterImageIdPrefix"] = "dbs";
-        results["bobPopup"] = ".bobMovieContent"; // place in dom to check to see if popup has changed
+        return self.getSelectors(location.pathname);
+    };
 
-//      consolelog("location.pathname = " + location.pathname);
+    // Returns a dict that mostly contains selectors that are useful for various scripts (esp keyboard shortcuts, where this originated)
+    this.getSelectors = function(pathname)
+    {
+        var selectors = {};
+        // General selection used by keyboard shortcuts
+        selectors["elementsList"] = null;
+        selectors["elements"] = ".agMovie";
+        selectors["borderedElement"] = ".boxShot"; // element to apply border css to; set to null to apply border to elements
 
-        if (location.pathname.indexOf("/WiHome") === 0)
-        {
-            results["elementsList"] = ".mrow"; // We get rid of this for keyboard shortcuts when /search is loaded
-            results["elemContainerId"] = "BobMovie";
-            results["queueMouseOver"] = ".btnWrap";
-            results["ratingMouseOver"] = ".stbrOl";
-            results["borderedElement"] = ".boxShot";
-        } else if (location.pathname.indexOf("/search") === 0)
-        {
-            results["elements"] = ".lockup";
-            results["borderedElement"] = null;
-            results["elemContainerId"] = "bob-container";
-            results["queueRemove"] = ".playListBtnText";
-            results["queueAdd"] = ".playListBtnText";
-            results["movieInfoSelector"] = null;
-            results["movieIdAttribute"] = "data-titleid";
-            results["bobPopup"] = "#bob-container";
-            results["posterImageIdPrefix"] = "";
-        } else if ((location.pathname.indexOf("/WiRecentAdditions") === 0) || (location.pathname.indexOf("/NewReleases") === 0))  // NewReleases seems to be a rename
-        {
-           results["elementsList"] = ".mrow";
-           results["elemContainerId"] = "BobMovie";
-           results["queueMouseOver"] = ".btnWrap";
-           results["ratingMouseOver"] = ".stbrOl";
-           results["borderedElement"] = ".boxShot";
-        } else if ((location.pathname.indexOf("/WiAgain") === 0) || (location.pathname.indexOf("/WiSimilarsByViewType") === 0) ||
-            (location.pathname.indexOf("/WiAltGenre") === 0))
-        {
-           results["elemContainerId"] = "BobMovie";
-           results["queueMouseOver"] = ".btnWrap";
-           results["ratingMouseOver"] = ".stbrOl";
-           results["borderedElement"] = ".boxShot";
-        } else if (location.pathname.indexOf("/WiGenre") === 0)
-        {
-            results["elements"] = ".lockup";
-            results["elemContainerId"] = "bob-container";
-            results["queueRemove"] = ".playListBtnText";
-            results["queueAdd"] = ".playListBtnText";
-            results["movieInfoSelector"] = null;
-            results["movieIdAttribute"] = "data-titleid";
-        } else if (location.pathname.indexOf("/KidsAltGenre") === 0)
-        {
-           results["bobPopup"] = null;
-           results["borderedElement"] = ".boxShot";
-        } else if (location.pathname.indexOf("/KidsMovie") === 0)
-        {
-            results["elements"] = null;
-            results["bobPopup"] = null;
-        } else if (location.pathname.indexOf("/Kids") === 0)
-        {
-            results["bobPopup"] = null;
-            results["elementsList"] = ".mrow";
-            results["borderedElement"] = ".boxShot";
-        } else if (location.pathname.indexOf("/WiSearch") === 0)
-        {
-            results["elements"] = ".mresult";
-            results["elemContainerId"] = "[selected]";
-            results["queueMouseOver"] = ".btnWrap";
-            results["ratingMouseOver"] = ".stbrIl";
-        } else if (location.pathname.indexOf("/Search") === 0) // If DVD service is enabled
-        {
-            results["elements"] = ".mresult";
-            results["elemContainerId"] = "[selected]";
-            results["queueMouseOver"] = ".btnWrap";
-            results["ratingMouseOver"] = ".stbrIl";
-            results["queueRemove"] = null;
-            results["movieInfoSelector"] = ".agMovie";
-            results["posterImageIdPrefix"] = "ag";
-        } else if (location.pathname.indexOf("/WiMovie") === 0)
-        {
-            results["elements"] = null;
-            results["movieIdAttribute"] = "data-movieid";
-            results["queueMouseOver"] = ".btnWrap";
-            results["elemContainerId"] = "displaypage-overview";
-            results["movieInfoSelector"] = ".displayPagePlayable a";
-            results["bobPopup"] = ".bobContent";
+        // add/remove queue, ratings
+        selectors["elemContainer"] = "#displaypage-overview, #BobMovie-content, #bob-container"; // a jquery selector or [selected], used to get add/remove queue and ratings
+        selectors["queueMouseOver"] = ".btnWrap";
+        selectors["queueAdd"] = ".inr, .playListBtn, .playListBtnText";
+        selectors["queueRemove"] = ".inr, .playListBtn, .delbtn, .playListBtnText";
+        selectors["ratingMouseOver"] = ".stbrOl, .stbrIl";
 
-            // for navigating episodes; not working yet
-/*          results["elements"] = ".episodeList li";
-            results["elementsList"] = "#seasonsNav li";
-            results["movieIdAttribute"] = "data-movieid";
-            results["borderedElement"] = null;
-            results["elemContainerId"] = null;          */
-        } else if (location.pathname.indexOf("/MyList") === 0)
+        // get movie id relative to a selected element
+        // Be careful about adding multiple entries; applyClassnameToPosters loops trhough for each unique prefix.
+        selectors["id_info"] = [{"selector": ".boxShot", "attrib": "id", "prefix": "dbs"}]; // used at wiHome, wialtgenre, kids, ...
+
+        // get popup (elemContainer is different to support the old search pages where buttons are on page itself instead of popup)
+        selectors["bobPopup"] = ".bobMovieContent";
+
+        if (pathname.indexOf("/WiHome") === 0)
+        {
+            selectors["elementsList"] = ".mrow";
+        } else if (pathname.indexOf("/search") === 0) // Note that HTML is different depending on how page is reached
+        {
+            selectors["elements"] = ".boxShot, .lockup";
+            selectors["borderedElement"] = null;
+            selectors["id_info"] = [
+                                     {"selector": null, "attrib": "data-titleid", "prefix": ""}, // accessing /search directly, from /moviesyouveseen, /wiviewingactivity
+                                     {"selector": ".popLink", "attrib": "data-id", "prefix": ""},
+                                     {"selector": ".boxShot", "attrib": "id", "prefix": "dbs"} // must include last since id field could have other uses
+                                 ];
+            selectors["bobPopup"] = "#bob-container";
+        } else if ((pathname.indexOf("/WiRecentAdditions") === 0) || (pathname.indexOf("/NewReleases") === 0))  // NewReleases seems to be a rename
+        {
+           selectors["elementsList"] = ".mrow";
+        } else if ((pathname.indexOf("/WiAgain") === 0) || (pathname.indexOf("/WiSimilarsByViewType") === 0) ||
+            (pathname.indexOf("/WiAltGenre") === 0))
+        {
+        } else if (pathname.indexOf("/WiGenre") === 0)
+        {
+            // should never run since we redirect to /WiAltGenre
+        } else if (pathname.indexOf("/KidsAltGenre") === 0)
+        {
+           selectors["bobPopup"] = null;
+        } else if (pathname.indexOf("/KidsMovie") === 0)
+        {
+            selectors["elements"] = null;
+            selectors["bobPopup"] = null;
+        } else if (pathname.indexOf("/Kids") === 0) // Always be careful of order since /KidsAltGenre and /KidsMovie will match /Kids if included later.
+        {
+            selectors["elementsList"] = ".mrow";
+            selectors["bobPopup"] = null;
+        } else if (pathname.indexOf("/Search") === 0) // maybe still search when DVD service is enabled; not tested recently
+        {
+            selectors["elements"] = ".mresult";
+            selectors["id_info"] = [
+                                    {"selector": ".agMovie", "attrib": "data-titleid", "prefix": "ag"}
+                                 ];
+        } else if (pathname.indexOf("/WiMovie") === 0)
+        {
+            selectors["elements"] = null;
+            selectors["id_info"] = [
+                                     {"selector": ".displayPagePlayable a", "attrib": "data-movieid", "prefix": ""}
+                                 ];
+            selectors["bobPopup"] = ".bobContent";
+        } else if (pathname.indexOf("/MyList") === 0)
         {
             if (self.isOldMyList())
             {
-                results["elements"] = "#queue tr";
-                results["elemContainerId"] = "[selected]";
-                results["queueAdd"] = null;
-                results["queueRemove"] = ".delbtn";
-                results["ratingMouseOver"] = ".stbrIl";
-                results["movieInfoSelector"] = null;
-                results["movieIdAttribute"] = "data-mid";
-                results["borderedElement"] = null;
+                selectors["elements"] = "#queue tr";
+                selectors["borderedElement"] = null;
+                selectors["id_info"] = [
+                                     {"selector": null, "attrib": "data-mid", "prefix": ""}
+                                 ];
             } else
             {
-                results["elementsList"] = ".list-items";
-                results["elemContainerId"] = "BobMovie";
-                results["queueMouseOver"] = ".btnWrap";
-                results["ratingMouseOver"] = ".stbrOl";
-                results["borderedElement"] = ".boxShot";
+                selectors["elementsList"] = ".list-items";
             }
-
-        } else if (location.pathname.indexOf("/RateMovies") === 0)
+        } else if (pathname.indexOf("/RateMovies") === 0) // We don't support this very much
         {
-            results["elemContainerId"] = "[selected]";
-            results["ratingMouseOver"] = ".stbrOl";
-    //        results["movieInfoSelector"] = ".title a";
-    //        results["movieIdAttribute"] = "href";
-            results["borderedElement"] = null;
-
-        } else if (location.pathname.indexOf("/WiViewingActivity") === 0)
+            selectors["borderedElement"] = null;
+        } else if ((pathname.indexOf("/WiViewingActivity") === 0) || (pathname.indexOf("/MoviesYouveSeen") === 0))
         {
-            results["elements"] = ".retable li";
-            results["movieInfoSelector"] = null;
-            results["movieIdAttribute"] = "data-movieid";
-            results["borderedElement"] = null;
-
-        } else if (location.pathname.indexOf("/MoviesYouveSeen") === 0)
-        {
-            results["elements"] = ".retable li";
-            results["movieInfoSelector"] = null;
-            results["movieIdAttribute"] = "data-movieid";
-            results["borderedElement"] = null;
-
-        } else if (location.pathname.indexOf("/WiPlayer") === 0)
+            selectors["elements"] = ".retable li";
+            selectors["id_info"] = [
+                                 {"selector": null, "attrib": "data-movieid", "prefix": ""}
+                                ];
+            selectors["borderedElement"] = null;
+        } else if (pathname.indexOf("/WiPlayer") === 0)
         {
             // do nothing
-        } else if (location.pathname.indexOf("/WiRoleDisplay") === 0)
+        } else if (pathname.indexOf("/WiRoleDisplay") === 0)
         {
-            results["bobPopup"] = ".bobContent";
-        } else if (location.pathname.indexOf("/ProfilesGate") === 0)
+            selectors["bobPopup"] = ".bobContent";
+        } else if (pathname.indexOf("/ProfilesGate") === 0)
         {
-            results["elements"] = ".profile";
-            results["elemContainerId"] = "[selected]"; // This field is not a jquery selector and can also be [selected] or [document]
-            results["queueMouseOver"] = null;
-            results["queueRemove"] = null;
-            results["queueAdd"] = null;
-            results["ratingMouseOver"] = null;
-            results["elementsList"] = null;
-            results["movieInfoSelector"] = null;
-            results["movieIdAttribute"] = null;
-            results["borderedElement"] = null;
-            results["posterImageIdPrefix"] = "dbs";
-            results["bobPopup"] = null;
+            selectors["elements"] = ".profile";
+            selectors["elemContainer"] = "[selected]";
+            selectors["elementsList"] = null;
+            selectors["borderedElement"] = null;
+            selectors["id_info"] = [];
+            selectors["bobPopup"] = null;
         } else
         {
-            consolelog("getSelectorsForPath: unexpected location.pathname: " + location.pathname);
+            consolelog("getSelectorsForPath: unexpected pathname: " + pathname);
         }
 
-        return results;
+        return selectors;
     };
 
     this.idMrows = function()
@@ -415,58 +359,81 @@ var _fplib = function()
         return profile_name;
     };
 
+    // Apply some classes to all posters that correspond with ids in an array.  We care about
+    // two separate elements for tinting and applying a border.  We also care about a third element
+    // (and attribute) for extracting the id.
+    //
+    // The following code lacks some flexibility (which causes it to not work on /search when accessed directly)
+    // since the field name is not the 'id' field and there is not a concept of 'instances' within the id.
+    //
+    // However, because of low priority there (we also don't shown rotten scores or have buttons for trailer/play)
+    // this simpler code that works for other cases will remain.
     // Apply a class to all posters that correspond with ids in an array
     // elem_prefix is usually dbs (although is ag if on search)
     this.applyClassnameToPosters = function(ids_array, class_name)
     {
-        var selectors = self.getSelectorsForPath();
+        consolelog("applyClassnameToPosters(" + class_name + "):");
+        consolelog(ids_array);
+
+        selectors = self.getSelectorsForPath();
         var elem_prefix = selectors["posterImageIdPrefix"];
         //consolelog("elem prefix is ");
         //consolelog(elem_prefix);
 
-        var no_gp = false;
         var count = 0;
         var grandparent_count = 0;
-        consolelog("applyClassnameToPosters(" + class_name + "):");
-        consolelog(ids_array);
 
-        var selector = selectors["borderedElement"];
-        if (selector === null)
-            no_gp = true;
+        var visited_prefixes = {};
 
-        for (i = 0; i < ids_array.length; i++)
+        for (infoIndex = 0; infoIndex < selectors["id_info"].length; infoIndex++)
         {
-            var instance = 0;
-            while (true)
+            var no_gp = false;
+
+            var elem_prefix = selectors["id_info"][infoIndex]["prefix"];
+            if (typeof(visited_prefixes[elem_prefix]) !== "undefined")
+                continue;
+            visited_prefixes[elem_prefix] = true;
+
+            console.log("trying for prefix " + elem_prefix);
+
+            var selector = selectors["borderedElement"];
+            if (selector === null)
+                no_gp = true;
+
+            for (i = 0; i < ids_array.length; i++)
             {
-                if (ids_array[i] === "")
-                    break;
-
-                var elem = document.getElementById(elem_prefix + ids_array[i] + "_" + instance);
-                //consolelog("looking for " + elem_prefix + ids_array[i] + "_" + instance);
-                if ((typeof(elem) !== "undefined") && (elem !== null))
+                var instance = 0;
+                while (true)
                 {
-                    //consolelog("found!");
-                    var img_elem = elem.getElementsByTagName("img")[0];
+                    if (ids_array[i] === "")
+                        break;
 
-                    if (!img_elem.classList.contains(class_name))
+                    var elem = document.getElementById(elem_prefix + ids_array[i] + "_" + instance);
+                    //consolelog("looking for " + elem_prefix + ids_array[i] + "_" + instance);
+                    if ((typeof(elem) !== "undefined") && (elem !== null))
                     {
-                        img_elem.classList.add(class_name);
-                        count += 1;
-                    }
+                        //consolelog("found!");
+                        var img_elem = elem.getElementsByTagName("img")[0];
 
-                    // This grandparent node lets allows us to hide posters via CSS (We don't fade the full poster because we don't want to fade the border.)
-                    var grandparentElem = (no_gp) ? img_elem.parentNode : img_elem.parentNode.parentNode;
+                        if (!img_elem.classList.contains(class_name))
+                        {
+                            img_elem.classList.add(class_name);
+                            count += 1;
+                        }
 
-                    if (!grandparentElem.classList.contains(class_name + "_gp"))
-                    {
-                        grandparentElem.classList.add(class_name + "_gp");
-                        grandparent_count += 1;
-                    }
+                        // This grandparent node lets allows us to hide posters via CSS (We don't fade the full poster because we don't want to fade the border.)
+                        var grandparentElem = (no_gp) ? img_elem.parentNode : img_elem.parentNode.parentNode;
 
-                } else
-                    break;
-                instance += 1;
+                        if (!grandparentElem.classList.contains(class_name + "_gp"))
+                        {
+                            grandparentElem.classList.add(class_name + "_gp");
+                            grandparent_count += 1;
+                        }
+
+                    } else
+                        break;
+                    instance += 1;
+                }
             }
         }
         consolelog("applyClassnameToPosters count = " + count + ", " + grandparent_count);
