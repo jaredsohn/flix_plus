@@ -466,7 +466,9 @@ function nextPreviousListItem(direction)
         try {
             if ((typeof(elemsInfo_.elemsListContainers) === 'undefined') || (elemsInfo_.elemsListContainers.length === 0) || !(extlib.isHidden($("#" + elemsInfo_.elemsListContainers[elemsInfo_.currListContainer].id + " .bd")[0])))
             {
-                extlib.simulateEvent(elemsInfo_.currElem, "mouseover");
+                console.log("mouseover...");
+                console.log(elemsInfo_.currElem);
+                extlib.simulateEvent($(".bobbable", $(elemsInfo_.currElem))[0], "mouseover");
                 scrollMiddle(elemsInfo_.currElem);
             } else
                 scrollMiddle(elemsInfo_.elemsListContainers[elemsInfo_.currListContainer]);

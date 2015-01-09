@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+	<title>Making Netflix load faster with Flix Plus</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="css/prefs.css" />
+
+	<script src='/forge/app_config.js'></script><script src='/forge/all.js'></script>
+	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="js/fplib.js"></script>
+	<script type="text/javascript" src="js/keyboard_shortcuts_info.js"></script>
+	<script type="text/javascript" src="js/shortcuts_editor.js"></script>
+  </head>
+
+  <body>
+
+    <div class="container">
+		<h2>Making Netflix load faster with Flix Plus</h2>
+		<br>
+		The Netflix homepage has around 40 sections and 1500 posters on it.  Some Flix Plus capabilities--primarily those that update each section or poster--can make Netflix a bit longer to load. Disabling certain scripts can help, if you&#39;re willing to sacrifice those features.  These are the scripts that can slow things down:
+		<br><br>
+		<ul>
+			<li><b>Hide sections</b> and <b>Remove scrollbars</b> add a button to each section, which can slightly increase page load time.</li>
+			<li><b>Fade/tint/hide rated</b> and <b>Fade/tint/hide watched</b> have two parts to them:</li>
+				<ul>
+					<li>Search the website for the existence of each poster id that was previously stored and update the site to fade/tint/hide it.</li>
+					<li>Every 28 hours, it requests updated data.  This takes about a hundredth of second for every show or episode you have rated or watched.  You do not need to wait for this to finish, but the data will not be updated until you do.</li>
+				</ul>
+			<li><b>Fade/tint/hide duplicates</b> looks at every poster on the page, keeps track of the posters it has seen, and hides it if it has seen it before and it is not in My List. Disabling this in conjunction with <b>Remove scrollbars</b> will produce a significant speed boost, since Flix Plus won&#39;t have to check for extra posters that are displayed but not loaded.</li>
+			<li><b>Clicking on poster shows details instead of playing</b> changes the play link for every poster and removes the play button from on top of the poster.</li>
+			<li><b>Add keyboard shortcuts</b> gets a list of sections and the posters in each section.  If you disable navigation (to use keyboard shortcuts just for controlling the player and jumping around pages), it loads very fast.</li>
+		</li></ul>
+
+		<br>You can speed up the My List page in manual mode by disabling <b>Allow rating by half star,</b> <b>Show box images,</b> and <b>Clicking on poster shows details instead of playing</b> since these scripts update every entry.
+		<br>
+
+		<br>The large majority of scripts (those not listed here) load very quickly (&lt; 10 ms). The following buttons will automatically disable the features listed above for optimal speed.<br><br>
+
+		<button id="speed_up_homepage">Speed up homepage</button>&nbsp;&nbsp;<button id="speed_up_mylist">Speed up My List</button><br><br>
+		<a id="back_to_options">Back to Options</a>
+        <br>
+    </div><!-- /.container -->
+
+    <script src="js/bootstrap.min.js"></script>
+	<script src='js/perftips.js'></script>
+  </body>
+</html>
+
+
+
