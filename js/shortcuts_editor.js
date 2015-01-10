@@ -336,7 +336,7 @@ var _shortcuts_editor = function() {
     {
         e.preventDefault();
 
-        if (window.confirm("If you clear the navigation keys (left, right, section beginning, section ending, next section, prev section, first section, last section) then borders will be removed and page load time will speed up.\n\nDo you want to do this?") === true)
+        if (window.confirm("If you clear the navigation keys (left, right, section beginning, section ending, next section, prev section, first section, last section) then borders will be removed and page load time will speed up but you lose access to the sections and posters keys.\n\nDo you want to do this?") === true)
         {
             var commands = ["prev_section", "next_section", "section_home", "section_end", "move_right", "move_left", "move_home", "move_end"];
             for (i = 0; i < commands.length; i++)

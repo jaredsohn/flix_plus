@@ -903,7 +903,6 @@ var initForSelectors = function(selectors)
 
     elemsInfo_ = { elemsListContainers: [], currListContainer: -1, elemsNPList: [], currListItem: -1, currElem: null };
 
-
     if ((keyboardIdToShortcutDict_["prev_section"] === "None") &&
         (keyboardIdToShortcutDict_["next_section"] === "None") &&
         (keyboardIdToShortcutDict_["section_home"] === "None") &&
@@ -917,7 +916,6 @@ var initForSelectors = function(selectors)
         console.log("Data loading skipped since navigation keys not defined.");
         return;
     }
-
 
     if (selectors["elementsList"] === ".mrow")
     {
@@ -1064,4 +1062,26 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     {
         $(".instantSearchGallery .gallery").before("<br>");
     });
+
+    // Don't break keyboard shortcuts if user also has Netflix Enhancer installed (just rearrange the elements)
+    if (!navigationDisabled_)
+    {
+        var tileRatingContainers = $(".tileRatingContainer");
+        var len = tileRatingContainers.length;
+        for (tileIndex = 0; tileIndex < len; tileIndex++)
+        {
+            var elem = tileRatingContainers[tileIndex];
+            var parentNode = elem.parentNode;
+            var temp = parentNode.removeChild(elem);
+            parentNode.appendChild(temp);
+        }
+        document.body.arrive(".tileRatingContainer", function()
+        {
+            console.log("moving tileratingcontainer");
+            var elem = this;
+            var parentNode = elem.parentNode;
+            var temp = parentNode.removeChild(elem);
+            parentNode.appendChild(temp);
+        });
+    }
 });

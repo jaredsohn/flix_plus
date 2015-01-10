@@ -112,6 +112,16 @@ var _fplib = function()
         } else if (pathname.indexOf("/WiGenre") === 0)
         {
             // should never run since we redirect to /WiAltGenre
+        } else if (pathname.indexOf("/KidsSearch") === 0)
+        {
+            selectors["elements"] = ".boxShot, .lockup";
+            selectors["borderedElement"] = null;
+            selectors["id_info"] = [
+                                     {"selector": null, "attrib": "data-titleid", "prefix": ""}, // accessing /search directly, from /moviesyouveseen, /wiviewingactivity
+                                     {"selector": ".popLink", "attrib": "data-id", "prefix": ""},
+                                     {"selector": ".boxShot", "attrib": "id", "prefix": "dbs"} // must include last since id field could have other uses
+                                 ];
+            selectors["bobPopup"] = "#bob-container";
         } else if (pathname.indexOf("/KidsAltGenre") === 0)
         {
            selectors["bobPopup"] = null;
