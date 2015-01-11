@@ -8,25 +8,42 @@
 
 MutationObserver2 = window.MutationObserver || window.WebKitMutationObserver;
 
+var ignore_ = false;
+
 var observer2 = new MutationObserver2(function(mutations) {
-    if (document.getElementsByClassName("exitKidsContainer").length === 0)
+    if ((document.getElementById("profiles-gate")).style["display"] !== "none")
     {
-        if ((document.getElementById("profiles-gate")).style["display"] !== "none")
+        if (ignore_)
         {
-            console.log('autoclosing dialog');
-            // autoclose it
-            setTimeout(function() {
-                var profilesGate = document.getElementById("profiles-gate");
-                var elems = profilesGate.getElementsByClassName("close");
-                var len = elems.length;
-                for (i = 0; i < len; i++)
-                {
-                    elems[i].click();
-                }
-            }, 100);
+            ignore_ = false;
+            return;
         }
+        console.log('autoclosing dialog');
+        // autoclose it
+        setTimeout(function() {
+            var profilesGate = document.getElementById("profiles-gate");
+            var elems = profilesGate.getElementsByClassName("close");
+            var len = elems.length;
+            for (i = 0; i < len; i++)
+                elems[i].click();
+        }, 100);
     }
 });
 var elem = document.getElementById("profiles-gate");
 if (typeof(elem) !== "undefined")
     observer2.observe(elem, { attributes: true });
+
+
+// Do not prevent the Who's Watching dialog when switching into and out of Kids
+$("#nav-kids")[0].addEventListener("click", function(f) {
+    ignore_ = true;
+});
+
+if ($(".btn-exitKids").length)
+{
+    $(".btn-exitKids")[0].addEventListener("click", function(f) {
+        ignore_ = true;
+    });
+}
+
+

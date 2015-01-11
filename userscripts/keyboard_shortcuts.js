@@ -28,6 +28,7 @@ var selectors_ = {};
 
 var navigationDisabled_ = false;
 var searchMode_ = false;
+var profilesMode_ = false;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Scrolling to element with keyboard focus
@@ -671,7 +672,7 @@ var handleKeydown = function(e)
 
     // hack; keys aren't user-definable.  Also, ideally would have an observer check if profilegate div is shown and switch modes
     // to allow this support when page is interrupted.  For now, users can instead use script that automatically hides it instead.
-    if ((location.pathname.indexOf("/ProfilesGate") === 0) && ((keyCombo === "Space") || (keyCombo === "Enter")))
+    if ((profilesMode_ || (location.pathname.indexOf("/ProfilesGate") === 0)) && ((keyCombo === "Space") || (keyCombo === "Enter")))
     {
         extlib.simulateClick($("img", elemsInfo_.elemsNPList[elemsInfo_.currListItem])[0]);
         return;
@@ -740,6 +741,8 @@ var runCommand = function(command)
         var elem = null;
 
         if ((keyboardCommandsShown_) && (command !== "help") && (command !== "close_window"))
+            return;
+        if ((profilesMode_) && (command !== "move_left") && (command !== "move_right") && (command !== "move_home") && (command !== "move_end") && (command !== "close_window"))
             return;
 
         switch (command)
@@ -961,6 +964,19 @@ var initForSelectors = function(selectors)
     console.log(elemsInfo_);
 };
 
+var addWhoWatchingInstructions = function()
+{
+    var profilesSelector = "#profiles-gate, .profilesGate";
+    if ($(profilesSelector).length)
+    {
+        text = "You can disable this dialog by enabling 'Prevent Who's Watching interruptions' in Flix Plus preferences.";
+        var elem = document.createElement("div"); elem.style.cssText = "text-align:center"; elem.innerText = text;
+        $(profilesSelector)[0].appendChild(elem);
+        var elem = document.createElement("br");
+        $(profilesSelector)[0].appendChild(elem);
+    }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Startup
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -978,30 +994,65 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     selectors_ = fplib.getSelectorsForPath();
     initForSelectors(selectors_);
 
-    // Show instructions on Who's Watching
-    if ($("#profiles-gate").length)
-    {
-        var text = '';
-        if (keyboardIdToShortcutDict_["close_window"] !== "None")
-            text += keyboardIdToShortcutDict_["close_window"] + " to close";
-        if (keyboardIdToShortcutDict_["jump_whos_watching"] !== "None")
+    // Show instructions on Who's Watching; we're assuming this is the only dialog with the show class for now
+    addWhoWatchingInstructions();
+
+    // Track when dialog is shown for most pages
+    MutationObserver2 = window.MutationObserver || window.WebKitMutationObserver;
+    var observer2 = new MutationObserver2(function(mutations) {
+        if ((document.getElementById("profiles-gate")).style["display"] !== "none")
         {
-            if (text !== "")
-                text += " or ";
-            text += keyboardIdToShortcutDict_["jump_whos_watching"] + " for navigation controls";
+            if (!profilesMode_)
+            {
+                console.log("who's watching arrive");
+                profilesMode_ = true;
+                savedElemsInfo_ = elemsInfo_;
+                savedSelectors_ = selectors_;
+
+                selectors_ = fplib.getSelectors("/ProfilesGate");
+                selectors_["elements"] = "#profiles-gate .profiles li";
+                initForSelectors(selectors_);
+            }
+        } else
+        {
+            if (profilesMode_)
+            {
+                profilesMode_ = false;
+                elemsInfo_ = savedElemsInfo_;
+                selectors_ = savedSelectors_;
+                $(".fp_keyboard_selected").removeClass("fp_keyboard_selected");
+                updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], true);
+                scrollMiddle(elemsInfo_.elemsNPList[elemsInfo_.currListItem]);
+            }
         }
-        if (text !== "")
-            text = "Press " + text + ".";
-        else
-            text = "";
-        var elem = document.createElement("div"); elem.style.cssText = "text-align:center"; elem.innerText = text;
-        $("#profiles-gate")[0].appendChild(elem);
-        text = "You can disable this dialog by enabling 'Prevent Who's Watching interruptions' in Flix Plus preferences.";
-        var elem = document.createElement("div"); elem.style.cssText = "text-align:center"; elem.innerText = text;
-        $("#profiles-gate")[0].appendChild(elem);
-        var elem = document.createElement("br");
-        $("#profiles-gate")[0].appendChild(elem);
-    }
+    });
+    var elem = document.getElementById("profiles-gate");
+    if ((typeof(elem) !== "undefined") && (elem !== null))
+        observer2.observe(elem, { attributes: true });
+
+    // Track when dialog is shown for newer pages
+    document.body.arrive("#profiles-gate, .profilesGate", function()
+    {
+        console.log("who's watching arrive");
+        profilesMode_ = true;
+        savedElemsInfo_ = elemsInfo_;
+        savedSelectors_ = selectors_;
+
+        selectors_ = fplib.getSelectors("/ProfilesGate");
+        initForSelectors(selectors_);
+
+        addWhoWatchingInstructions();
+    });
+
+    document.body.leave("#profiles-gate, .profilesGate", function()
+    {
+        elemsInfo_ = savedElemsInfo_;
+        selectors_ = savedSelectors_;
+        $(".fp_keyboard_selected").removeClass("fp_keyboard_selected");
+        updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], true);
+        profilesMode_ = false;
+        scrollMiddle(elemsInfo_.elemsNPList[elemsInfo_.currListItem]);
+    });
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1029,6 +1080,7 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
                     selectors_ = savedSelectors_;
                     $(".fp_keyboard_selected").removeClass("fp_keyboard_selected");
                     updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], true);
+                    scrollMiddle(elemsInfo_.elemsNPList[elemsInfo_.currListItem]); // this doesn't work as I'd like, but if user presses arrow things are okay
                 }
             } else
             {
@@ -1040,7 +1092,6 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
                     savedSelectors_ = selectors_;
 
                     selectors_ = fplib.getSelectors("/search");
-                    //selectors_["elementsList"] = null; //hack that works for wihome
                     initForSelectors(selectors_);
                 }
             }

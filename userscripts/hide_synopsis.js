@@ -61,6 +61,10 @@ var hideOnPlayer = function()
             spans[2].classList.add("fp_spoiler");
     });
 
+    var elems = $(".description h2");
+    if (elems.length)
+        elems[0].innerText = elems[0].innerText.split("“")[0];
+
     document.body.arrive(".description h2", function() {
         this.innerText = this.innerText.split("“")[0];
     });
