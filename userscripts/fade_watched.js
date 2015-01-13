@@ -136,7 +136,7 @@ chrome.storage.sync.get(key_prefix_ + "fp_ignore_tv", function(items)
     });
 
     var keyname = "flix_plus " + fplib.getProfileName() + " viewingactivity";
-    extlib.checkForNewData(keyname,
+    extlib.checkForNewData([keyname],
         5 * 60, // five minutes
         28 * 60 * 60, // 28 hours
         function(history_last_checked, callback)
@@ -146,11 +146,11 @@ chrome.storage.sync.get(key_prefix_ + "fp_ignore_tv", function(items)
             {
                 update_history(keyname, results, callback);
             });
-        }, function(data)
+        }, function(datas)
         {
             console.log("callback");
-            console.log(data);
-            var ids_array = data.split(",");
+            console.log(datas[0]);
+            var ids_array = datas[0].split(",");
             fplib.applyClassnameToPosters(ids_array, "fp_watched");
             fplib.applyClassnameToPostersOnArrive(ids_array, "fp_watched");
         }

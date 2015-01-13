@@ -285,13 +285,7 @@ var rateMovie = function(rating)
 
         var ratingClass = fplib.getRatingClass(rating);
         var elemRating = elemContainer.getElementsByClassName(ratingClass);
-        console.log("foo");
-        console.log(ratingClass);
-        console.log(elemContainer);
-        console.log(elemRating);
         if (elemRating && (elemRating.length > 0)) {
-            console.log("bar");
-            console.log(elemRating);
             extlib.simulateClick(elemRating[0]);
         }
     }
