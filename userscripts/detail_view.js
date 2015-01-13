@@ -29,9 +29,8 @@
 // -- changes links that are created dynamically
 
 var regex_ = /^https?\:\/\/www\.netflix\.com\/WiPlayer\?movieid=([\d]+)/; // changed from movies to www lifehacker-jaredsohn
-var linkBase_ = ((location.pathname.indexOf("/Kids") === 0) || (location.pathname.indexOf("/KidsAltGenre") === 0) || (location.pathname.indexOf("/KidsMovie") === 0)) ? 'http://www.netflix.com/KidsMovie/' : 'http://www.netflix.com/WiMovie/';
+var linkBase_ = (location.pathname.indexOf("/Kids") === 0) ? 'http://www.netflix.com/KidsMovie/' : 'http://www.netflix.com/WiMovie/'; // apply to all kids pages
 var aTags_ = Array.prototype.slice.call(document.getElementsByTagName('a'));
-var playClass_ = /(?:\s|^)playLink|hoverPlay(?:\s|$)/; // hoverPlay added lifehacker-jaredsohn
 var tagIndex_ = aTags_.length;
 
 var stopIt = function(e) { e.preventDefault(); e.stopPropagation(); };
@@ -44,7 +43,7 @@ var fixTag = function(tag)
         if ((tag.id === "fp_play_popover") || (tag.classList.contains("fp_play")))
             return;
         tag.playhref = tag.href;
-        tag.className = tag.className.replace(playClass_, ' ');
+        tag.classList.remove("playLink"); // also care about hoverPlay for genre pages but Flix Plus forwards those URLs to AltGenre
         tag.href = linkBase_ + tag.href.match(regex_)[1];
         tag.onmousedown = stopIt;
         tag.onclick = clickIt;
@@ -109,6 +108,9 @@ ignoreElems($("#chronology a")); // play buttons for episodes on kidsmovie
 
 while (tagIndex_--)
     fixTag(aTags_[tagIndex_]);
+
+// clear out hasText class so that it doesn't grey out the recently watched movie when it is highlighted
+$.each($(".recentlyWatchedInner .hasText"), function() { this.classList.remove("hasText"); });
 
 // Fixes links that are added to the page (such as when you add something to My List).
 document.arrive("a", function()

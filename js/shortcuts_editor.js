@@ -1,7 +1,7 @@
 // Note that this module uses snakecase for variable and function names.
 
 var shortcuts_editor = shortcuts_editor || {};
-var _shortcuts_editor = function() {
+var shortcuts_editor_ = function() {
     var self = this;
     var profile_name_ = "undefined";
 
@@ -211,7 +211,7 @@ var _shortcuts_editor = function() {
             }
 
             // Remove old key
-            var old_shortcut = _keyboard_id_to_shortcut_dict[id];
+            var old_shortcut = keyboard_id_to_shortcut_dict_[id];
             delete keyboard_id_to_shortcut_dict_[id];
             delete keyboard_shortcut_to_id_dict_[old_shortcut];
 
@@ -262,7 +262,7 @@ var _shortcuts_editor = function() {
             //  return;
 
             // Remove old key
-            var old_shortcut = _keyboard_id_to_shortcut_dict[id];
+            var old_shortcut = keyboard_id_to_shortcut_dict_[id];
             delete keyboard_id_to_shortcut_dict_[id];
             delete keyboard_shortcut_to_id_dict_[old_shortcut];
 
@@ -370,7 +370,7 @@ $(document).ready(function()
     {
         profile_name_ = items["flix_plus profilename"];
         console.log(profile_name_);
-        _shortcuts_editor.call(shortcuts_editor);
+        shortcuts_editor_.call(shortcuts_editor);
 
         shortcuts_editor.init(profile_name_);
     });

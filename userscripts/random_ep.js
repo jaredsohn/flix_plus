@@ -137,13 +137,13 @@ else if (location.pathname.indexOf("/WiMovie") === 0)
     //                $(elem).after(titleElem);
                 }
             },
-            {
-                'selector': '.currentSeason .videoRow',
+            { // Orange is the New Black and other 'special' pages
+                'selector': ".episodesContent .videoRow",
                 'insert': function() {
-                    var elem = $('<span class="mltBtn" style="position:relative;top:35px;float:right"><a class="svf-button svfb-silver evo-btn svf-button-inq"><span class="inr">Random Episode</span></a></span>');
+                    var elem = $('<span class="mltBtn" style="position:relative;top:35px;float:right"><a class="svf-button svfb-black evo-btn svf-button-inq"><span class="inr">Random Episode</span></a></span>');
                     elem.on('click', function() {
-                        var idx = randomIdx($('.currentSeason .videoRow').length);
-                        $('.currentSeason .videoRow:nth-child(' + idx + ')').trigger('click');
+                        var idx = Math.floor(Math.random() * $(".episodesContent .videoRow").length);
+                        ($('.episodesContent .videoRow')[idx]).click();
                     });
                     $('.video-controls').css('height', '70px');
                     $('.video-controls .video-tabs').after(elem);

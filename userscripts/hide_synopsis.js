@@ -2,7 +2,7 @@
 
 // code relies on jquery, arrive.js
 
-// requires HTML5 player (not Silverlight)
+// requires HTML5 (not Silverlight) player
 var hideOnPlayer = function()
 {
     try
@@ -18,27 +18,22 @@ var hideOnPlayer = function()
     });
 
     document.body.arrive(".episode-list-image", function() {
-        console.log("image found!");
         this.classList.add("fp_spoiler");
     });
 
     document.body.arrive(".episode-list-synopsis", function() {
-        console.log("synopsis");
         this.classList.add("fp_spoiler");
     });
 
     document.body.arrive(".next-episode-image", function() {
-        console.log("next episode image found!");
         this.classList.add("fp_spoiler");
     });
 
     document.body.arrive(".episode-list-title", function() {
-        console.log("next episode desc found!");
         this.classList.add("fp_spoiler");
     });
 
     document.body.arrive(".player-next-episode-description", function() {
-        console.log("next episode desc found!");
         this.classList.add("fp_spoiler");
     });
 
@@ -51,7 +46,6 @@ var hideOnPlayer = function()
     });
 
     document.body.arrive(".player-postplay-autoplay-still", function() {
-        console.log("postplay autoplay still found");
         this.classList.add("fp_spoiler");
     });
 
@@ -79,19 +73,14 @@ var hideOnMovieDetails = function()
         console.log("synopsis");
         this.classList.add("fp_spoiler");
     });
+    $.each($("#seasonDetail .synopsis"), function() { this.classList.add("fp_spoiler") });
 
-    var elems = document.getElementsByClassName("synopsis");
-    for (i = 0; i < elems.length; i++)
-        elems[i].classList.add("fp_spoiler");
+    $.each($(".episodeTitle"), function() { this.classList.add("fp_spoiler") });
 
-    var elems = document.getElementsByClassName("episodeTitle");
-    for (i = 0; i < elems.length; i++)
-        elems[i].classList.add("fp_spoiler");
-
-    // for 'special' shows like Orange Is The New Black
-    var elems2 = document.getElementsByClassName("videoImagery");
-    for (i = 0; i < elems2.length; i++)
-        elems2[i].classList.add("fp_spoiler");
+    // Used by 'special' shows like Orange is the New Black
+    $.each($(".videoImagery"), function() { this.classList.add("fp_spoiler") });
+    $.each($(".videoDetails .title-text"), function() {this.classList.add("fp_spoiler"); });
+    $.each($(".videoDetails .synopsis"), function() {this.classList.add("fp_spoiler"); });
 };
 
 if (location.pathname.indexOf("/WiPlayer") === 0)

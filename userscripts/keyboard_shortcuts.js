@@ -30,6 +30,8 @@ var navigationDisabled_ = false;
 var searchMode_ = false;
 var profilesMode_ = false;
 
+var spoilers_revealed_ = false;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Scrolling to element with keyboard focus
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,10 +95,15 @@ var playOrZoomMovie = function(command)
 
     if ((location.pathname.indexOf("/WiMovie") === 0) && (command === "play"))
     {
-        var movieId = getMovieIdFromSelection(document);
+        if ($(".playButton").length)
+            $(".playButton")[0].click();
+        else
+        {
+            var movieId = getMovieIdFromSelection(document);
 
-        if (movieId !== "0")
-            this.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movieId;
+            if (movieId !== "0")
+                this.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movieId;
+        }
     } else
     {
         if (elemsInfo_.currElem === null)
@@ -262,7 +269,7 @@ var addToQueue = function()
 var rateMovie = function(rating)
 {
     if (location.pathname.indexOf("/search") === 0)
-        return; // don't support for /search since it isn't working right yet and is awkward to hit shortcut and type
+        return; // don't support for /search since it isn't working right yet and is awkward to use keyboard shortcut and type
 
     var elemContainer = getElemContainer();
 
@@ -272,11 +279,19 @@ var rateMovie = function(rating)
         {
             var mouseOverContainer = $(selectors_["ratingMouseOver"], elemContainer);
             extlib.simulateEvent(mouseOverContainer[0], "mouseover");
+            console.log("just moused over");
+            console.log(selectors_["ratingMouseOver"]);
         }
 
         var ratingClass = fplib.getRatingClass(rating);
         var elemRating = elemContainer.getElementsByClassName(ratingClass);
+        console.log("foo");
+        console.log(ratingClass);
+        console.log(elemContainer);
+        console.log(elemRating);
         if (elemRating && (elemRating.length > 0)) {
+            console.log("bar");
+            console.log(elemRating);
             extlib.simulateClick(elemRating[0]);
         }
     }
@@ -824,7 +839,13 @@ var runCommand = function(command)
             case "jump_viewing_activity": window.location = "http://www.netflix.com/WiViewingActivity"; break;
             case "jump_your_ratings": window.location = "https://www.netflix.com/MoviesYouveSeen"; break;
             case "jump_whos_watching": window.location = "https://www.netflix.com/ProfilesGate"; break;
-            case "reveal_spoilers": $.each($(".fp_spoiler"), function(index, value) { this.classList.remove('fp_spoiler'); }); break;
+            case "reveal_spoilers": // actually toggles spoilers
+                if (spoilers_revealed_)
+                    $.each($(".fp_spoiler_disabled"), function(index, value) { this.classList.add('fp_spoiler'); this.classList.remove('fp_spoiler_disabled'); });
+                else
+                    $.each($(".fp_spoiler"), function(index, value) { this.classList.add('fp_spoiler_disabled'); this.classList.remove('fp_spoiler'); });
+                spoilers_revealed_ = !spoilers_revealed_;
+                break;
             case "search":
                 elem = document.getElementById("searchTab");
                 if (elem !== null)
@@ -876,6 +897,16 @@ var runCommand = function(command)
                         next.click();
                     else
                         $(".player-timed-text-tracks li")[0].click();
+                }
+                break;
+            case "player_toggle_audio":
+                if ($(".player-audio-tracks li").length)
+                {
+                    var next = $(".player-audio-tracks .player-track-selected").next();
+                    if (next.length !== 0)
+                        next.click();
+                    else
+                        $(".player-audio-tracks li")[0].click();
                 }
                 break;
             case "player_nextepisode": {

@@ -109,7 +109,7 @@ switch (window.location.pathname.split('/')[1])
         patchAllArrive("#BobMovie-content", "strbrContainer", false); // popups
         break;
     case "WiMovie":
-        patchAll($("#displaypage-overview-details")[0], "strbrContainer", false);
+        patchAll($("#odp-body, #displaypage-overview-details")[0], "strbrContainer", false);
         patchAllArrive("#BobMovie-content", "strbrContainer", false); // popups
         break;
     case "MyList":

@@ -77,7 +77,7 @@ var _fplib = function()
         selectors["borderedElement"] = ".boxShot"; // element to apply border css to; set to null to apply border to elements
 
         // add/remove queue, ratings
-        selectors["elemContainer"] = "#displaypage-overview, #BobMovie-content, #bob-container"; // a jquery selector or [selected], used to get add/remove queue and ratings
+        selectors["elemContainer"] = "#odp-body, #displaypage-overview, #BobMovie-content, #bob-container"; // a jquery selector or [selected], used to get add/remove queue and ratings
         selectors["queueMouseOver"] = ".btnWrap";
         selectors["queueAdd"] = ".inr, .playListBtn, .playListBtnText";
         selectors["queueRemove"] = ".inr, .playListBtn, .delbtn, .playListBtnText";
@@ -332,6 +332,8 @@ var _fplib = function()
     // This should only be used by contentscripts, since it retrieves from the active page or localStorage
     //
     // This will actually reload the webpage if the profile name is different than before (in case some userscripts ran before they could detect the current profile name)
+    // At the moment, the reason we do this is so that darker netflix is properly enabled/disabled.  Ideally, we would check if darker is enabled/disabled
+    // in each of the two profiles; if it is the same, no need for a refresh. TODO
     this.getProfileName = function()
     {
         if ((self.profile_name_ !== "") && (typeof(self.profile_name_) !== "undefined"))
@@ -352,7 +354,7 @@ var _fplib = function()
         if (profile_name !== "_unknown")
         {
             localStorage["flix_plus profilename"] = profile_name;
-            chrome.storage.local.set({"flix_plus profilename" : profile_name }, function() 
+            chrome.storage.local.set({"flix_plus profilename" : profile_name }, function()
             {
                 consolelog("written to storage.local");
 

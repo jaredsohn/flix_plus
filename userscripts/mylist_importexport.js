@@ -101,7 +101,8 @@ var getListOldMyList = function()
         obj.netflixid = fplib.getMovieIdFromField(titles[i].id);
         obj.title = titles[i].innerText;
         obj.yourrating = "";
-        obj.ratedate = "";
+        //obj.ratedate = "";
+
         exportData.push(obj);
     }
 

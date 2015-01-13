@@ -34,6 +34,8 @@ else
 
 var CACHE_LIFE = 1000 * 60 * 60 * 24 * 7 * 2; //two weeks in milliseconds
 
+var https_supported_ = true; // Not true if using this as a userscript
+
 //////////// CACHE //////////////
 
 function addCache(ui_data, movie_info) {
@@ -155,6 +157,7 @@ function parseRoles(args) {
     }
     catch (ex)
     {
+        extlib.stackTrace();
         console.log(ex);
     }
     return roles;
@@ -162,13 +165,23 @@ function parseRoles(args) {
 
 ///////////////// AJAX ////////////////
 
+// a replacement for $.get that uses the background page to make requests.
+// Allows requesting http data via an https page.
+function getViaBackgroundPage(url, callback)
+{
+    chrome.runtime.sendMessage({"request_type": "get", "url": url}, function(response) {
+        callback(response["data"]);
+    });
+}
+
 function getMovieInfo(url, callback)
 {
     console.log(url);
     var movie_info = {};
 
-    $.get(url, function(res)
+    getViaBackgroundPage(url, function(res)
     {
+        console.log(res);
         try {
             var omdb_json = JSON.parse(res);
             movie_info = parseMovieInfo(omdb_json);
@@ -187,7 +200,7 @@ function getAllMovieInfos(title, args, callback)
         [
             function(callback2) {
                 url = getSearchIMDBAPI(title);
-                $.get(url, function(res) {
+                getViaBackgroundPage(url, function(res) {
                     callback2(null, res);
                 });
             }, function(callback2) {
@@ -198,7 +211,7 @@ function getAllMovieInfos(title, args, callback)
                 } else
                 {
                     url = getSearchIMDBAPI(simplified);
-                    $.get(url, function(res) {
+                    getViaBackgroundPage(url, function(res) {
                         callback2(null, res);
                     });
                 }
@@ -552,7 +565,7 @@ function infoMatchUi(movie_info, args) {
     try
     {
         // The year (or start year) must be within one
-        var ajax_years = extlib.parse_year_range(movie_info["year"]);
+        var ajax_years = extlib.parseYearRange(movie_info["year"]);
         var ajax_year_str = null;
         if (ajax_years.length)
             ajax_year_str = ajax_years[0].toString();
@@ -576,6 +589,7 @@ function infoMatchUi(movie_info, args) {
         }
     } catch (ex)
     {
+        extlib.stackTrace();
         console.log(ex);
         console.log("years don't match");
         return false;
@@ -590,7 +604,7 @@ function displayRating(movie_info, is_https, args) {
     clearOld(args);
     if ((movie_info === null) || (movie_info.nodata === true) || (!infoMatchUi(movie_info, args)))
     {
-        if (is_https)
+        if (is_https && !https_supported_)
             $(args["selector"]).append("<div class='fp_rt_no_https'><br>No HTTPS support for external ratings.</div>");
         else
             $(args["selector"]).append("<div id='fp_rt_not_found'><br>Could not find external ratings.</div>");
@@ -717,7 +731,7 @@ function onPopup()
     clearOld(args);
 
     var is_https = (window.location.protocol === "https:");
-    getRating(args, is_https, function(movie_info) {
+    getRating(args, is_https && !https_supported_, function(movie_info) {
         displayRating(movie_info, is_https, args);
     });
 }
@@ -730,14 +744,14 @@ $(document).ready(function() {
     {
         var args = {"info_section" : "#displaypage-overview-details", "roles_section" : "#displaypage-details", "selector" : ".ratingsInfo", "hide_labels" : false, "fix_alignment": false };
 
-        if (window.location.protocol === "https:")
+        var is_https = (window.location.protocol === "https:");
+
+        if (is_https && !https_supported_)
         {
             $(args["info_section"]).append("<div class='fp_rt_no_https'><br>No https support for Rotten Tomatoes / IMDB ratings.</div>");
         } else
         {
             getRating(args, false, function(movie_info) {
-
-                var is_https = (window.location.protocol === "https:");
                 displayRating(movie_info, is_https, args);
             });
         }
