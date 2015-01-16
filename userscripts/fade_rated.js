@@ -59,6 +59,9 @@ var create_unique_ids_dict = function(id_array, results_json, notinterested_only
     for (i = 0; i < id_array.length; i++)
         unique_ids_dict[id_array[i]] = true;
 
+    if (typeof(results_json.ratingItems) === "undefined")
+        return unique_ids_dict;
+
     for (i = 0; i < results_json.ratingItems.length; i++)
     {
         //console.log(results_json.ratingItems[i]);
@@ -111,6 +114,10 @@ var keys_dict = {};
 keys_dict[key_prefix_ + "fp_rated_style"] = "fade";
 keys_dict[key_prefix_ + "fp_rated_notinterested_style"] = "hide";
 
+console.log("~2");
+
+fplib.showProgressBar("fade_rated");
+
 fplib.syncGet(keys_dict, function(items)
 {
     console.log(items);
@@ -122,9 +129,11 @@ var keyname = "flix_plus " + fplib.getProfileName() + " ratingactivity";
 
 extlib.checkForNewData([keyname, keyname + "_notinterested"],
     5 * 60, // five minutes
-    28 * 60 * 60, // 28 hours
+    7 * 24 * 60 * 60, // one week
     function(history_last_checked, callback)
     {
+console.log("~3");
+
         $.ajax({
             url: window.location.protocol + "//www.netflix.com/WiViewingActivity",
             cache: false,
@@ -139,14 +148,25 @@ extlib.checkForNewData([keyname, keyname + "_notinterested"],
         });
     }, function(datas)
     {
+        console.log("~4");
+
+        // Remove class from existing elements in case something was removed
+        $.each($(".fp_rated"), function(index, value) { this.classList.remove("fp_rated"); });
+        console.log("~5");
+
         console.log("datas");
         console.log(datas);
         var ids_array = datas[0].split(",");
         fplib.applyClassnameToPosters(ids_array, "fp_rated");
         fplib.applyClassnameToPostersOnArrive(ids_array, "fp_rated");
+        console.log("~6");
 
         var ids_array = datas[1].split(",");
         fplib.applyClassnameToPosters(ids_array, "fp_rated_notinterested");
         fplib.applyClassnameToPostersOnArrive(ids_array, "fp_rated_notinterested");
+    }, function()
+    {
+        // all done
+        fplib.hideProgressBar("fade_rated");
     }
 );

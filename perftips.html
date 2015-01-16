@@ -33,9 +33,10 @@
 			<li><b>Fade/tint/hide rated</b> and <b>Fade/tint/hide watched</b> have two parts to them:</li>
 				<ul>
 					<li>Search the website for the existence of each poster id that was previously stored and update the site to fade/tint/hide it.</li>
-					<li>Every 28 hours, it requests updated data.  This takes about a hundredth of second for every show or episode you have rated or watched.  You do not need to wait for this to finish, but the data will not be updated until you do.</li>
+					<li>Every week, it requests updated data.  This takes about a hundredth of second for every show or episode you have rated or watched.  You do not need to wait for this to finish, but the data will not be updated until you do.</li>
 				</ul>
-			<li><b>Fade/tint/hide duplicates</b> looks at every poster on the page, keeps track of the posters it has seen, and hides it if it has seen it before and it is not in My List. Disabling this in conjunction with <b>Remove scrollbars</b> will produce a significant speed boost, since Flix Plus won&#39;t have to check for extra posters that are displayed but not loaded.</li>
+			<li><b>Fade/tint/hide duplicates</b> looks at every poster on the page, keeps track of the posters it has seen, and hides it if it has seen it before and it is not in My List.</li>
+			<li>Whenever a script makes it so that a poster is visible on page load that otherwise wouldn't be (Remove scrollbars and hiding rated, watched, duplicates do this), Flix Plus needs to check whether or not each visible poster is loaded and then load it if not.  If you disable all such functionality, this check will be skipped to give a significant speed boost.
 			<li><b>Clicking on poster shows details instead of playing</b> changes the play link for every poster and removes the play button from on top of the poster.</li>
 			<li><b>Add keyboard shortcuts</b> gets a list of sections and the posters in each section.  If you disable navigation (to use keyboard shortcuts just for controlling the player and jumping around pages), it loads very fast.</li>
 		</li></ul>

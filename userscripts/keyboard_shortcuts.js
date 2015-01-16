@@ -298,6 +298,9 @@ var rateMovie = function(rating)
 
 var updateKeyboardSelection = function(elem, selected)
 {
+    if ((location.pathname.indexOf("/WiMovie") === 0) || (location.pathname.indexOf("/KidsMovie") === 0))
+        return;
+
     if ((keyboardIdToShortcutDict_["move_right"] === "None") &&
         (keyboardIdToShortcutDict_["move_left"] === "None") &&
         (keyboardIdToShortcutDict_["move_home"] === "None") &&
@@ -478,6 +481,7 @@ function nextPreviousListItem(direction)
             {
                 console.log("mouseover...");
                 console.log(elemsInfo_.currElem);
+                extlib.simulateEvent(elemsInfo_.currElem, "mouseover"); // done for /search since another element is also in the bobbable class
                 extlib.simulateEvent($(".bobbable", $(elemsInfo_.currElem))[0], "mouseover");
                 scrollMiddle(elemsInfo_.currElem);
             } else

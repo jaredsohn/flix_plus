@@ -93,15 +93,54 @@ document.body.arrive(".fp_export_cmd", function() {
 var getListOldMyList = function()
 {
     var exportData = [];
-    var titles = ($("#queue .qtbl tr .mdpLink"));
-    var len = titles.length;
-    for (i = 0; i < len; i++)
+    var entries = ($("#queue .qtbl tr"));
+    var len = entries.length;
+    for (i = 1; i < len; i++) // first row is column titles
     {
         var obj = {};
-        obj.netflixid = fplib.getMovieIdFromField(titles[i].id);
-        obj.title = titles[i].innerText;
-        obj.yourrating = "";
-        //obj.ratedate = "";
+
+        var titleElems = $(".mdpLink", $(entries[i]));
+        if (titleElems.length === 0)
+            continue;
+
+        obj.netflixid = fplib.getMovieIdFromField(titleElems[0].id);
+        obj.title = titleElems[0].innerText;
+        obj.yourRating = "";
+        obj.suggestedRating = "";
+
+        obj.customNote = $(".fp_notes", $(entries[i]))[0].innerText.trim();
+        if (obj.customNote === "add note")
+            obj.customNote = "";
+        obj.genre = $(".gn a", ($("tr")[10]))[0].text.trim();
+
+        var ratingElems = $(".stbrMaskFg", $(entries[i]));
+        if (ratingElems.length === 0)
+            continue;
+        console.log(ratingElems);
+
+        var classes = ratingElems[0].classList;
+        var rating = null;
+        for (classIndex = 0; classIndex < classes.length; classIndex++)
+        {
+            try
+            {
+                if (classes[classIndex].indexOf("sbmf-") === 0)
+                {
+                    var temp = classes[classIndex].substring(classes[classIndex].indexOf("-") + 1);
+                    rating = parseInt(temp) / 10;
+                }
+            } catch (ex)
+            {
+                console.log(ex);
+            }
+        }
+        if ((classes.contains("sbmfpr")) && (rating !== null))
+        {
+            obj.suggestedRating = rating.toString();
+        } else if (classes.contains("sbmfrt"))
+        {
+            obj.yourRating = rating.toString();
+        }
 
         exportData.push(obj);
     }
@@ -120,8 +159,11 @@ var getListNewMyList = function()
         var obj = {};
         obj.netflixid = fplib.getMovieIdFromField(titles[i].id);
         obj.title = $("img", titles[i])[0].alt;
-        obj.yourrating = "";
-        obj.ratedate = "";
+        obj.yourRating = "";
+        obj.suggestedRating = "";
+        obj.customNote = "";
+        obj.genre = "";
+
         exportData.push(obj);
     }
 

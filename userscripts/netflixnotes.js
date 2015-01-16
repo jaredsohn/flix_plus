@@ -204,6 +204,7 @@ function makeNoteSpan(noteText)
     innerSpan.style.cursor = 'pointer';
     innerSpan.addEventListener('click', onEditMovieNote, true);
     innerSpan.innerHTML = noteText;
+    innerSpan.className = "fp_notes";
     return innerSpan;
 }
 

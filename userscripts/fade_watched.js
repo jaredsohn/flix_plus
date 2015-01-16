@@ -50,6 +50,7 @@ var get_history = function(start_time, page_no, authUrl, results_json, callback)
                             callback(results_json);
                     } catch (ex)
                     {
+                        fplib.hideProgressBar("fade_watched");
                         consolelog("error getting watched history");
                         consolelog(ex);
                     }
@@ -65,6 +66,9 @@ var create_unique_ids_dict = function(id_array, results_json)
 
     for (i = 0; i < id_array.length; i++)
         unique_ids_dict[id_array[i]] = true;
+
+    if (typeof(results_json.viewedItems) === "undefined")
+        return unique_ids_dict;
 
     for (i = 0; i < results_json.viewedItems.length; i++)
     {
@@ -98,11 +102,10 @@ var update_history = function(keyname, results, callback)
 
     console.log(keyname + " count = " + unique_movie_ids_array.length);
 
-    callback(unique_movie_ids_array.toString());
+    callback([unique_movie_ids_array.toString()]);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 chrome.storage.sync.get(key_prefix_ + "fp_ignore_tv", function(items)
 {
@@ -112,7 +115,7 @@ chrome.storage.sync.get(key_prefix_ + "fp_ignore_tv", function(items)
     if (typeof(items[key_prefix_ + "fp_ignore_tv"]) !== "undefined")
         ignore_tv_ = items[key_prefix_ + "fp_ignore_tv"];
     else
-        ignore_tv_ = false;
+        ignore_tv_ = true;
 
     // force a reload of stored data when this changes
     if (ignore_tv_ !== (localStorage[key_prefix_ + "fp_ignore_tv"] === "true"))
@@ -121,6 +124,7 @@ chrome.storage.sync.get(key_prefix_ + "fp_ignore_tv", function(items)
     }
     localStorage[key_prefix_ + "fp_ignore_tv"] = ignore_tv_;
 
+    fplib.showProgressBar("fade_watched");
 
     var keys_dict = {};
     keys_dict[key_prefix_ + "fp_watched_style"] = "tint";
@@ -138,7 +142,7 @@ chrome.storage.sync.get(key_prefix_ + "fp_ignore_tv", function(items)
     var keyname = "flix_plus " + fplib.getProfileName() + " viewingactivity";
     extlib.checkForNewData([keyname],
         5 * 60, // five minutes
-        28 * 60 * 60, // 28 hours
+        7 * 24 * 60 * 60, // one week
         function(history_last_checked, callback)
         {
             console.log("!");
@@ -148,11 +152,15 @@ chrome.storage.sync.get(key_prefix_ + "fp_ignore_tv", function(items)
             });
         }, function(datas)
         {
-            console.log("callback");
-            console.log(datas[0]);
+            // Remove everything already marked with the class
+            $.each($(".fp_watched"), function(index, value) { this.classList.remove("fp_watched"); });
+
             var ids_array = datas[0].split(",");
             fplib.applyClassnameToPosters(ids_array, "fp_watched");
             fplib.applyClassnameToPostersOnArrive(ids_array, "fp_watched");
+        }, function()
+        {
+            fplib.hideProgressBar("fade_watched");
         }
     );
 });

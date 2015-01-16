@@ -136,30 +136,59 @@ function parseEndYear(args) {
 function parseRoles(args) {
     var roles = { "actors" : {}, "directors" : {}, "creators" : {} };
     var target_elem = $(args["roles_section"]);
-    try
+
+    // The structure is different for movie pages (it doesn't just have a different parent element)
+    if (location.pathname.indexOf("/WiMovie") === 0)
     {
-        var dts = $(" dl dt", target_elem);
-        var dds = $(" dl dd", target_elem);
+        var dls = $("dl", target_elem);
 
-        var dts_len = dts.length;
-        for (i = 0; i < dts_len; i++)
+        var dls_len = dls.length;
+        for (i = 0; i < dls_len; i++)
         {
-            var dt = dts[i].innerText.trim().replace(":", "").toLowerCase();
+            var dts = $("dt", dls[i]);
+            if (dts.length === 0)
+                continue;
+            var dds = $("dd a", dls[i]);
+            var ddLength = dds.length;
+            for (ddIndex = 0; ddIndex < ddLength; ddIndex++)
+            {
+                var dict = {"starring": "actors", "cast": "actors", "director": "directors", "creator": "creators"};
 
-            var elems = $("a", dds[i]);
-            var elems_len = elems.length;
+                if (dts[0].innerHTML.toLowerCase() in dict)
+                    roles[dict[dts[0].innerHTML.toLowerCase()]][dds[ddIndex].innerText.trim()] = true;
+            }
+        }
+    } else
+    {
+        try
+        {
+            var dts = $(" dl dt", target_elem);
+            var dds = $(" dl dd", target_elem);
 
-            var dict = {"starring": "actors", "cast": "actors", "director": "directors", "creator": "creators"};
-            if (dt in dict)
-                for (j = 0; j < elems_len; j++)
-                    roles[dict[dt]][elems[j].innerText.trim()] = true;
+            var dts_len = dts.length;
+            for (i = 0; i < dts_len; i++)
+            {
+                var dt = dts[i].innerText.trim().replace(":", "").toLowerCase();
+
+                var elems = $("a", dds[i]);
+                var elems_len = elems.length;
+
+                var dict = {"starring": "actors", "cast": "actors", "director": "directors", "creator": "creators"};
+                if (dt in dict)
+                    for (j = 0; j < elems_len; j++)
+                        roles[dict[dt]][elems[j].innerText.trim()] = true;
+            }
+        }
+        catch (ex)
+        {
+            extlib.stackTrace();
+            console.log(ex);
         }
     }
-    catch (ex)
-    {
-        extlib.stackTrace();
-        console.log(ex);
-    }
+
+    console.log("parsed roles = ");
+    console.log(roles);
+
     return roles;
 }
 
@@ -480,6 +509,9 @@ function infoMatchUiType(movie_info, args) {
 }
 
 function infoMatchUiRolesCount(movie_info, args) {
+    console.log("comparing roles");
+    console.log(movie_info);
+
     if (typeof(movie_info["roles"]) === "undefined")
         return 1;
 

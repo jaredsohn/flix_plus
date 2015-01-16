@@ -406,7 +406,7 @@ var _fplib = function()
                 continue;
             visited_prefixes[elem_prefix] = true;
 
-            console.log("trying for prefix " + elem_prefix);
+            consolelog("trying for prefix " + elem_prefix);
 
             var selector = selectors["borderedElement"];
             if (selector === null)
@@ -583,6 +583,33 @@ var _fplib = function()
             extlib.addGlobalStyle("." + className + "{ }");
         }
     };
+
+    this.hideProgressBar = function(script_id)
+    {
+        var elem = $("#fp_progress")[0];
+        elem.classList.remove("active_" + script_id);
+
+        if ($("#fp_progress")[0].classList.length === 1)
+            $("#fp_progress")[0].style.display = "none";
+    };
+
+    this.showProgressBar = function(script_id)
+    {
+        if ($("#fp_progress").length === 1)
+        {
+            $("#fp_progress")[0].classList.add("active_" + script_id);
+            return;
+        }
+
+        var elem = document.createElement("li");
+        elem.innerHTML = "<div>Flix Plus <img title='Getting rated and/or watched history; try to let it finish (should take at most 30 seconds) so it does not have to start over on next page load.' width='100' height='15px' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'></div>";
+        elem.id = 'fp_progress';
+        $("#global-header")[0].appendChild(elem);
+
+        $("#fp_progress")[0].classList.add('nav-item');
+        $("#fp_progress")[0].classList.add('active_' + script_id);
+    };
+
 
     function consolelog(msg)
     {
