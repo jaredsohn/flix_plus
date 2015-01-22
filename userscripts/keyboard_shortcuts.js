@@ -13,6 +13,10 @@
 //
 // Now requires jquery, arrive.js, extlib.js, fplib.js
 
+// Since exclude support is disabled in compiler, do it manually here
+if (location.pathname.indexOf("/KidsCharacter") === 0)
+    return;
+
 var elemsInfo_ = null;
 var savedElemsInfo_ = null;
 var savedSelectors_ = {};
@@ -29,7 +33,6 @@ var selectors_ = {};
 var navigationDisabled_ = false;
 var searchMode_ = false;
 var profilesMode_ = false;
-
 var spoilers_revealed_ = false;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +48,7 @@ var scrollMiddle = function(elem)
 {
     console.log("scrollmiddle:");
     console.log(elem);
-    if (elem === null)
+    if ((typeof(elem) === "undefined") || (elem === null))
         return;
     elem.scrollIntoView(true);
     var pos = elem.documentOffsetTop() - (window.innerHeight / 2);
@@ -65,6 +68,9 @@ var getMovieIdFromSelection = function(element)
     console.log("element1 is ");
     console.log(element);
 
+//    console.log("id_info is");
+//    console.log(selectors_["id_info"]);
+
     var fullStr = null;
     var infos = selectors_["id_info"];
     if (infos === null)
@@ -76,11 +82,7 @@ var getMovieIdFromSelection = function(element)
         if (infos[infoIndex]["selector"] !== null)
             attrElem = $(infos[infoIndex]["selector"], element);
 
-        console.log(infos[infoIndex]["attrib"]);
-        console.log("element2 is ");
-        console.log($(attrElem));
         fullStr = ($(attrElem)).attr(infos[infoIndex]["attrib"]);
-        console.log(fullStr);
         if (typeof(fullStr) !== "undefined")
             break;
     }
@@ -93,7 +95,7 @@ var playOrZoomMovie = function(command)
     if (selectors_ === null)
         return;
 
-    if ((location.pathname.indexOf("/WiMovie") === 0) && (command === "play"))
+    if (((location.pathname.indexOf("/WiMovie") === 0) || (location.pathname.indexOf("/KidsMovie") === 0)) && (command === "play"))
     {
         if ($(".playButton").length)
             $(".playButton")[0].click();
@@ -117,7 +119,10 @@ var playOrZoomMovie = function(command)
                     this.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movieId;
                     break;
                 case "zoom_into_details":
-                    this.location = window.location.protocol + "//www.netflix.com/WiMovie/" + movieId;
+                    if (location.pathname.indexOf("/Kids") === 0) // this also matches other Kids pages, but changing the URL for that is okay
+                        this.location = window.location.protocol + "//www.netflix.com/KidsMovie/" + movieId;
+                    else
+                        this.location = window.location.protocol + "//www.netflix.com/WiMovie/" + movieId;
                     break;
             }
         }
@@ -298,7 +303,7 @@ var rateMovie = function(rating)
 
 var updateKeyboardSelection = function(elem, selected)
 {
-    if ((location.pathname.indexOf("/WiMovie") === 0) || (location.pathname.indexOf("/KidsMovie") === 0))
+    if ((profilesMode_ === false) && (((location.pathname.indexOf("/WiMovie") === 0) || (location.pathname.indexOf("/KidsMovie") === 0))))
         return;
 
     if ((keyboardIdToShortcutDict_["move_right"] === "None") &&
@@ -344,29 +349,9 @@ var updateKeyboardSelection = function(elem, selected)
 // Cycle through selections
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-var nextPreviousListPage = function(direction)
-{
-    return; // removing this for now
-/*
-    var strBtnClass;
-    switch (direction) {
-    case 1:
-        strBtnClass = "next";
-        break;
-    case -1:
-        strBtnClass = "prev";
-        break;
-    default:
-        return;
-        break;
-    }
-    extlib.simulateClick(document.getElementsByClassName(strBtnClass)[0]);*/
-};
-
 function nextPreviousListContainer(direction)
 {
     if (!listHasItems(elemsInfo_.elemsListContainers)) {
-        nextPreviousListPage(direction);
         return;
     }
 
@@ -470,10 +455,8 @@ function nextPreviousListItem(direction)
 
     if (elemsInfo_.currListItem < 0) {
         elemsInfo_.currListItem = 0;
-        nextPreviousListPage(-1);
     } else if (elemsInfo_.currListItem > lastIndex) {
         elemsInfo_.currListItem = lastIndex;
-        nextPreviousListPage(1);
     } else {
         elemsInfo_.currElem = elemsInfo_.elemsNPList[elemsInfo_.currListItem];
         try {

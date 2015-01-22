@@ -108,9 +108,13 @@ var getListOldMyList = function()
         obj.yourRating = "";
         obj.suggestedRating = "";
 
-        obj.customNote = $(".fp_notes", $(entries[i]))[0].innerText.trim();
-        if (obj.customNote === "add note")
+        if ($(".fp_notes").length > 0)
+            obj.customNote = $(".fp_notes", $(entries[i]))[0].innerText.trim();
+            if (obj.customNote === "add note")
+                obj.customNote = "";
+        else
             obj.customNote = "";
+
         obj.genre = $(".gn a", ($("tr")[10]))[0].text.trim();
 
         var ratingElems = $(".stbrMaskFg", $(entries[i]));

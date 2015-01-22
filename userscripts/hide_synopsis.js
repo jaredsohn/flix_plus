@@ -2,6 +2,18 @@
 
 // code relies on jquery, arrive.js
 
+function addSpoilerClassToSelectors(selectors)
+{
+    for (i = 0; i < selectors.length; i++)
+    {
+        document.body.arrive(selectors[i], function() {
+            this.classList.add("fp_spoiler");
+        });
+
+        $.each($(selectors[i]), function() { this.classList.add("fp_spoiler") });
+    }
+}
+
 // requires HTML5 (not Silverlight) player
 var hideOnPlayer = function()
 {
@@ -17,25 +29,8 @@ var hideOnPlayer = function()
         this.style.opacity = 0;
     });
 
-    document.body.arrive(".episode-list-image", function() {
-        this.classList.add("fp_spoiler");
-    });
-
-    document.body.arrive(".episode-list-synopsis", function() {
-        this.classList.add("fp_spoiler");
-    });
-
-    document.body.arrive(".next-episode-image", function() {
-        this.classList.add("fp_spoiler");
-    });
-
-    document.body.arrive(".episode-list-title", function() {
-        this.classList.add("fp_spoiler");
-    });
-
-    document.body.arrive(".player-next-episode-description", function() {
-        this.classList.add("fp_spoiler");
-    });
+    var selectors = [".episode-list-image", ".episode-list-synopsis", ".next-episode-image", ".episode-list-title", ".player-next-episode-description", ".player-postplay-autoplay-still"];
+    addSpoilerClassToSelectors(selectors);
 
     document.body.arrive(".playback-longpause-container", function() {
         var paragraphs = $(".playback-longpause-container .content p");
@@ -43,10 +38,6 @@ var hideOnPlayer = function()
 
         var h3s = this.getElementsByTagName("h3");
         h3s[h3s.length - 1].classList.add("fp_spoiler");
-    });
-
-    document.body.arrive(".player-postplay-autoplay-still", function() {
-        this.classList.add("fp_spoiler");
     });
 
     document.body.arrive(".player-status", function() {
@@ -69,18 +60,8 @@ var hideOnPlayer = function()
 
 var hideOnMovieDetails = function()
 {
-    document.body.arrive(".synopsis", function() {
-        console.log("synopsis");
-        this.classList.add("fp_spoiler");
-    });
-    $.each($("#seasonDetail .synopsis"), function() { this.classList.add("fp_spoiler") });
-
-    $.each($(".episodeTitle"), function() { this.classList.add("fp_spoiler") });
-
-    // Used by 'special' shows like Orange is the New Black
-    $.each($(".videoImagery"), function() { this.classList.add("fp_spoiler") });
-    $.each($(".videoDetails .title-text"), function() {this.classList.add("fp_spoiler"); });
-    $.each($(".videoDetails .synopsis"), function() {this.classList.add("fp_spoiler"); });
+    var selectors = ["#seasonDetail .synopsis", ".episodeTitle", ".videoImagery", ".videoDetails .title-text", ".videoDetails .synopsis"];
+    addSpoilerClassToSelectors(selectors);
 };
 
 if (location.pathname.indexOf("/WiPlayer") === 0)

@@ -117,9 +117,7 @@ var _fplib = function()
             selectors["elements"] = ".boxShot, .lockup";
             selectors["borderedElement"] = null;
             selectors["id_info"] = [
-                                     {"selector": null, "attrib": "data-titleid", "prefix": ""}, // accessing /search directly, from /moviesyouveseen, /wiviewingactivity
-                                     {"selector": ".popLink", "attrib": "data-id", "prefix": ""},
-                                     {"selector": ".boxShot", "attrib": "id", "prefix": "dbs"} // must include last since id field could have other uses
+                                     {"selector": null, "attrib": "id", "prefix": "dbs"}
                                  ];
             selectors["bobPopup"] = "#bob-container";
         } else if (pathname.indexOf("/KidsAltGenre") === 0)
@@ -162,6 +160,7 @@ var _fplib = function()
         } else if (pathname.indexOf("/RateMovies") === 0) // We don't support this very much
         {
             selectors["borderedElement"] = null;
+            selectors["elements"] = null;
         } else if ((pathname.indexOf("/WiViewingActivity") === 0) || (pathname.indexOf("/MoviesYouveSeen") === 0))
         {
             selectors["elements"] = ".retable li";
@@ -265,7 +264,7 @@ var _fplib = function()
 
                 if (!ignore)
                 {
-                    console.log(".");
+                    consolelog(".");
                     count++;
 
                     var imgs = (posters[i].getElementsByTagName("img"));
