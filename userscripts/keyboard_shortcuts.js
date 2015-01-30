@@ -24,7 +24,7 @@ var savedSelectors_ = {};
 var keyboardCommandsShown_ = false;
 var alreadyHasShiftChars_ = ["~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
 var preventDefaultKeys_ = ["Home", "End", "Ctrl-Home", "Ctrl-End", "Space"];
-
+var speed_ = 1;
 var keyboardShortcutToIdDict_ = {};
 var keyboardIdToShortcutDict_ = {};
 
@@ -33,7 +33,8 @@ var selectors_ = {};
 var navigationDisabled_ = false;
 var searchMode_ = false;
 var profilesMode_ = false;
-var spoilers_revealed_ = false;
+var spoilersRevealed_ = false;
+var statusClearer_ = null;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Scrolling to element with keyboard focus
@@ -821,11 +822,11 @@ var runCommand = function(command)
             case "jump_your_ratings": window.location = "https://www.netflix.com/MoviesYouveSeen"; break;
             case "jump_whos_watching": window.location = "https://www.netflix.com/ProfilesGate"; break;
             case "reveal_spoilers": // actually toggles spoilers
-                if (spoilers_revealed_)
+                if (spoilersRevealed_)
                     $.each($(".fp_spoiler_disabled"), function(index, value) { this.classList.add('fp_spoiler'); this.classList.remove('fp_spoiler_disabled'); });
                 else
                     $.each($(".fp_spoiler"), function(index, value) { this.classList.add('fp_spoiler_disabled'); this.classList.remove('fp_spoiler'); });
-                spoilers_revealed_ = !spoilers_revealed_;
+                spoilersRevealed_ = !spoilersRevealed_;
                 break;
             case "search":
                 elem = document.getElementById("searchTab");
@@ -865,6 +866,8 @@ var runCommand = function(command)
             case "player_playpause": console.log("player_playpause"); injectJs("setTimeout(function() {netflix.cadmium.objects.videoPlayer().getPaused() ? netflix.cadmium.objects.videoPlayer().play() : netflix.cadmium.objects.videoPlayer().pause();}, 10);"); break;
             case "player_play": injectJs("netflix.cadmium.objects.videoPlayer().play();"); break;
             case "player_pause": injectJs("netflix.cadmium.objects.videoPlayer().pause();"); break;
+            case "player_faster": speed_ = document.getElementsByTagName('video')[0].playbackRate + 0.1; if (speed_ > 10) { speed_ = 10; } setSpeed(); break;
+            case "player_slower": speed_ = document.getElementsByTagName('video')[0].playbackRate - 0.1; if (speed_ < 0.1) { speed_ = 0.1; } setSpeed(); break;
             case "player_back_to_browse":
                 $.each($(".back-to-browsing"), function(index, value) { this.click() });
                 $.each($(".player-back-to-browsing"), function(index, value) { this.click() });
@@ -909,6 +912,24 @@ var injectJs = function(js)
     var scriptNode = document.createElement("script");
     scriptNode.innerText = js; // "setTimeout(function() {" + js + "}, 2000);"
     document.body.appendChild(scriptNode);
+};
+
+var setSpeed = function()
+{
+    $(".fp_status_message").remove();
+    clearTimeout(statusClearer_);
+
+    var elem = document.createElement("div");
+    elem.className = "fp_status_message";
+    elem.style.cssText = "color:white; top:" + (document.body.clientHeight - 100).toString() + "px; left:30px; position: fixed; z-index:999999";
+    elem.innerText = "Setting speed to " + parseFloat(Math.round(speed_ * 10) / 10).toFixed(1);
+
+    document.body.appendChild(elem);
+    statusClearer_ = setTimeout(function() {
+        $(".fp_status_message").remove();
+    }, 2000);
+
+    document.getElementsByTagName('video')[0].playbackRate = speed_;
 };
 
 var initForSelectors = function(selectors)
@@ -1125,6 +1146,15 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
     {
         $(".instantSearchGallery .gallery").before("<br>");
     });
+
+    if (location.pathname.indexOf("/WiPlayer") === 0)
+    {
+        document.body.arrive(".player-next-episode", function() {
+            console.log("updating speed!");
+            if (speed_ !== 1)
+                setSpeed();
+        });
+    }
 
     // Don't break keyboard shortcuts if user also has Netflix Enhancer installed (just rearrange the elements)
     if (!navigationDisabled_)

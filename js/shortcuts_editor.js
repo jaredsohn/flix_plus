@@ -106,7 +106,7 @@ var shortcuts_editor_ = function() {
             shortcuts_div.appendChild(category_div);
 
             //console.log("For category '" + categories[category_index] + "'");
-            var ids_for_category = keyboard_shortcuts_info.get_shortcuts_for_category(keyboard_id_to_shortcut_dict, categories[category_index]);
+            var ids_for_category = keyboard_shortcuts_info.get_shortcuts_for_category(categories[category_index]);
             var ids_for_category_len = ids_for_category.length;
             var j;
 
@@ -128,7 +128,10 @@ var shortcuts_editor_ = function() {
                 node.name = "fname";
                 node.id = ids_for_category[j];
                 node.className = "shortcuts_key";
-                node.value = keyboard_id_to_shortcut_dict[ids_for_category[j]];
+                var val = keyboard_id_to_shortcut_dict[ids_for_category[j]];
+                if (typeof(val) === "undefined")
+                    val = "None";
+                node.value = val;
                 div_node.appendChild(node);
 
                 node = document.createElement("br");

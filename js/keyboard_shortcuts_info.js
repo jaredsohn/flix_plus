@@ -4,16 +4,19 @@ var keyboard_shortcuts_info = _keyboard_shortcuts_info || {};
 var _keyboard_shortcuts_info = function() {
     var self = this;
 
-    var _categories_in_order = ["Posters", "Sections", "Player", "Jump to page", "Misc"];
+    var categories_in_order_ = ["Posters", "Sections", "Player", "Jump to page", "Misc"];
 
-    var _keyboard_shortcuts_defs = {
+    // Any new keys created after Flix Plus 2.0 should be included here so that existing users
+    // will have keys assigned to default value (if still available)
+    var newer_key_ids_ = ["player_slower", "player_faster"];
+
+    var keyboard_shortcuts_defs_ = {
         reveal_spoilers:
         {
              default_key: 'e',
              description: 'Toggle Spoilers',
              category: 'Misc',
              order: 200 },
-
         jump_kids:
         {
              default_key: 'd',
@@ -284,6 +287,18 @@ var _keyboard_shortcuts_info = function() {
              description: 'Mute',
              category: 'Player',
              order: 0 },
+        player_faster:
+        {
+             default_key: ']',
+             description: 'Faster',
+             category: 'Player',
+             order: 200 },
+        player_slower:
+        {
+             default_key: '[',
+             description: 'Slower',
+             category: 'Player',
+             order: 202 },
         player_unmute:
         {
              default_key: 'None',
@@ -367,11 +382,11 @@ var _keyboard_shortcuts_info = function() {
     this.generate_defaults = function()
     {
         var new_defaults = [];
-        var ids = Object.keys(_keyboard_shortcuts_defs);
+        var ids = Object.keys(keyboard_shortcuts_defs_);
         for (i = 0; i < ids.length; i++)
         {
             var obj = {};
-            obj[ids[i]] = _keyboard_shortcuts_defs[ids[i]]["default_key"];
+            obj[ids[i]] = keyboard_shortcuts_defs_[ids[i]]["default_key"];
             new_defaults.push(obj);
         }
 
@@ -381,7 +396,7 @@ var _keyboard_shortcuts_info = function() {
     this.generate_clear = function()
     {
         var new_defaults = [];
-        var ids = Object.keys(_keyboard_shortcuts_defs);
+        var ids = Object.keys(keyboard_shortcuts_defs_);
         for (i = 0; i < ids.length; i++)
         {
             var obj = {};
@@ -418,7 +433,7 @@ var _keyboard_shortcuts_info = function() {
         {
             var id = Object.keys(orig_shortcuts_list[i])[0];
             var key = orig_shortcuts_list[i][id];
-            var category = _keyboard_shortcuts_defs[id]["category"];
+            var category = keyboard_shortcuts_defs_[id]["category"];
             var should_add = false; // this only indicates if the shortcut->id mapping should take place or not.
             // We still want the mapping to show in editor UI and shortcuts help
 
@@ -457,35 +472,50 @@ var _keyboard_shortcuts_info = function() {
 
             if (typeof(items[key]) === "undefined")
             {
-                    //console.log("generating default shortcut keys");
-                    keyboard_shortcuts = self.generate_defaults();
-                    //console.log(keyboard_shortcuts);
+                //console.log("generating default shortcut keys");
+                keyboard_shortcuts = self.generate_defaults();
+                //console.log(keyboard_shortcuts);
             }
             else
             {
-                    //console.log("shortcut keys found");
-                    keyboard_shortcuts = items[key];
-                    //console.log(keyboard_shortcuts);
+                //console.log("shortcut keys found");
+                keyboard_shortcuts = items[key];
+                //console.log(keyboard_shortcuts);
             }
 
             var dicts = self.create_keyboard_shortcut_dicts(keyboard_shortcuts);
             //console.log("dicts");
             //console.log(keyboard_shortcuts);
             //console.log(dicts);
+
+            // If newer keys are not defined, then set to default values (so long as keys aren't assigned to something else already)
+            for (i = 0; i < newer_key_ids_.length; i++)
+            {
+                if (typeof(dicts[1][newer_key_ids_[i]]) === "undefined")
+                {
+                    var default_key = keyboard_shortcuts_defs_[newer_key_ids_[i]].default_key;
+                    if (typeof(dicts[0][default_key]) === "undefined")
+                    {
+                        dicts[0][default_key] = newer_key_ids_[i];
+                        dicts[1][newer_key_ids_[i]] = default_key;
+                    }
+                }
+            }
+
             callback(dicts[0], dicts[1]);
         });
     };
 
-    this.get_shortcuts_for_category = function(keyboard_id_to_shortcut_dict, category)
+    this.get_shortcuts_for_category = function(category)
     {
         var ids_for_category = [];
-        var keys = Object.keys(keyboard_id_to_shortcut_dict);
+        var keys = Object.keys(keyboard_shortcuts_defs_);
         var len = keys.length;
         var i;
         for (i = 0; i < len; i++)
         {
             var id = keys[i];
-            var this_category = _keyboard_shortcuts_defs[id]["category"];
+            var this_category = keyboard_shortcuts_defs_[id]["category"];
             if (this_category === category)
                 ids_for_category.push(id);
         }
@@ -493,7 +523,7 @@ var _keyboard_shortcuts_info = function() {
         // sort ids by 'order'
         ids_for_category.sort(function(a, b)
         {
-            return (_keyboard_shortcuts_defs[a].order - _keyboard_shortcuts_defs[b].order);
+            return (keyboard_shortcuts_defs_[a].order - keyboard_shortcuts_defs_[b].order);
         });
 
         return ids_for_category;
@@ -501,24 +531,31 @@ var _keyboard_shortcuts_info = function() {
 
     this.get_categories_in_order = function()
     {
-        return _categories_in_order;
+        return categories_in_order_;
     };
 
     this.get_shortcuts_defs = function()
     {
-        return _keyboard_shortcuts_defs;
+        return keyboard_shortcuts_defs_;
     };
 
-    // Ignores 'None'
+    // Groups together or ignores 'None'
     this.get_keys_string = function(shortcut_keys)
     {
+        if (typeof(shortcut_keys) === "undefined")
+            return "None";
+
         var keys = [];
 
         var str = "";
         var len = shortcut_keys.length;
         for (i = 0; i < len; i++)
+        {
+            if (typeof(shortcut_keys[i]) === "undefined")
+                shortcut_keys[i] = "None";
             if (shortcut_keys[i] !== "None")
                 keys.push(shortcut_keys[i]);
+        }
 
         var len2 = keys.length;
         for (i = 0; i < len2; i++)
@@ -587,7 +624,8 @@ var _keyboard_shortcuts_info = function() {
             text += "&nbsp;&nbsp;&nbsp;Random episode: " + s["player_random_episode"] + "<br>";
             text += "&nbsp;&nbsp;&nbsp;Toggle closed captioning: " + s["player_toggle_cc"] + "<br>";
             text += "&nbsp;&nbsp;&nbsp;Toggle audio tracks: " + s["player_toggle_audio"] + "<br>";
-            text += "&nbsp;&nbsp;&nbsp;Back to browse: " + s["player_back_to_browse"];
+            text += "&nbsp;&nbsp;&nbsp;Back to browse: " + s["player_back_to_browse"] + "<br>";
+            text += "&nbsp;&nbsp;&nbsp;Slower/faster: " + self.get_keys_string([s["player_slower"], s["player_faster"]]) + "<br>";
         }
 
         text += "<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"] + "<br>&nbsp;&nbsp;&nbsp;Who's Watching: " + s["jump_whos_watching"] + "<br>&nbsp;&nbsp;&nbsp;Your Account: " + s["your_account"];
