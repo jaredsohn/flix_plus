@@ -60,7 +60,9 @@ var hideOnPlayer = function()
 
 var hideOnMovieDetails = function()
 {
-    var selectors = ["#seasonDetail .synopsis", ".episodeTitle", ".videoImagery", ".videoDetails .title-text", ".videoDetails .synopsis"];
+    // old for netflix originals: ".videoImagery", ".videoDetails .title-text", ".videoDetails .synopsis"
+    // first three are newer netflix originals; last two are for normal pages
+    var selectors = [".episode .title", ".episode .synopsis", ".episode .stillImage", "#seasonDetail .synopsis", ".episodeTitle"];
     addSpoilerClassToSelectors(selectors);
 };
 

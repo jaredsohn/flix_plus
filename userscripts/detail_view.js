@@ -105,6 +105,7 @@ extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !imp
 ignoreElems($(".displayPagePlayable a")); // play button on wimovie
 ignoreElems($(".episodeList .playBtn a")); // play buttons for episodes on wimovie
 ignoreElems($("#chronology a")); // play buttons for episodes on kidsmovie
+ignoreElems($(".episode .playButton")); // play buttons for episodes on wimovie (Netflix Originals)
 
 while (tagIndex_--)
     fixTag(aTags_[tagIndex_]);

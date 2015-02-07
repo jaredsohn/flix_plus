@@ -100,6 +100,7 @@ switch (window.location.pathname.split('/')[1])
 {
     case "WiHome":
     case "WiRecentAdditions":
+    case "WiRecentAdditionsGallery":
     case "NewReleases":
     case "WiAgain":
     case "WiSimilarsByViewType":

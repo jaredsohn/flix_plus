@@ -103,6 +103,9 @@ var _fplib = function()
                                      {"selector": ".boxShot", "attrib": "id", "prefix": "dbs"} // must include last since id field could have other uses
                                  ];
             selectors["bobPopup"] = "#bob-container";
+        } else if (pathname.indexOf("/WiRecentAdditionsGallery") === 0)
+        {
+            // add nothing
         } else if ((pathname.indexOf("/WiRecentAdditions") === 0) || (pathname.indexOf("/NewReleases") === 0))  // NewReleases seems to be a rename
         {
            selectors["elementsList"] = ".mrow";
