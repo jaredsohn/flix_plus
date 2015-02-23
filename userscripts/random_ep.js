@@ -108,6 +108,7 @@ else if (location.pathname.indexOf("/WiMovie") === 0)
                             seasonEpisodeCounts.push(count);
                         }
                         var rnd = Math.floor(Math.random() * episodeCount);
+                        console.log(rnd);
                         for (i = 0; i < seasonElems.length; i++)
                         {
                             if (rnd >= seasonEpisodeCounts[i])
@@ -118,7 +119,9 @@ else if (location.pathname.indexOf("/WiMovie") === 0)
                                 console.log(i);
                                 console.log(rnd);
                                 seasonElems[i].click();
-                                $('.episodeList li')[rnd].click();
+                                setTimeout(function() {
+                                    $('.episodeList li')[rnd].click();
+                                }, 1000);
                                 /*$("#random_title")[0].href = "#";
                                 $("#random_title")[0].innerHTML = "(Rolling the dice...)";
                                 setTimeout(function() {

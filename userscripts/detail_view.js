@@ -99,14 +99,18 @@ var ignoreElems = function(elems)
     }
 };
 
+var ignoreAllElems = function()
+{
+    ignoreElems($(".displayPagePlayable a")); // play button on wimovie
+    ignoreElems($(".episodeList .playBtn a")); // play buttons for episodes on wimovie
+    ignoreElems($("#chronology a")); // play buttons for episodes on kidsmovie
+    ignoreElems($(".episode .playButton")); // play buttons for episodes on wimovie (Netflix Originals)
+};
+
 // Remove the Play hover buttons on posters on genre pages
 extlib.addGlobalStyle(".lockup:hover>.playHover { background-image:none; }  !important");
 
-ignoreElems($(".displayPagePlayable a")); // play button on wimovie
-ignoreElems($(".episodeList .playBtn a")); // play buttons for episodes on wimovie
-ignoreElems($("#chronology a")); // play buttons for episodes on kidsmovie
-ignoreElems($(".episode .playButton")); // play buttons for episodes on wimovie (Netflix Originals)
-
+ignoreAllElems();
 while (tagIndex_--)
     fixTag(aTags_[tagIndex_]);
 
@@ -116,6 +120,8 @@ $.each($(".recentlyWatchedInner .hasText"), function() { this.classList.remove("
 // Fixes links that are added to the page (such as when you add something to My List).
 document.arrive("a", function()
 {
+    ignoreAllElems(); // a little redundant
+
     fixTag(this);
 });
 
