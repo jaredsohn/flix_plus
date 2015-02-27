@@ -105,6 +105,8 @@ var ignoreAllElems = function()
     ignoreElems($(".episodeList .playBtn a")); // play buttons for episodes on wimovie
     ignoreElems($("#chronology a")); // play buttons for episodes on kidsmovie
     ignoreElems($(".episode .playButton")); // play buttons for episodes on wimovie (Netflix Originals)
+    ignoreElems($(".playButtonWrapper a")); // play and recap buttons on wimovie for Netflix Originals
+    ignoreElems($(".trailers a")); // Buttons within trailers
 };
 
 // Remove the Play hover buttons on posters on genre pages
