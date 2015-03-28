@@ -212,7 +212,7 @@ function getMovieInfo(url, callback)
     {
         console.log(res);
         try {
-            var omdb_json = JSON.parse(res);
+            var omdb_json = res;
             movie_info = parseMovieInfo(omdb_json);
         } catch (ex) {
             console.log(ex);
@@ -251,8 +251,8 @@ function getAllMovieInfos(title, args, callback)
             console.log("~~~~");
             console.log(res);
 
-            var searchJson0 = JSON.parse(res[0]);
-            var searchJson1 = JSON.parse(res[1]);
+            var searchJson0 = res[0];
+            var searchJson1 = res[1];
 
             var search_request_datas = [];
             var dict = {};
