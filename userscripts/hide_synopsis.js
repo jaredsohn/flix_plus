@@ -29,7 +29,7 @@ var hideOnPlayer = function()
         this.style.opacity = 0;
     });
 
-    var selectors = [".episode-list-image", ".episode-list-synopsis", ".next-episode-image", ".episode-list-title", ".player-next-episode-description", ".player-postplay-autoplay-still"];
+    var selectors = [".episode-list-image", ".episode-list-synopsis", ".next-episode-image", ".episode-list-title", ".player-next-episode-description", ".player-postplay-episode-synopsis", ".player-postplay-episode-title", ".player-postplay-autoplay-still"];
     addSpoilerClassToSelectors(selectors);
 
     document.body.arrive(".playback-longpause-container", function() {
