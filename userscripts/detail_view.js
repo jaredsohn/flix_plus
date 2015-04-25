@@ -44,7 +44,7 @@ var fixTag = function(tag)
             return;
         tag.playhref = tag.href;
         tag.classList.remove("playLink"); // also care about hoverPlay for genre pages but Flix Plus forwards those URLs to AltGenre
-        tag.href = linkBase_ + tag.href.match(regex_)[1];
+        tag.href = linkBase_ + tag.href.match(regex_)[1] + "?movieid=" + tag.href.match(regex_)[1]; // April 2015: now shows bob based on movieid in parameter
         tag.onmousedown = stopIt;
         tag.onclick = clickIt;
     }
