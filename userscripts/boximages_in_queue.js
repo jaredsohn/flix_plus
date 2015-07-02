@@ -1,3 +1,9 @@
+// boximages_in_queue userscript for Netflix
+// Used (barely altered) in Flix Plus by Lifehacker, 2014-2015
+// http://www.github.com/jaredsohn/flixplus
+// Depends on: (none)
+
+
 // ==UserScript==
 // @name           Netflix boximages in queue
 // @namespace

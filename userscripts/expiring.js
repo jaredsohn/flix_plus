@@ -1,4 +1,8 @@
-//jaredsohn/lifehacker: source was http://userscripts.org:8080/scripts/show/159166
+// expiring userscript for Netflix
+// Was found at http://userscripts.org:8080/scripts/show/159166
+// Used (barely altered) in Flix Plus by Lifehacker, 2014-2015
+// http://www.github.com/jaredsohn/flixplus
+// Depends on: (none)
 
 // ==UserScript==
 // @name          Netflix Expiring
@@ -25,8 +29,6 @@
  ** Firefox: http://greasemonkey.mozdev.org/
  ** Chrome: http://www.chromium.org/developers/design-documents/user-scripts
  **/
-
-// This file has very minimal changes for Flix Plus.
 
 (function()
 {

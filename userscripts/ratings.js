@@ -35,6 +35,7 @@ else
 var CACHE_LIFE = 1000 * 60 * 60 * 24 * 7 * 2; //two weeks in milliseconds
 
 var https_supported_ = true; // Not true if using this as a userscript
+var movie_info_cached_ = {}; // id: movieInfo; only stored in memory
 
 //////////// CACHE //////////////
 
@@ -45,7 +46,7 @@ function addCache(ui_data, movie_info) {
     var compact_movie_info = {};
     var fields = ["title", "year", "type", "date", "imdbID", "imdbScore", "tomatoMeter", "tomatoUserMeter", "metaScore"];
     var len = fields.length;
-    for (i = 0; i < len; i++)
+    for (var i = 0; i < len; i++)
         compact_movie_info[fields[i]] = movie_info[fields[i]];
 
     var key = ui_data["title"] + "_" + ui_data["year"] + "_" + ui_data["type"];
@@ -106,27 +107,21 @@ function getTomatoLink(imdbID) {
 
 ///////////////// UI PARSERS ////////////////
 function parseTitle(args) {
-    return $(args["info_section"] + " .title")[0].innerText.trim();
+    return fplib.parseTitle(args["parse_head"]);
 }
 
 // Assumes only tv series or movie
 function parseType(args) {
-    var $target = $(args["info_section"] + " .duration");
-    var text = $target.text();
-    if ((text.indexOf("Season") !== -1) || (text.indexOf("Series") !== -1) || (text.indexOf("Episode") !== -1) ||
-        (text.indexOf("Part") !== -1) || (text.indexOf("Volume") !== -1) || (text.indexOf("Collection") !== -1))
-        return "series";
-    else
-        return "movie";
+    return ($(".Episodes", $(args["parse_head"])).length) ? "series" : "movie";
 }
 
 function parseYear(args) {
-    var $target = $(args["info_section"] + " .year");
+    var $target = $(".meta .year", $(args["parse_head"]));
     return $target.text().split('-')[0];
 }
 
 function parseEndYear(args) {
-    var $target = $(args["info_section"] + " .year");
+    var $target = $(".meta .year", $(args["parse_head"]));
     var endYear = null;
     if ($target[0].innerText.indexOf("-") !== -1)
         endYear = $target.text().split('-')[1];
@@ -135,59 +130,13 @@ function parseEndYear(args) {
 
 function parseRoles(args) {
     var roles = { "actors" : {}, "directors" : {}, "creators" : {} };
-    var target_elem = $(args["roles_section"]);
+    var $target = $(".metaList a", args["parse_head"]);
 
-    // The structure is different for movie pages (it doesn't just have a different parent element)
-    if (location.pathname.indexOf("/WiMovie") === 0)
-    {
-        var dls = $("dl", target_elem);
-
-        var dls_len = dls.length;
-        for (i = 0; i < dls_len; i++)
-        {
-            var dts = $("dt", dls[i]);
-            if (dts.length === 0)
-                continue;
-            var dds = $("dd a", dls[i]);
-            var ddLength = dds.length;
-            for (ddIndex = 0; ddIndex < ddLength; ddIndex++)
-            {
-                var dict = {"starring": "actors", "cast": "actors", "director": "directors", "creator": "creators"};
-
-                if (dts[0].innerHTML.toLowerCase() in dict)
-                    roles[dict[dts[0].innerHTML.toLowerCase()]][dds[ddIndex].innerText.trim()] = true;
-            }
+    [].slice.call($target).forEach(function(metaEntry) {
+        if (metaEntry.getAttribute("type") === "person") {
+            roles["actors"][metaEntry.innerHTML.toLowerCase().trim()] = true;
         }
-    } else
-    {
-        try
-        {
-            var dts = $(" dl dt", target_elem);
-            var dds = $(" dl dd", target_elem);
-
-            var dts_len = dts.length;
-            for (i = 0; i < dts_len; i++)
-            {
-                var dt = dts[i].innerText.trim().replace(":", "").toLowerCase();
-
-                var elems = $("a", dds[i]);
-                var elems_len = elems.length;
-
-                var dict = {"starring": "actors", "cast": "actors", "director": "directors", "creator": "creators"};
-                if (dt in dict)
-                    for (j = 0; j < elems_len; j++)
-                        roles[dict[dt]][elems[j].innerText.trim()] = true;
-            }
-        }
-        catch (ex)
-        {
-            extlib.stackTrace();
-            console.log(ex);
-        }
-    }
-
-    console.log("parsed roles = ");
-    console.log(roles);
+    });
 
     return roles;
 }
@@ -260,7 +209,7 @@ function getAllMovieInfos(title, args, callback)
             if ((searchJson0 !== null) && (typeof(searchJson0.Search) !== "undefined"))
             {
                 var len = searchJson0.Search.length;
-                for (i = 0; i < len; i++)
+                for (var i = 0; i < len; i++)
                 {
                     if (typeof(dict[searchJson0.Search[i]["imdbID"]]) === "undefined")
                     {
@@ -273,7 +222,7 @@ function getAllMovieInfos(title, args, callback)
             if ((searchJson1 !== null) && (typeof(searchJson1.Search) !== "undefined"))
             {
                 var len = searchJson1.Search.length;
-                for (i = 0; i < len; i++)
+                for (var i = 0; i < len; i++)
                 {
                     if (typeof(dict[searchJson1.Search[i]["imdbID"]]) === "undefined")
                     {
@@ -299,7 +248,7 @@ function getAllMovieInfos(title, args, callback)
                         {
                             if (infoMatchUi(movie_info, args) === false)
                                 callback3(0, null);
-                            else if (infoMatchUiRolesCount(movie_info, args) === 0)
+                            else if (((movie_info["type"] || null) !== "series") && (infoMatchUiRolesCount(movie_info, args) === 0))
                                 callback3(0, null);
                             else
                                 callback3(0, movie_info);
@@ -313,7 +262,7 @@ function getAllMovieInfos(title, args, callback)
                     var matches = [];
 
                     var len = results.length;
-                    for (i = 0; i < len; i++)
+                    for (var i = 0; i < len; i++)
                         if ((results[i] !== null) && (results[i].nodata === false))
                             matches.push(results[i]);
                     callback(matches);
@@ -331,7 +280,7 @@ function getRating(args, cache_only, callback) {
 
     var ui_data = getUiData(args);
 
-    var $target = $(args["selector"]);
+    var $target = $(args["out_head"]);
     var spinner = "<div id='fp_rt_spinner_div'>Looking up external ratings...<br><img class='fp_button fp_rt_spinner' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'><br><br><br></div>";
     $target.append(spinner);
 
@@ -423,6 +372,8 @@ function parseMovieInfo(omdb_json)
     info.roles["creators"] = getRolesArray(omdb_json, "Creator");
     info.rated = omdb_json["Rated"];
     info.nodata = false;
+    info.ignoreRoles = false;
+    info.ignoreYears = false;
     console.log("parsed movie info");
     console.log(info);
 
@@ -439,7 +390,7 @@ function getRolesArray(json_obj, field)
     var roles_array = [];
     if ((typeof(json_obj[field]) !== "undefined") && (json_obj[field] !== null))
         roles_array = json_obj[field].split(",");
-    for (i = 0; i < roles_array.length; i++)
+    for (var i = 0; i < roles_array.length; i++)
         roles_array[i] = roles_array[i].trim();
 
     return roles_array;
@@ -502,7 +453,7 @@ function infoMatchUiType(movie_info, args) {
     var type = parseType(args);
     if (type !== movie_info["type"])
     {
-        console.log("type doesn't match");
+        console.log("types don't match");
         return false;
     }
     return true;
@@ -535,19 +486,19 @@ function infoMatchUiRolesCount(movie_info, args) {
     {
         // must have at least one match.
         var role_names = ["actors", "directors", "creators"];
-        for (i = 0; i < role_names.length; i++)
+        for (var i = 0; i < role_names.length; i++)
         {
             var dict = {};
 
             var keys = Object.keys(ui_roles[role_names[i]]);
             var len = keys.length;
-            for (j = 0; j < len; j++)
+            for (var j = 0; j < len; j++)
             {
                 var name = keys[j].toLowerCase().trim();
                 dict[name] = true;
             }
 
-            for (j = 0; j < ajax_roles[role_names[i]].length; j++)
+            for (var j = 0; j < ajax_roles[role_names[i]].length; j++)
             {
                 var name = ajax_roles[role_names[i]][j].trim();
                 if (typeof(dict[name.toLowerCase()]) !== "undefined")
@@ -578,14 +529,24 @@ function infoMatchUi(movie_info, args) {
         return false;
     }
 
-    var roles_match_count = infoMatchUiRolesCount(movie_info, args);
-    console.log("~~~");
-    console.log(movie_info);
-    console.log(roles_match_count);
-    if (roles_match_count === 0)
-    {
-        console.log("roles don't match.");
-        return false;
+    // Netflix no longer shows roles on the show info page if a series (it
+    // is still accessible in the details page, but then we need to do some
+    // magic to get at that information.
+    console.log("will skip roles if series");
+    console.log(movie_info["type"]);
+    console.log((movie_info["type"] || null) !== "series");
+    console.log(movie_info["type"] || null);
+    if (((movie_info["type"] || null) !== "series") && (movie_info["ignoreRoles"] === false)) {
+        console.log("guess we will compare");
+        var roles_match_count = infoMatchUiRolesCount(movie_info, args);
+        console.log("~~~");
+        console.log(movie_info);
+        console.log(roles_match_count);
+        if (roles_match_count === 0)
+        {
+            console.log("roles don't match.");
+            return false;
+        }
     }
 
     if (simplifyTitle(movie_info["title"]) !== simplifyTitle(parseTitle(args)))
@@ -596,28 +557,34 @@ function infoMatchUi(movie_info, args) {
 
     try
     {
-        // The year (or start year) must be within one
-        var ajax_years = extlib.parseYearRange(movie_info["year"]);
-        var ajax_year_str = null;
-        if (ajax_years.length)
-            ajax_year_str = ajax_years[0].toString();
+        // We ignore years for series (but will reject if more than one match),
+        // since Netflix's June 2015 update now only shows the year that the series
+        // was updated on Netflix.  Means that we cannot show ratings for some shows
+        // such as Doctor Who.
+        if (((movie_info["type"] || null) !== "series") && (movie_info["ignoreYears"] === false)) {
+            // The year (or start year) must be within one
+            var ajax_years = extlib.parseYearRange(movie_info["year"]);
+            var ajax_year_str = null;
+            if (ajax_years.length)
+                ajax_year_str = ajax_years[0].toString();
 
-        if ((ajax_year_str !== null) && (ajax_year_str.trim() !== ""))
-        {
-            var ajax_year = parseInt(ajax_year_str);
-            var ui_year_str = parseYear(args);
+            if ((ajax_year_str !== null) && (ajax_year_str.trim() !== ""))
+            {
+                var ajax_year = parseInt(ajax_year_str);
+                var ui_year_str = parseYear(args);
 
-            if ((ui_year_str !== ((ajax_year).toString())) &&
-                (ui_year_str !== ((ajax_year - 1).toString())) &&
-                (ui_year_str !== ((ajax_year + 1).toString())))
+                if ((ui_year_str !== ((ajax_year).toString())) &&
+                    (ui_year_str !== ((ajax_year - 1).toString())) &&
+                    (ui_year_str !== ((ajax_year + 1).toString())))
+                {
+                    console.log("years don't match");
+                    return false;
+                }
+            } else
             {
                 console.log("years don't match");
                 return false;
             }
-        } else
-        {
-            console.log("years don't match");
-            return false;
         }
     } catch (ex)
     {
@@ -637,9 +604,9 @@ function displayRating(movie_info, is_https, args) {
     if ((movie_info === null) || (movie_info.nodata === true) || (!infoMatchUi(movie_info, args)))
     {
         if (is_https && !https_supported_)
-            $(args["selector"]).append("<div class='fp_rt_no_https'><br>No HTTPS support for external ratings.</div>");
+            $(args["out_head"]).append("<div class='fp_rt_no_https'><br>No HTTPS support for external ratings.</div>");
         else
-            $(args["selector"]).append("<div id='fp_rt_not_found'><br>Could not find external ratings.</div>");
+            $(args["out_head"]).append("<div id='fp_rt_not_found'><br>Could not find external ratings.</div>");
     }
     else
     {
@@ -647,31 +614,115 @@ function displayRating(movie_info, is_https, args) {
         var tomato = getTomatoHtml(movie_info, '');
 //        var meta = getMetatcriticHtml(movie_info, '');
 
-        var $target = $(args["selector"]);
-        $target.append(imdb);
-        $target.append(tomato);
+        $(args["out_head"]).append(imdb);
+        $(args["out_head"]).append(tomato);
   //      $target.append(meta);
+    }
+}
+
+Object.defineProperty(Element.prototype, 'outerHeight', {
+    'get': function()
+    {
+        var height = this.clientHeight;
+        var computedStyle = window.getComputedStyle(this);
+        height += parseInt(computedStyle.marginTop, 10);
+        height += parseInt(computedStyle.marginBottom, 10);
+        height += parseInt(computedStyle.borderTopWidth, 10);
+        height += parseInt(computedStyle.borderBottomWidth, 10);
+        return height;
+    }
+});
+
+Element.prototype.documentOffsetTop = function()
+{
+  return this.offsetTop + (this.offsetParent ? this.offsetParent.documentOffsetTop() : 0);
+};
+
+// Hide elements as necessary so that the most important content fits
+function ensureEverythingFits(overviewInfo) {
+    var jawBoneElems = $(overviewInfo).closest(".jawBone");
+    if (jawBoneElems.length === 0)
+        return;
+    var menuElems = jawBoneElems[0].getElementsByClassName("menu");
+    if (menuElems.length === 0)
+        return;
+
+
+    // We make use of the menubar's vertical space as well (but leave a 5 pixel margin)
+    var allowedHeight = menuElems[0].documentOffsetTop() - overviewInfo.documentOffsetTop() + menuElems[0].offsetHeight - 5;
+    var actualHeight = overviewInfo.scrollHeight;
+
+    console.log("allowed1: " + menuElems[0].documentOffsetTop());
+    console.log("allowed2: " + overviewInfo.documentOffsetTop());
+    console.log("allowed3: " + menuElems[0].offsetHeight || 0);
+    console.log(".fp_links: ");
+    console.log($(".fp_links"));
+
+    console.log("allowedHeight = " + allowedHeight);
+    console.log("actualHeight = " + actualHeight);
+
+    if (actualHeight > allowedHeight)
+    {
+        var elems = overviewInfo.getElementsByClassName("user-evidence");
+        if (elems.length) {
+            actualHeight = actualHeight - elems[0].outerHeight;
+            elems[0].style.display = "none";
+            console.log("hid user-evidence");
+            console.log("new actualheight is " + actualHeight);
+        }
+    }
+
+    if (actualHeight > allowedHeight)
+    {
+        var elems = overviewInfo.getElementsByClassName("listMeta");
+        if (elems.length > 0) {
+            var tagElems = elems[0].getElementsByTagName("p");
+            if (tagElems.length)
+            {
+                var elemsArray = [].slice.call(tagElems);
+                for (var tagIndex = elemsArray.length - 1; tagIndex >= 0; tagIndex--)
+                {
+                    if (actualHeight > allowedHeight)
+                    {
+                        actualHeight -= tagElems[tagIndex].offsetHeight;
+                        console.log("new actualheight is " + actualHeight);
+                        tagElems[tagIndex].style.display = "none";
+                        console.log("hid listmeta p");
+                    }
+                }
+                var tags = elems[0].getElementsByTagName("p");
+                if (tags.length === 0)
+                {
+                    actualHeight -= elems[0].outerHeight;
+                    console.log("new actualheight is " + actualHeight);
+                    elems[0].style.display = "none";
+                    console.log("hid all listmeta");
+                }
+            }
+        }
+    }
+
+    if (actualHeight > allowedHeight)
+    {
+        var elems = overviewInfo.getElementsByClassName("fp_external_ratings");
+        if (elems.length) {
+            console.log("hid fp_external_ratings");
+            console.log(elems[0].outerHeight);
+            actualHeight = actualHeight - elems[0].outerHeight;
+            console.log("new actualheight is " + actualHeight);
+            elems[0].style.display = "none";
+        }
     }
 }
 
 // Clear old ratings and unused content.
 function clearOld(args) {
-    var $target = $(args["info_section"]);
-    if (args["hide_labels"] === true)
-        $target.find('.label').contents().remove();
+    var $target = $(args["out_head"]);
     $target.find('.ratingPredictor').remove();
     $target.find('.fp_rt_rating_link').remove();
     $target.find('#fp_rt_spinner_div').remove();
     $target.find('#fp_rt_not_found').remove();
     $target.find('.fp_rt_no_https').remove();
-
-    if (args["fix_alignment"] === true)
-    {
-        // Fix alignment issues by removing stbrLeftAlign class so rotten/imdb ratings appear on same line as user star ratings)
-        var elems = $target.find('.bobMovieRatings')[0].getElementsByClassName("stbrLeftAlign");
-        for (i = 0; i < elems.length; i++)
-            elems[i].className = elems[i].className.replace(new RegExp(" ?\\b" + "stbrLeftAlign" + "\\b"), '');
-    }
 }
 
 function getTomatoClass(score) {
@@ -741,55 +792,153 @@ function getMetatcriticHtml(movie_info, klass) {
     return html;
 }
 
-
 ///////// MAIN /////////////
 
-function onPopup()
-{
-    console.log("arrive-ratings-onPopup");
-
-    $(".bobMovieContent").height(250); // jaredsohn-lifehacker: Added to make room for ratings buttons (after recommend button was added)
-    $(".bobMovieContent").width(325);  // Sometimes the code below wouldn't fit within the popup; make it bigger to accomodate it
-    $("#BobMovie-content").width(347); // Match the width
-    $(".bobMovieHeader").width(329);   // Match the width
-
-    var args = {"info_section" : "#BobMovie", "roles_section" : ".info", "selector" : ".midBob", "hide_labels" : true, "fix_alignment": true };
-    if (location.pathname.indexOf("/search") === 0)
-    {
-        console.log("fix alignment set to false");
-        args["fix_alignment"] = false;
+var createRatingElemsDiv = function(head) {
+    // Don't create more than one
+    console.log(head.getElementsByClassName("fp_external_ratings"));
+    if (head.getElementsByClassName("fp_external_ratings").length !== 0) {
+        return null;
     }
 
-    clearOld(args);
+    var out_heads = [head];
+    if (!head.classList.contains("jawbone-overview-info"))
+        out_heads = head.getElementsByClassName("jawbone-overview-info");
 
-    var is_https = (window.location.protocol === "https:");
-    getRating(args, is_https && !https_supported_, function(movie_info) {
-        displayRating(movie_info, is_https, args);
-    });
-}
+    var ratingsDiv = document.createElement("div");
+    ratingsDiv.className = "fp_external_ratings";
+    var metaElems = out_heads[0].getElementsByClassName("meta");
+    if (metaElems.length)
+    {
+        $(metaElems[0]).after(ratingsDiv);
+    } else
+    {
+        ratingsDiv = null;
+    }
+    return ratingsDiv;
+};
 
 $(document).ready(function() {
     extlib.addStyle("fp_rt_rating_overlay", chrome.extension.getURL('../src/css/ratings.css'));
 
-    // Show ratings on movie details page
-    if (location.pathname.indexOf("/WiMovie") === 0)
-    {
-        var args = {"info_section" : "#displaypage-overview-details", "roles_section" : "#displaypage-details", "selector" : ".ratingsInfo", "hide_labels" : false, "fix_alignment": false };
+    console.log("starting!");
 
-        var is_https = (window.location.protocol === "https:");
+    var is_https = (window.location.protocol === "https:");
 
-        if (is_https && !https_supported_)
+    if (!(is_https && !https_supported_)) {
+        document.body.arrive(".jawBone", { fireOnAttributesModification: true }, function()
         {
-            $(args["info_section"]).append("<div class='fp_rt_no_https'><br>No https support for Rotten Tomatoes / IMDB ratings.</div>");
-        } else
-        {
-            getRating(args, false, function(movie_info) {
-                displayRating(movie_info, is_https, args);
+            var movie_id = $(this).closest(".jawBoneContainer")[0].id;
+            var self;
+            var overviewInfos = this.getElementsByClassName("jawbone-overview-info");
+            if (overviewInfos.length)
+            {
+                var ratingsDiv = createRatingElemsDiv(overviewInfos[0]);
+                if (ratingsDiv !== null)
+                {
+                  var args = {"parse_head" : this, "out_head" : ratingsDiv };
+                    console.log(args);
+                    getRating(args, false, function(movie_info)
+                    {
+                        displayRating(movie_info, is_https, args);
+                        // Cache movie info and don't require that year and roles match
+                        movie_info.ignoreRoles = true;
+                        movie_info.ignoreYears = true;
+                        movie_info_cached_[movie_id] = movie_info;
+
+                        console.log("displayRating - 2");
+                        ensureEverythingFits(overviewInfos[0]);
+                        document.body.arrive(".fp_links", function() {
+                            console.log("fp_links arrive");
+                            ensureEverythingFits(overviewInfos[0]);
+                        });
+                    });
+                }
+            } else {
+                console.log("overviewInfos.length was zero");
+            }
+            var jawBoneElem = this;
+            this.arrive(".jawbone-overview-info", { fireOnAttributesModification: true }, function()
+            {
+//                console.log("arrived - .jawbone-overview-info!");
+
+                var movie_id = $(this).closest(".jawBoneContainer")[0].id;
+                console.log("movie_id2 = " + movie_id);
+
+                if ((movie_info_cached_[movie_id] || null) !== null)
+                {
+                    var ratingsDiv = createRatingElemsDiv(this);
+                    if (ratingsDiv !== null)
+                    {
+                      var args = {"parse_head" : jawBoneElem, "out_head" : ratingsDiv };
+                        displayRating(movie_info_cached_[movie_id], is_https, args); // redisplay as needed
+                        ensureEverythingFits(this);
+                        document.body.arrive(".fp_links", function() {
+                            console.log("fp_links arrive");
+                            ensureEverythingFits(overviewInfos[0]);
+                        });
+                    }
+                }
             });
-        }
+        });
     }
 
-    var selectors = fplib.getSelectorsForPath();
-    if (selectors !== null)
-        document.arrive(selectors["bobPopup"], onPopup);
+    var changeMenuPointerLogic = function(elem)
+    {
+        try {
+            elem.style.pointerEvents = "none";
+            var tagElems = elem.getElementsByTagName("li");
+            [].slice.call(tagElems).forEach(function(tagElem) {
+                tagElem.style.pointerEvents = "all";
+            });
+        } catch (ex) {
+            console.error(ex);
+        }
+    };
+
+    document.body.arrive(".menu", function() {
+        changeMenuPointerLogic(this);
+    });
+    $(".menu").each(function(index, value) { changeMenuPointerLogic(this); });
+
+    [].slice.call($(".jawBone")).forEach(function(ratingArea)
+    {
+        console.log("jawbone ready");
+        var ratingsDiv = createRatingElemsDiv(ratingArea);
+        if (ratingsDiv)
+        {
+            console.log("ratingsdiv exists");
+            var args = {"parse_head" : ratingArea, "out_head" : ratingsDiv };
+
+            if (is_https && !https_supported_)
+            {
+                console.log("won't work since https");
+                $(args["out_head"]).append("<div class='fp_rt_no_https'><br>No https support for Rotten Tomatoes / IMDB ratings.</div>");
+            } else
+            {
+                console.log("getRating");
+                getRating(args, false, function(movie_info)
+                {
+                    var movie_id = $(ratingArea).closest(".jawBoneContainer")[0].id;
+                    console.log("movie_id0 = " + movie_id);
+                    console.log("displayRating - 1");
+                    displayRating(movie_info, is_https, args);
+
+                    // Cache movie info and don't require that year and roles match
+                    movie_info.ignoreRoles = true;
+                    movie_info.ignoreYears = true;
+                    movie_info_cached_[movie_id] = movie_info;
+
+                    var overviewInfos = ratingArea.getElementsByClassName("jawbone-overview-info");
+                    if (overviewInfos.length) {
+                        ensureEverythingFits(overviewInfos[0]);
+                        document.body.arrive(".fp_links", function() {
+                            console.log("fp_links arrive3");
+                            ensureEverythingFits(overviewInfos[0]);
+                        });
+                    }
+                });
+            }
+        }
+    });
 });

@@ -1,7 +1,7 @@
-// Note that this module uses snakecase for variable and function names.
+// Note that this module uses a different code style than most other code.
 
-var keyboard_shortcuts_info = _keyboard_shortcuts_info || {};
-var _keyboard_shortcuts_info = function() {
+var keyboard_shortcuts_info = keyboard_shortcuts_info_ || {};
+var keyboard_shortcuts_info_ = function() {
     var self = this;
 
     var categories_in_order_ = ["Posters", "Sections", "Player", "Jump to page", "Misc"];
@@ -9,6 +9,7 @@ var _keyboard_shortcuts_info = function() {
     // Any new keys created after Flix Plus 2.0 should be included here so that existing users
     // will have keys assigned to default value (if still available)
     var newer_key_ids_ = ["player_slower", "player_faster"];
+    var obsolete_key_ids_dict_ = { "jump_whos_watching" : true };
 
     var keyboard_shortcuts_defs_ = {
         reveal_spoilers:
@@ -23,12 +24,12 @@ var _keyboard_shortcuts_info = function() {
              description: 'Kids',
              category: 'Jump to page',
              order: 3 },
-        jump_whos_watching:
+/*        jump_whos_watching:
         {
              default_key: 'w',
              description: 'Who\'s Watching',
              category: 'Jump to page',
-             order: 99 },
+             order: 99 },*/
         section_show_random:
         {
              default_key: 'r',
@@ -383,7 +384,7 @@ var _keyboard_shortcuts_info = function() {
     {
         var new_defaults = [];
         var ids = Object.keys(keyboard_shortcuts_defs_);
-        for (i = 0; i < ids.length; i++)
+        for (var i = 0; i < ids.length; i++)
         {
             var obj = {};
             obj[ids[i]] = keyboard_shortcuts_defs_[ids[i]]["default_key"];
@@ -397,7 +398,7 @@ var _keyboard_shortcuts_info = function() {
     {
         var new_defaults = [];
         var ids = Object.keys(keyboard_shortcuts_defs_);
-        for (i = 0; i < ids.length; i++)
+        for (var i = 0; i < ids.length; i++)
         {
             var obj = {};
             obj[ids[i]] = "None";
@@ -427,12 +428,16 @@ var _keyboard_shortcuts_info = function() {
         var orig_shortcuts = Object.keys(orig_shortcuts_list);
         var len = orig_shortcuts_list.length;
 
-        var isPlayer = (location.pathname.indexOf("/WiPlayer") === 0);
+        var isPlayer = (location.pathname.indexOf("/watch") === 0);
 
-        for (i = 0; i < len; i++)
+        for (var i = 0; i < len; i++)
         {
             var id = Object.keys(orig_shortcuts_list[i])[0];
             var key = orig_shortcuts_list[i][id];
+
+            if ((obsolete_key_ids_dict_[id] || null) !== null)
+                continue;
+
             var category = keyboard_shortcuts_defs_[id]["category"];
             var should_add = false; // this only indicates if the shortcut->id mapping should take place or not.
             // We still want the mapping to show in editor UI and shortcuts help
@@ -441,7 +446,8 @@ var _keyboard_shortcuts_info = function() {
             {
                 case "Posters":
                 case "Sections":
-                    should_add = !isPlayer;
+                    //should_add = !isPlayer;
+                    should_add = false; // Not supported yet for Netflix June 2015 update
                     break;
                 case "Player":
                     should_add = isPlayer;
@@ -480,6 +486,7 @@ var _keyboard_shortcuts_info = function() {
             {
                 //console.log("shortcut keys found");
                 keyboard_shortcuts = items[key];
+
                 //console.log(keyboard_shortcuts);
             }
 
@@ -489,7 +496,7 @@ var _keyboard_shortcuts_info = function() {
             //console.log(dicts);
 
             // If newer keys are not defined, then set to default values (so long as keys aren't assigned to something else already)
-            for (i = 0; i < newer_key_ids_.length; i++)
+            for (var i = 0; i < newer_key_ids_.length; i++)
             {
                 if (typeof(dicts[1][newer_key_ids_[i]]) === "undefined")
                 {
@@ -511,8 +518,7 @@ var _keyboard_shortcuts_info = function() {
         var ids_for_category = [];
         var keys = Object.keys(keyboard_shortcuts_defs_);
         var len = keys.length;
-        var i;
-        for (i = 0; i < len; i++)
+        for (var i = 0; i < len; i++)
         {
             var id = keys[i];
             var this_category = keyboard_shortcuts_defs_[id]["category"];
@@ -549,7 +555,7 @@ var _keyboard_shortcuts_info = function() {
 
         var str = "";
         var len = shortcut_keys.length;
-        for (i = 0; i < len; i++)
+        for (var i = 0; i < len; i++)
         {
             if (typeof(shortcut_keys[i]) === "undefined")
                 shortcut_keys[i] = "None";
@@ -558,7 +564,7 @@ var _keyboard_shortcuts_info = function() {
         }
 
         var len2 = keys.length;
-        for (i = 0; i < len2; i++)
+        for (var i = 0; i < len2; i++)
         {
             str += keys[i];
             if (i < (len2 - 1))
@@ -585,6 +591,7 @@ var _keyboard_shortcuts_info = function() {
         else
             text += "<br><br>This list only shows the keys that work on this page (selection pages, show details, and the player are different.)  The complete list of shortcut keys can be viewed and changed in options.";
 
+/*
         if ((context !== "player") && (context !== "nonplayer-no-navigation") && (context !== "show_details"))
         {
             text += "<br><br>";
@@ -602,6 +609,8 @@ var _keyboard_shortcuts_info = function() {
         {
             text += "<br><br>Many commands are not shown here because navigation is disabled.";
         }
+*/ // TODO-disabled because not supported yet for Netflix June 2015 update
+            text += "<br><br>Navigation commands have been temporarily removed since they are not yet supported for Netflix's June 2015 update.";
 
         if (context === "show_details")
         {
@@ -628,10 +637,10 @@ var _keyboard_shortcuts_info = function() {
             text += "&nbsp;&nbsp;&nbsp;Slower/faster: " + self.get_keys_string([s["player_slower"], s["player_faster"]]) + "<br>";
         }
 
-        text += "<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"] + "<br>&nbsp;&nbsp;&nbsp;Who's Watching: " + s["jump_whos_watching"] + "<br>&nbsp;&nbsp;&nbsp;Your Account: " + s["your_account"];
+        text += "<br><br>Jump to page<br>&nbsp;&nbsp;&nbsp;Home: " + s["jump_instant_home"] + "<BR>&nbsp;&nbsp;&nbsp;My List : " + s["jump_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;New arrivals: " + s["jump_new_arrivals"] + "<br>&nbsp;&nbsp;&nbsp;Kids: " + s["jump_kids"] + "<br>&nbsp;&nbsp;&nbsp;Your Account: " + s["your_account"];
         text += "<BR>&nbsp;&nbsp;&nbsp;Viewing activity: " + s["jump_viewing_activity"] + "<br>&nbsp;&nbsp;&nbsp;Your Ratings: " + s["jump_your_ratings"] + "<BR><br>Search: " + s["search"] + "<BR>Updated rated/watched: " + s["update_rated_watched"] + "<BR>Toggle spoilers: " + s["reveal_spoilers"] + "<BR>Close window: " + s["close_window"] + "<BR>"; + "<BR>Help: " + s["help"] + "<BR>";
 
         return text;
     };
 };
-_keyboard_shortcuts_info.call(keyboard_shortcuts_info);
+keyboard_shortcuts_info_.call(keyboard_shortcuts_info);

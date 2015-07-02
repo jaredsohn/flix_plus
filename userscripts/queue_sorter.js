@@ -1,3 +1,8 @@
+// queue_sorter userscript for Netflix
+// Used (barely altered) in Flix Plus by Lifehacker, 2014-2015
+// http://www.github.com/jaredsohn/flixplus
+// Depends on: (none)
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // This is a Greasemonkey user script.

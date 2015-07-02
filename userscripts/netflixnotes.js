@@ -1,3 +1,13 @@
+// netflixnotes userscript for Netflix
+// Used (with minimal changes) in Flix Plus by Lifehacker, 2014-2015
+// http://www.github.com/jaredsohn/flixplus
+// Depends on: (none)
+//
+// Local modifications include using fewer storage keys and using
+// Chrome's sync storage.
+// Found at found at http://userscripts.org:8080/scripts/review/30744/
+
+
 // Netflix Notes user script
 // version 1.2.5
 // 2014-01-04
@@ -35,11 +45,6 @@
 // @include       http://*.netflix.com/Queue*
 // @include       http://*.netflix.com/MyList*
 // ==/UserScript==
-
-// Updated by jaredsohn-lifehacker to use a single localstorage key so as to not pollute it as much.  Also, uses Chrome's sync storage.
-// Originally found at http://userscripts.org:8080/scripts/review/30744
-
-// Note: We do not update to match style guidelines for this script since we are including it mostly unchanged.
 
 var KEY_NAME = "flix_plus " + fplib.getProfileName() + " notes";
 
@@ -251,7 +256,7 @@ function insertNotesByClass(className)
     if (q)
     {
         // Loop changed from "for each" to for loop so that it works in Chrome (jaredsohn-lifehacker)
-        for (i = 0; i < q.length; i++)
+        for (var i = 0; i < q.length; i++)
         {
             insertNotesInElem(q[i]);
         }

@@ -1,3 +1,4 @@
+
 #flix_plus_keyboard_commands {
 	align: center;
 	width: 60%;
@@ -53,5 +54,68 @@
 .fp_spoiler:hover, .fp_spoiler:focus {
 	-webkit-filter: blur(0px) !important;
 }
+.fp_spoilerblack {
+	display: none;
+}
 
+.extlib_button {
+    font: bold 11px Arial;
+    text-decoration: none;
+    padding: 2px 6px 2px 6px;
+    border-top: 1px solid #CCCCCC;
+    border-right: 1px solid #333333;
+    border-bottom: 1px solid #333333;
+    border-left: 1px solid #CCCCCC;
+    margin-left: 15px;
+    cursor: pointer; cursor: hand;
+    display: inline;
+  	background-color: #EEEEEE;
+   	color: #333333;
+}
 
+.fp_random_buttons {
+	display: inline;
+}
+
+.extlib_button_dark {
+	background-color: #333333 !important;
+	color: #EEEEEE; !important;
+}
+
+/* Most of new Netflix is dark  */
+.fp_button, .fp_button_text, .flix_plus_shownsectionbutton, .flix_plus_hiddensectionbutton, .flix_plus_scrolls_shown_button, .flix_plus_all_shown_button, #fp_progress {
+	-webkit-filter: invert(100%);
+}
+
+.fp_external_ratings {
+	margin-bottom: -25px;
+	min-height:60px;
+}
+
+/*.jawbone-overview-info {
+	height: 250px;
+	overflow-y:scroll;
+}*/
+
+.fp_preview_link {
+    top: 45%;
+    right: 26%;
+    font-size: 7.2vw;
+    height: 7.92vw;
+    width: 7.92vw;
+    margin-left: -3.78vw;
+    margin-top: -3.78vw;
+	margin-right: 55px !important;
+    border-radius: 50%;
+    color: #fff;
+    opacity: .7;
+    position: absolute;
+    z-index: 100;
+    box-sizing: border-box;
+    outline: 0;
+    -webkit-transition: all 150ms ease;
+    -moz-transition: all 150ms ease;
+    -o-transition: all 150ms ease;
+    -ms-transition: all 150ms ease;
+    transition: all 150ms ease;
+}

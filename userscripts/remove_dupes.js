@@ -1,59 +1,54 @@
-// remove_dupes
-//
-// Written by jaredsohn/lifehacker
-//
-// Hide duplicate titles.  Requires fplib.js
-//////////////////////////////////////////////////////////////////
+return; // TODO: reenable this feature later
 
-var key_prefix = "flix_plus " + fplib.getProfileName() + " ";
+// remove_dupes userscript for Netflix
+// Built by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
+// http://www.github.com/jaredsohn/flixplus
+// Depends on: jquery, arrive.js, fplib.js
 
-var keys_dict = {};
-keys_dict[key_prefix + " fpduplicate_style"] = "hide";
+var keyPrefix = "flix_plus " + fplib.getProfileName() + " ";
 
-fplib.syncGet(keys_dict, function(items)
-{
-    fplib.definePosterCss("fp_duplicate", items[key_prefix + " fpduplicate_style"]);
+var keysDict = {};
+keysDict[keyPrefix + "fp_duplicates_style"] = "hide";
+console.log(keysDict);
+
+fplib.syncGet(keysDict, function(items) {
+  console.log(items);
+  fplib.definePosterCss("fp_duplicate", items[keyPrefix + "fp_duplicates_style"]);
 });
 
-// Mark 'Rate what you've seen' and 'because you like' elements so that they do not get hidden as duplicates
-$(".mrow-rating .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);});
-$(".supportVideos .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);});
-$(".recentlyWatched .boxShot img").each(function() { $(this).attr("data-fp-ignore", true);});
+var dupeCount = 0;
+var alreadyShown = {};
+var imgs = $(".lockup .video-artwork");
+var imgsLength = imgs.length;
+for (var i = 0; i < imgsLength; i++) {
+  if (imgs[i].getAttribute("data-fp-ignore") === "true")
+    continue;
 
-var dupe_count = 0;
-var already_shown = {};
-var imgs = $(".boxShot img");
-for (i = 0; i < imgs.length; i++) {
-    if (imgs[i].getAttribute("data-fp-ignore") === "true")
-        continue;
+  var movieId = fplib.getMovieIdFromField(imgs[i].parentNode.parentNode.id);
 
-    var movie_id = fplib.getMovieIdFromField(imgs[i].parentNode.id);
-
-    if (typeof(already_shown[movie_id]) === "undefined")
-        already_shown[movie_id] = true;
-    else
-    {
-        dupe_count++;
-        imgs[i].classList.add("fp_duplicate");
-        imgs[i].parentNode.parentNode.classList.add("fp_duplicate_gp");
-    }
+  if (!alreadyShown.hasOwnProperty(movieId))
+    alreadyShown[movieId] = true;
+  else {
+    dupeCount++;
+    imgs[i].parentNode.classList.add("fp_duplicate"); // technically this is parent herex
+    imgs[i].parentNode.parentNode.parentNode.classList.add("fp_duplicate_gp"); // technically is ggp now
+  }
 }
 
+/* //TODO: add this back; perhaps have idmrows run earlier and identify the my list row
 // Don't mark anything as dupe if it is within My List
 var myListImgs = $(".yourListRow .boxShot img");
 var len = myListImgs.length;
-for (i = 0; i < len; i++)
-{
-    if (myListImgs[i].classList.contains("fp_duplicate"))
-    {
-        myListImgs[i].classList.remove("fp_duplicate");
-        myListImgs[i].parentNode.parentNode.classList.remove("fp_duplicate_gp");
-        dupe_count--;
-    }
-}
+for (var i = 0; i < len; i++) {
+  if (myListImgs[i].classList.contains("fp_duplicate")) {
+    myListImgs[i].classList.remove("fp_duplicate");
+    myListImgs[i].parentNode.parentNode.classList.remove("fp_duplicate_gp");
+    dupe_count--;
+  }
+}*/
 
 
-console.log("Found " + dupe_count + " posters (of " + imgs.length + ")");
+console.log("Found " + dupeCount + " duplicate posters (of " + imgs.length + ")");
 
-fplib.idMrows();
+fplib.idMrows(); // TODO: not all mrows are ided on page load
 fplib.rolloverVisibleImages(["fp_duplicate_gp"]);

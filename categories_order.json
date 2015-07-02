@@ -1,8 +1,8 @@
 {
     "order": [
         "Title Selection",
-        "Player",
         "Title Details",
+        "Player",
         "My List",
         "Ratings History",
         "Everywhere"

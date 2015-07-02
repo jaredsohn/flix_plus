@@ -1,70 +1,39 @@
-// export_ratings
-//
-// Written by Jared Sohn for Lifehacker as a part of Flix Plus.
-// August 2014
+// export_ratings userscript for Netflix
+// Built by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
+// http://www.github.com/jaredsohn/flixplus
+// Depends on: jquery, arrive.js
 
-var exportRatings = function()
-{
-    var rated_data = [];
+var exportRatings = function() {
+  var rated_data = [];
 
-    var ratingsHistory = document.getElementById("ratingHistorySection");
-    var elems = ratingsHistory.getElementsByTagName("li");
+  var ratingsHistory = document.getElementById("ratingHistorySection");
+  var nodes = ratingsHistory.getElementsByTagName("li");
+  var elems = Array.prototype.slice.call(nodes);
 
-    for (i = 0; i < elems.length; i++)
-    {
-        var obj = {};
-        obj.netflixid = elems[i].getAttribute("data-movieid");
-        obj.yourrating = elems[i].getElementsByClassName("starbar")[0].getAttribute("data-your-rating");
-        obj.titlename = elems[i].getElementsByClassName("title")[0].getElementsByTagName("a")[0].text;
-        obj.ratedate = elems[i].getElementsByClassName("date")[0].innerHTML;
+  elems.forEach(function(elem) {
+    rated_data.push({
+      netflixid: elem.getAttribute("data-movieid"),
+      yourrating: elem.getElementsByClassName("starbar")[0].getAttribute("data-your-rating"),
+      titlename: elem.getElementsByClassName("title")[0].getElementsByTagName("a")[0].text,
+      ratedate: elem.getElementsByClassName("date")[0].innerHTML
+    });
+  });
 
-        rated_data.push(obj);
-    }
-    console.log(rated_data.append);
-
-    // from stackoverflow
-    var saveData = (function() {
-        var a = document.createElement("a");
-        document.body.appendChild(a);
-        a.style = "display: none";
-        return function(data, fileName) {
-            var json = JSON.stringify(data),
-                blob = new Blob([json], {type: "octet/stream"}),
-                url = window.URL.createObjectURL(blob);
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        };
-    }());
-
-    saveData(rated_data, "netflix_ratings.json");
+  extlib.saveData(rated_data, "netflix_ratings.json");
 };
 
 // Add a button
-var header = document.getElementsByClassName("account-header")[0];
-if ($(".account-header br").length === 0)
-    header.appendChild(document.createElement("br"));
+var header = document.getElementsByClassName("controlBar")[0];
+if (($(".controlBar br") || null) !== null)
+  header.appendChild(document.createElement("br"));
 
-var createA = document.createElement("a");
-var createAText = document.createTextNode("Export as JSON");
-createA.setAttribute("href", 'javascript:var div = document.createElement("div"); div.className="fp_export_ratings_cmd"; div.style="display:none"; document.body.appendChild(div);');
-createA.appendChild(createAText);
-createA.className = "extlib_button";
-createA.style = "align:right;";
-header.appendChild(createA);
-
-extlib.initButtonCss();
-
-document.body.arrive(" .fp_export_ratings_cmd", function() {
-    var ratingsHistory = document.getElementById("ratingHistorySection");
-    var elems = ratingsHistory.getElementsByTagName("li");
-    if (elems.length === 100)
-    {
-        if (confirm("This only exports ratings that can be found on the page.  Because exactly 100 ratings were found, you probably need to scroll down if you want to export all ratings.\n\nAre you sure you want to export just these 100 ratings?"))
-            exportRatings();
-    } else
-    {
-        exportRatings();
-    }
-});
+header.appendChild(extlib.createButton("export_ratings", "Export JSON", false, function(e) {
+  var ratingsHistory = document.getElementById("ratingHistorySection");
+  var elems = ratingsHistory.getElementsByTagName("li");
+  if (elems.length === 100) {
+    if (confirm("This only exports ratings that can be found on the page.  Because exactly 100 ratings were found, you probably need to scroll down if you want to export all ratings.\n\nAre you sure you want to export just these 100 ratings?"))
+      exportRatings();
+  } else {
+    exportRatings();
+  }
+}));

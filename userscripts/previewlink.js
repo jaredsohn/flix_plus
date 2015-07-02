@@ -1,70 +1,107 @@
-// from https://github.com/michaelschade/netflix-trailers
-// jaredsohn-lifehacker: removed insertion of jquery.js, analytics
-
-MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+// random_ep userscript for Netflix
+// Code was originally from https://github.com/michaelschade/netflix-trailers
+// Updated by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
+// http://www.github.com/jaredsohn/flixplus
+// Depends on: jquery, arrive.js, fplib
 
 // YouTube URL for trailer
 var trailerURL = function(movieName) {
-    return 'https://youtube.com/results?search_query=' + encodeURIComponent(movieName + ' trailer');
+  return 'https://youtube.com/results?search_query=' + encodeURIComponent(movieName + ' trailer');
 };
 
 var createTrailerElem = function(movieName, id) {
-    var elem = document.createElement("a");
-    elem.className = "fp_preview_link fp_button";
-    elem.href = trailerURL(movieName);
-    elem.innerHTML = "<img alt='Watch trailer' width=32px src='" + chrome.extension.getURL('../src/img/trailer.png') + "'>";
-    elem.target = '_blank';
-    elem.style.cssText = "display:inline-block;";
-    elem.id = id;
-    elem.title = "Watch trailer";
+  var elem = document.createElement("a");
+  elem.className = "fp_preview_link fp_button";
+  elem.href = trailerURL(movieName);
+  elem.innerHTML = "<img alt='Watch trailer' width=96px src='" + chrome.extension.getURL('../src/img/trailer.png') + "'>";
+  elem.target = '_blank';
+  elem.style.cssText = "display:inline-block;";
+  elem.id = id;
+  elem.title = "Watch trailer";
+  elem.classList.add("overviewPlay");
 
-    return elem;
+  return elem;
 };
 
-// Detect movie popover and add trailer link
-var monitorPreview = function(id) {
-    var target = document.querySelector('#' + id);
-    var observer = new MutationObserver(function(mutations) {
+var createPreviewLink = function(overviewInfoElem) {
+//  console.log("createPreviewLink");
+//  console.log(overviewInfoElem);
 
-        fplib.createPopupHeaderRow();
+  var jawBoneContainerElems = $(overviewInfoElem).closest(".jawBoneContainer");
 
-        var movieName = $('#' + id + ' .mdpLink .title').text().trim();
-        var linkElem = createTrailerElem(movieName, 'trailer-popover');
-        linkElem.style.cssText += " margin-left: 20px;";
+  if (jawBoneContainerElems.length === 0)
+    return;
+  if (jawBoneContainerElems[0].getElementsByClassName("fp_preview_link").length !== 0)
+    return;
+  if (jawBoneContainerElems[0].getElementsByClassName("title").length === 0)
+    return;
 
-        $(".fp_header_row")[0].appendChild(linkElem);
+  var movieName = fplib.parseTitle(jawBoneContainerElems[0]);
+  var previewElem = createTrailerElem(movieName, 'trailer-detail');
 
-    });
-    observer.observe(target, { childList: true });
+  var infoElems = jawBoneContainerElems[0].getElementsByClassName("overviewPlay");
+  if (infoElems.length) {
+//    console.log("adding!");
+    $(infoElems[0]).after(previewElem);
+    infoElems[0].id = "fp_overviewPlay_" + infoElems[0].parentNode.id; // Name this so we can identify it when removed
+  }
 };
 
-// Add trailer link to movie detail page
-var movieInfo = function() {
-    var header$ = $('h1.title');
-    var movieName = header$.text().trim();
-    var link$ = $('<span>', {
-        class: 'year'
-    }).append(createTrailerElem(movieName, 'trailer-detail'));
-    header$.parent().after(link$);
+$(".jawbone-overview-info").each(function() {
+  createPreviewLink(this);
+});
+document.body.arrive(".overviewPlay.playLink", function() {
+  createPreviewLink(this);
+});
+
+
+var removePreviewLinks = function(elem) {
+  var previewLinks = elem.getElementsByClassName("fp_preview_link");
+  [].slice.call(previewLinks).forEach(function(previewLink) {
+    console.log("removing!");
+    previewLink.parentNode.removeChild(previewLink);
+  });
 };
 
-// Make window bigger so there is room for button
-var onPopup = function()
-{
-    console.log("arrive");
+// Remove preview links when users click on menu buttons
+// We create event listeners on the menu buttons instead of using leave() because otherwise an
+// exception occurs when trying to show the panel again later.
+var addMenuListener = function(elem) {
+  if (elem.classList.contains("Overview"))
+    return;
 
-    $(".bobMovieContent").height(250); // jaredsohn-lifehacker: Added to make room for ratings buttons (after recommend button was added)
-    $(".bobMovieContent").width(325);  // Sometimes the code below wouldn't fit within the popup; make it bigger to accomodate it
-    $("#BobMovie-content").width(347); // Match the width
-    $(".bobMovieHeader").width(329);   // Match the width
+  console.log("adding listener to ");
+  console.log(elem);
+
+  var self = $(elem).closest(".jawBoneContainer");
+
+  elem.addEventListener("click", function() {
+    console.log("clicked!");
+//    console.log(self);
+    removePreviewLinks($(self)[0]);
+    var count = 0;
+    var removeInterval = setInterval(function() {
+      removePreviewLinks($(self)[0]);
+      count++;
+      if (count > 10) {
+        console.log('clearing interval');
+        clearInterval(removeInterval);
+      }
+    }, 25);
+  });
 };
 
-var selectors = fplib.getSelectorsForPath();
-if (selectors !== null)
-    document.arrive(selectors["bobPopup"], onPopup);
+console.log("~!~");
+document.body.arrive(".jawBone .menu li", function() {
+  addMenuListener(this);
+});
+var menuLis = $(".jawBone .menu li");
+if (menuLis.length) {
+  [].slice.call(menuLis).forEach(function(menuLi) {
+    addMenuListener(menuLi);
+  });
+}
 
-monitorPreview('BobMovie-content'); // should work everywhere except for wigenre; redirect those pages to wialtgenre
-if ((window.location.pathname.split('/')[1]) === "WiMovie")
-    movieInfo();
+extlib.addGlobalStyle(".overviewPlay { margin-right: -55px }");
 
 
