@@ -29,13 +29,13 @@ var arriveAndNow = function(parentElem, selector, options, callback) {
 
 // Add fp_spoiler and fp_spoiler_disabled classes now and for future instances
 var addSpoilerClassToSelector = function(parentElem, selector) {
-  arriveAndNow(parentElem, selector, { fireOnAttributesModification: true }, function() {
+  arriveAndNow(parentElem, selector, null, function() {
     this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
   });
 };
 // Add fp_spoiler and fp_spoiler_disabled classes now and for future instances
 var addSpoilerBlackClassToSelector = function(parentElem, selector) {
-  arriveAndNow(parentElem, selector, { fireOnAttributesModification: true }, function() {
+  arriveAndNow(parentElem, selector, null, function() {
     this.classList.add(hideSpoilersDisabled_ ? "fp_spoilerblack_disabled" : "fp_spoilerblack");
   });
 };
@@ -133,7 +133,7 @@ selectors.forEach(function(selector) {
 });
 
 // TODO: try to also add a div with the title in a spoiler afterward
-arriveAndNow(document.body, ".jawbone-overview-info .watched .episodeTitle", { fireOnAttributesModification: true }, function() {
+arriveAndNow(document.body, ".jawbone-overview-info .watched .episodeTitle", null, function() {
   var origText = getCachedText(this) || "";
   this.innerText = (hideSpoilersDisabled_) ? origText : origText.split("\"")[0];
 });
@@ -142,16 +142,16 @@ arriveAndNow(document.body, ".jawbone-overview-info .watched .episodeTitle", { f
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Player (HTML5)
 ////////////////////////////////////////////////////////////////////////////////////////////////
-arriveAndNow(document.body, "#playerWrapper .player-loading-background", { fireOnAttributesModification: true }, function() {
+arriveAndNow(document.body, "#playerWrapper .player-loading-background", null, function() {
   this.style.opacity = hideSpoilersDisabled_ ? 100 : 0;
 });
 
-arriveAndNow(document.body, "#playerWrapper .description h2", { fireOnAttributesModification: true }, function() {
+arriveAndNow(document.body, "#playerWrapper .description h2", null, function() {
   var origText = getCachedText(this) || "";
   this.innerText = (hideSpoilersDisabled_) ? origText : origText.split("“")[0];
 });
 
-document.body.arrive("#playerWrapper .playback-longpause-container", { fireOnAttributesModification: true }, function() {
+document.body.arrive("#playerWrapper .playback-longpause-container", null, function() {
   var paragraphs = $(".playback-longpause-container .content p");
   paragraphs[paragraphs.length - 1].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
 
@@ -159,13 +159,13 @@ document.body.arrive("#playerWrapper .playback-longpause-container", { fireOnAtt
   h3s[h3s.length - 1].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
 });
 
-document.body.arrive("#playerWrapper .player-status", { fireOnAttributesModification: true }, function() {
+document.body.arrive("#playerWrapper .player-status", null, function() {
   var spans = this.getElementsByTagName("span");
   if (spans.length >= 3)
     spans[2].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
 });
 
-document.body.arrive("#playerWrapper .description h2", { fireOnAttributesModification: true }, function() {
+document.body.arrive("#playerWrapper .description h2", null, function() {
   var origText = getCachedText(this) || "";
   this.innerText = (hideSpoilersDisabled_) ? origText : origText.split("“")[0];
 });

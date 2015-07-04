@@ -7,12 +7,11 @@
 //      -- created a simplified version of a title and compare against that
 //      -- do searches of original and simplified titles and check all returned results
 //      -- look at roles and other information to deal with choose among multiple matches
-//  3. make popup bigger to handle newer recommend button; show progress via spinner; indicate if no match is found
-//  4. ensure it works on all pages (added wiRoledisplay, wimovie, perhaps a few others).  WiGenre pages are handled by Flix Plus redirecting to WiAltGenre URLs.
-//  5. remove support for DVDs; also match current (Nov 2014) version of site
-//  6. warn about lack of https support
-//  7. show rotten ratings even if only one type found
-//  8. not pollute localstorage or css classes
+//  3. update to work with Netflix June 2015 UI; show progress via spinner; indicate if no match is found
+//  4. remove support for DVDs
+//  5. support HTTPS via support from background page or warn that it is not supported
+//  6. show rotten ratings even if only one type found
+//  7. not pollute localstorage or css classes
 //
 // Note: The metacritic code here came from a newer version of joshblum's script and has not been tested yet.  One issue is that omdbapi
 // does not include metacritic URLs, so to include links additional code would be needed.
@@ -826,7 +825,7 @@ $(document).ready(function() {
     var is_https = (window.location.protocol === "https:");
 
     if (!(is_https && !https_supported_)) {
-        document.body.arrive(".jawBone", { fireOnAttributesModification: true }, function()
+        document.body.arrive(".jawBone", null, function()
         {
             var movie_id = $(this).closest(".jawBoneContainer")[0].id;
             var self;
@@ -858,7 +857,7 @@ $(document).ready(function() {
                 console.log("overviewInfos.length was zero");
             }
             var jawBoneElem = this;
-            this.arrive(".jawbone-overview-info", { fireOnAttributesModification: true }, function()
+            this.arrive(".jawbone-overview-info", null, function()
             {
 //                console.log("arrived - .jawbone-overview-info!");
 

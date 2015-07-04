@@ -1,7 +1,7 @@
 // export_ratings userscript for Netflix
 // Built by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
-// Depends on: jquery, arrive.js
+// Depends on: jquery
 
 var exportRatings = function() {
   var rated_data = [];

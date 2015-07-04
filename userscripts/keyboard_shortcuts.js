@@ -934,9 +934,8 @@ keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName()
   keyboardShortcutToIdDict_ = keyboardShortcutToIdDict;
   keyboardIdToShortcutDict_ = keyboardIdToShortcutDict;
 
-  fplib.idMrows();
-
 /*
+  fplib.idMrows();
 
 // Commented out because it needs to be revisited for Netflix June 2015 layout
 //TODO  selectors_ = fplib.getSelectorsForPath();

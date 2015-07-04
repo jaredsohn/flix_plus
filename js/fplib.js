@@ -11,7 +11,6 @@ var fplib = fplib || {};
 var fplib_ = function() {
   var self = this;
   var profileName_ = "";
-  var nextMrowId_ = 0;
 
   // Returns zero if not able to get id
   this.getMovieIdFromField = function(attrStr) {
@@ -153,40 +152,10 @@ var fplib_ = function() {
     return selectors;
   };
 
-  var idMrow_ = function(mrow) {
-    if (mrow.classList.contains("characterRow")) // skips over characters on kids page
-      return;
-
-    // Don't renumber it
-    if (mrow.id.startsWith("mrow_id"))
-      return;
-
-    // Set the id
-    mrow.id = "mrow_id_" + nextMrowId_;
-    nextMrowId_++;
-
-    // Mark the MyList row
-    var rowTitles = mrow.getElementsByClassName("rowTitle");
-    if (rowTitles.length && rowTitles[0].innerHTML === "My List") {
-      mrow.classList.add("fp_yourListRow");
-    }
-  }
-
-  this.idMrows = function() {
-    this.idMrows = function() {}; // run only once
-    nextMrowId_ = 0;
-
-    Array.prototype.slice.call($(".lolomoRow")).forEach(function(mrow) {
-      idMrow_(mrow);
-    });
-    document.arrive(".mrow, .lolomoRow", {fireOnAttributesModification: true}, function() {
-      idMrow_(this);
-    })
-  };
 
   // Iterate over movies that are not a member of a class in ignoreClassesList. Ensure we have loaded at least n images per row.
   //
-  // Requires that idMrows() is called beforehand
+  // Required that idMrows() was called beforehand; rewrite to not need it
   // TODO: have this work with class names properly; .agMovie might not always be right (check on other urls, too)
   this.rolloverVisibleImages = function(ignoreClassesList) {
     var start = new Date();
@@ -235,7 +204,7 @@ var fplib_ = function() {
   var getNumAcross_ = function() {
     var numAcross = 100;
 
-    var movies = $("#mrow_id_1 .agMovie, #mrow_id_1 .smallTitleCard");
+    var movies = $("#fp_mrow_id_1 .agMovie, #fp_mrow_id_1 .smallTitleCard");
 
     var firstOffset = -1;
     var moviesLength = movies.length;
