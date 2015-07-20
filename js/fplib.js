@@ -581,7 +581,7 @@ var fplib_ = function() {
   }
 
   function consolelog(msg) {
-    if ((localStorage["fplib debug"] || null) !== null)
+    if ((localStorage["fplib debug"] || null) === "true")
       console.log(msg);
   }
 };
