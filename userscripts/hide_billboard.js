@@ -3,23 +3,6 @@
 // http://www.github.com/jaredsohn/flixplus
 // Depends on: jquery, arrive.js
 
-/*
-$.each($(".billboard-row"), function() { this.style.display = "none"; });
-$.each($(".is-fullbleed"), function() { this.classList.remove("is-fullbleed"); });
-
-document.body.arrive(".is-fullbleed", {fireOnAttributesModification: true}, function() {
-	this.classList.remove("is-fullbleed");
-});
-
-document.body.arrive(".billboard-row", function() {
-	this.style.display = "none";
-	$.each($(".is-fullbleed"), function() { this.classList.remove("is-fullbleed"); });
-});*/
-
-
-// Some newer code that uses mutation-summary instead of arrive.js.  Don't
-// want to include overhead of mutation-summary yet.
-
 var lolomoObserver_ = null;
 
 var hideBillboardAndFixBleed = function() {
@@ -74,4 +57,3 @@ document.body.arrive(".lolomo", null, function() {
 
 if ($(".lolomo").length)
 	createLolomoObserver();
-

@@ -6,79 +6,106 @@
 // Derived from Flix Plus customizations made to Scrollbuster, but with different behavior
 // (hides/shows sections instead of removing/adding scrollbars)
 
-return; //TODO (disabled for now)
-
+"use strict";
 
 var KEY_NAME = "flix_plus " + fplib.getProfileName() + " sectionhider";
 
-var show_template = "#MROWID .bd { display:block }";
-var hide_template = "#MROWID .bd { display:none }";
+var showTemplate_ = "#MROWID { display:block !important }";
+var hideTemplate_ = "#MROWID { display:none !important }";
 
-var hideImageHtml_ = "<img class='flix_plus_hiddensectionbutton' src='" + chrome.extension.getURL("src/img/hide.png") + "' width=24 title='Section hidden; click to show.'>";
-var showImageHtml_ = "<img class='flix_plus_shownsectionbutton' src='" + chrome.extension.getURL("src/img/show.png") + "' width=24 title='Section shown; click to hide.'>";
+var shownImageHtml_ = "<img class='flix_plus_shownsectionbutton' src='" + chrome.extension.getURL("src/img/hide.png") + "' width=24 title='Section shown; click to hide.'>";
+var hiddenImageHtml_ = "<img class='flix_plus_hiddensectionbutton' src='" + chrome.extension.getURL("src/img/show.png") + "' width=24 title='Section hidden; click to show.'>";
 
-fplib.syncGet(KEY_NAME, function(items) {
-  defaults = items[KEY_NAME];
-  defaults = (typeof(defaults) === "undefined") ? {} : JSON.parse(defaults);
+var removeRowTitleMarginLeft_ = ".rowTitle { margin-left: 0 !important }";
+var addRowHeaderMarginLeft_ = ".rowHeader { margin-left: 49.156px !important }";
 
-  fplib.idMrows();
+var defaults_ = {};
 
-  mrows = $(".mrow, .lolomoRow");
-  for (var i = 0; i < mrows.length; i++) {
-    if (mrows[i].classList.contains("characterRow")) // skips over characters on kids page
-        continue;
+extlib.addGlobalStyle(removeRowTitleMarginLeft_);
+extlib.addGlobalStyle(addRowHeaderMarginLeft_);
 
-    var id = mrows[i].id;
+var addSectionButton = function(mrow) {
+  try {
+    if (mrow.classList.contains("characterRow")) // skips over characters on kids page
+      return false;
+    if (mrow.classList.contains("lolomoPreview")) // doesn't have full content; ignore it
+      return false;
+
+    var $mrow = $(mrow);
+    var $rowContainer = $(".rowContainer", $mrow);
+
+    var id = $rowContainer[0].id;
+    var parts = id.split('_');
+    var rowContainerId = parts[parts.length - 1];
 
     // Get relevant info
-    showCssCode = showTemplate.replace(new RegExp("MROWID", 'g'), id);
-    hideCssCode = hideTemplate.replace(new RegExp("MROWID", 'g'), id);
+    showCssCode = showTemplate_.replace(new RegExp("MROWID", 'g'), rowContainerId);
+    hideCssCode = hideTemplate_.replace(new RegExp("MROWID", 'g'), rowContainerId);
 
-    var mrowName = mrows[i].getElementsByClassName("rowTitle")[0].innerHTML.trim();
-
-    //TODO_broke_old
-    //var mrow_name = document.getElementById(id).getElementsByClassName("hd")[0].getElementsByTagName("h3")[0].childNodes[
-    //    document.getElementById(id).getElementsByClassName("hd")[0].getElementsByTagName("h3")[0].childNodes.length - 1]
-    //    .textContent.trim();
+    var mrowName = "";
+    var $spans = $(".rowTitle span", $mrow);
+    if ($spans)
+      mrowName = $spans[0].innerHTML.trim();
+    else {
+      console.log("rowTitle span not found");
+      return false;
+    }
 
     // Update UI now
-    var showHideText = showImageHtml_;
-    if ((mrowName in defaults) && (defaults[mrowName] === true)) {
+    var showHideText = shownImageHtml_;
+    if ((mrowName in defaults_) && (defaults_[mrowName] === true)) {
       extlib.addGlobalStyle(hideCssCode);
+      showHideText = hiddenImageHtml_;
+    } else {
+      extlib.addGlobalStyle(showCssCode);
     }
 
     // Add a button
     var showHideNode = document.createElement("a");
-    showHideNode.id = id + "_showhide";
-    //TODO_broke_old (see github for old code here)
-    mrows[i].insertBefore(showHideNode, mrows[i].getElementsByClassName("rowTitle")[0]);
-    document.getElementById(id + "_showhide").innerHTML = showHideText;
+    showHideNode.id = "fp_section_toggle_" + id;
+    showHideNode.classList.add("fp_section_toggle");
+    showHideNode.innerHTML = showHideText;
+
+    var $rowHeader = $(".rowHeader", $mrow);
+    var $rowTitle = $(".rowTitle", $mrow);
+
+    $rowHeader[0].insertBefore(showHideNode, $rowTitle[0]);
 
     // Create event listener to update based on user interaction
-    document.getElementById(id + "_showhide").addEventListener('click', function() {
+    document.getElementById("fp_section_toggle_" + id).addEventListener('click', function() {
       var id_ = id;
-      var showCssCode_ = showCssCode;
-      var hideCssCode_ = hideCssCode;
+      var rowContainerId_ = rowContainerId;
+      var mrowName_ = mrowName;
 
       return function() { // Toggles show/hide and saves to localstorage
-        var shouldHide = (document.getElementById(id_ + "_showhide").innerHTML.indexOf("click to hide") !== -1);
-        extlib.addGlobalStyle(shouldHide ? hideCssCode_ : showCssCode_);
-        document.getElementById(id_ + "_showhide").innerHTML = shouldHide ? hideImageHtml_ : showImageHtml_;
+        var shouldHide = (document.getElementById("fp_section_toggle_" + id_).innerHTML.indexOf("click to hide") !== -1);
+        var template = shouldHide ? hideTemplate_ : showTemplate_;
+        extlib.addGlobalStyle(template.replace("MROWID", rowContainerId));
+        document.getElementById("fp_section_toggle_" + id_).innerHTML = shouldHide ? hiddenImageHtml_ : shownImageHtml_;
 
         fplib.syncGet(KEY_NAME, function(items) {
-          defaults = items[KEY_NAME];
-          defaults = (typeof(defaults) === "undefined") ? {} : JSON.parse(defaults);
-
-          var mrowName = document.getElementById(id_).getElementsByClassName("rowTitle")[0].innerHTML.trim();
-
-          //TODO_BROKE_OLD var mrow_name = document.getElementById(_id).getElementsByClassName("hd")[0].getElementsByTagName("h3")[0].childNodes[
-          //    document.getElementById(_id).getElementsByClassName("hd")[0].getElementsByTagName("h3")[0].childNodes.length - 1]
-          //    .textContent.trim();
-          defaults[mrowName] = shouldHide;
-          fplib.syncSet(KEY_NAME, JSON.stringify(defaults), function(items) {
-          });
+          var defaults = JSON.parse(items[KEY_NAME] || "{}");
+          defaults[mrowName_] = shouldHide;
+          defaults_[mrowName_] = shouldHide; // update in memory, too
+          fplib.syncSet(KEY_NAME, JSON.stringify(defaults));
         });
-      };
-    }(), false);
+      }();
+    });
+  } catch (ex) {
+    console.error(ex);
+    return false;
   }
-});
+  return true;
+}
+
+fplib.syncGet(KEY_NAME, function(items) {
+  defaults_ = JSON.parse(items[KEY_NAME] || "{}");
+//  console.log("defaults:");
+//  console.log(defaults_);
+
+  fplib.addMutationAndNow("sectionHider lolomorow", {element: ".lolomoRow"}, function(summary) {
+    summary.added.forEach(function(added) {
+      addSectionButton(added);
+    });
+  });
+}); //syncGet

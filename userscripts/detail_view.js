@@ -69,21 +69,6 @@ var createPlayLink = function(movie_id, link_id) {
   return elem;
 };
 
-var monitorPreview = function(elem_id)
-{
-  // Add a play button to the popup.  mark as fp_play_popover so URL isn't rewritten.
-  document.body.arrive("#" + elem_id + " .readMore", function() {
-    console.log("arrive");
-
-    fplib.createPopupHeaderRow();
-
-    var parts = $("#" + elem_id + " .mdpLink")[0].href.split("/");
-    var movie_id = parts[parts.length - 1];
-    var link = createPlayLink(movie_id, "fp_play_popover");
-    $(".fp_header_row")[0].appendChild(link);
-  });
-};
-
 // Make window bigger so there is room for button
 var onPopup = function() {
   console.log("arrive");
@@ -127,9 +112,6 @@ document.arrive("a", function()
 
   fixTag(this);
 });
-
-monitorPreview('BobMovie-content');
-// for wiGenre, would use monitorPreview('bob-container'), but that page now redirects to wiAltGenre
 
 var selectors = fplib.getSelectorsForPath();
 if ((selectors !== null) && (selectors["bobPopup"] !== null))

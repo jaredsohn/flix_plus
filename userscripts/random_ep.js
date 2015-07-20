@@ -3,54 +3,13 @@
 // Updated substantially (works with player, finds random episode across seasons, works with newer Netflix) by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
 // Depends on: jquery, arrive.js
+//
+// TODO: there is some code to allow advanced random options; it has been removed but available in github's history (look for July 2015)
+
 
 var keyPrefix_ = "flix_plus " + fplib.getProfileName() + " ";
 
-// TODO: support keepPlayingRandom, rewindBeforePlaying, preferUnwatched and have places to set them and make them viewable
-var randomDefaultDict_ = {"keepPlayingRandom": false, "sameSeasonOnly": false, "rewindBeforePlaying": false, "preferUnwatched": false};
-var randomSettings_ = {};
 var randomInProgress_ = false;
-
-// TODO: functionality where we allow advanced random options disabled for now (not complete)
-// TODO: clear out the request after we try it so it doesn't keep seeking random eps (usually not a problem unless the first random brought it to the original episode)
-// TODO: random settings do not stick among videos (i.e. if you start as random same season, it isn't staying as random same season)
-
-
-/*
-// Reset settings every time we reload the player
-var onPlayer = function() {
-  console.log("seasons loaded.");
-  var dict = {};
-  dict[keyPrefix_ + "random_defaults"] = randomDefaultDict_;
-  dict[keyPrefix_ + "random_request"] = null;
-  chrome.storage.sync.get(dict, function(items) {
-    console.log(items);
-    randomSettings_ = items[keyPrefix_ + "random_defaults"];
-    var randomRequest = items[keyPrefix_ + "random_request"];
-    if (randomRequest !== null) {
-      var urlPath = randomRequest["urlPath"] || null;
-      var timestamp = randomRequest["timestamp"] || null;
-//console.log("1" + ((urlPath !== null) && (window.location.pathname.startsWith(urlPath))));
-//console.log("2" + ((timestamp !== null) && ((new Date().getTime() - timestamp) < 60000)));
-      if (((urlPath !== null) && (window.location.pathname.startsWith(urlPath))) &&
-          ((timestamp !== null) && ((new Date().getTime() - timestamp) < 60000))) {
-        // urlPath must match and must be within a short time period of when the random episode button was clicked
-        console.log("Found a valid request in sync storage to play a random episode."); //TODO: tell the user this.
-        console.log(randomRequest);
-        Object.keys(randomRequest).forEach(function(randomSetting) {
-          if ((randomSetting !== "urlPath") && (randomSetting != "timestamp") && (randomSetting != "season"))
-            randomSettings_[randomSetting] = randomRequest[randomSetting]; // update in memory settings to match what was chosen in the UI
-        });
-        playRandomFromPlayer();
-      }
-    }
-  });
-}
-
-document.body.arrive("#playerWrapper .season", function() {
-  onPlayer();
-});
-*/
 
 var playRandomFromPlayer = function() {
   if (randomInProgress_) {
@@ -60,7 +19,7 @@ var playRandomFromPlayer = function() {
 
   console.log("playing random...");
 
-  var restrictToSeason = randomSettings_["sameSeasonOnly"] || false;
+  var restrictToSeason = false;
 
   randomInProgress_ = true;
 
@@ -120,19 +79,6 @@ var injectJs = function(js) {
   document.body.appendChild(scriptNode);
 };
 
-/* // commented out since no way to set this yet
-document.body.arrive(".player-postplay", function() {
-  var autoRandomInterval = setInterval(function() {
-    if (randomSettings_["keepPlayingRandom"] || false) {
-      if ($("#netflix-player")[0].classList.contains("video-ended")) {
-        clearInterval(autoRandomInterval);
-        playRandomFromPlayer();
-      }
-    }
-  }, 1000);
-});*/
-
-
 /////////////////////////////////////////////////////////////////////////////////////
 
 // Create a hidden div so that keyboard shortcuts can play a new random episode within player
@@ -150,24 +96,6 @@ $(elem).on('click', function() {
 var insertAfter = function(newNode, referenceNode) {
   referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
-
-/*var createRandomSettings = function(showId, sameSeasonOnly) {
-  console.log("click!");
-  console.log("showId = " + showId);
-  var obj = {};
-  obj["timestamp"] = new Date().getTime();
-  obj["urlPath"] = "/watch/" + showId;
-  obj["sameSeasonOnly"] = sameSeasonOnly ?
-        this.parentNode.getElementsByClassName("label")[0].getElementsByTagName("a")[0].innerHTML :
-        false
-
-  var dict = {};
-  dict[keyPrefix_ + "random_request"] = obj;
-  chrome.storage.sync.set(dict, function() {
-    window.location = window.location.protocol + "//www.netflix.com/watch/" + showId;
-  })
-};*/
-
 
 var getSeasonList = function(showId, callback) {
   var html = document.documentElement.outerHTML;

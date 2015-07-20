@@ -87,10 +87,10 @@ var createUniqueIdsDict = function(idArray, resultsJson, matchesFilter) {
 };
 
 var updateUniques = function(keyName, results, matchesFilter) {
-  var prevArray = (localStorage[keyname] || "").split(",");
+  var prevArray = (localStorage[keyName] || "").split(",");
 
   var updatedArray = Object.keys(createUniqueIdsDict(prevArray, results, matchesFilter));
-  localStorage[keyname] = updatedArray;
+  localStorage[keyName] = updatedArray;
   return updatedArray;
 }
 
@@ -110,8 +110,8 @@ fplib.showProgressBar("fade_rated");
 initCss("fp_rated", "fade");
 initCss("fp_rated_notinterested", "hide");
 
-var keyname = keyPrefix_ + "ratingactivity";
-extlib.checkForNewData([keyname, keyname + "_notinterested"],
+var keyName = keyPrefix_ + "ratingactivity";
+extlib.checkForNewData([keyName, keyName + "_notinterested"],
   5 * 60, // five minutes
   7 * 24 * 60 * 60, // one week
   function(historyLastChecked, callback) { // request data if stale
@@ -137,7 +137,7 @@ extlib.checkForNewData([keyname, keyname + "_notinterested"],
                           return true;
                         });
 
-                        console.log(keyname + " counts = " + uniqueArray.length + ", " + notInterestedArray.length);
+                        console.log(keyName + " counts = " + uniqueArray.length + ", " + notInterestedArray.length);
 
                         callback([uniqueArray.toString(), notInterestedArray.toString()]);
                     }

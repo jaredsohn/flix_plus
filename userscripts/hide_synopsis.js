@@ -1,44 +1,15 @@
 // hide_synopsis userscript for Netflix
 // Built by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
-// Depends on: jquery, arrive.js
-//
-// TODO: Be more careful about how we use arrive to improve performance
+// Depends on: jquery, fplib.js, mutation-summary.js
+
+"use strict";
 
 var hideSpoilersDisabled_ = false;
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-var arriveAndNow = function(parentElem, selector, options, callback) {
-  try {
-    if ($(selector).length) {
-      for (var i = 0; i < $(selector).length; i++) {
-        callback.call($(selector)[i]);
-      }
-    }
-  } catch (ex) {
-    console.error(ex);
-  }
-//  console.log("will arrive on");
-//  console.log(parentElem);
-  document.body.arrive(selector, options, callback); //TODO: use parentelem here
-};
-
-// Add fp_spoiler and fp_spoiler_disabled classes now and for future instances
-var addSpoilerClassToSelector = function(parentElem, selector) {
-  arriveAndNow(parentElem, selector, null, function() {
-    this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
-  });
-};
-// Add fp_spoiler and fp_spoiler_disabled classes now and for future instances
-var addSpoilerBlackClassToSelector = function(parentElem, selector) {
-  arriveAndNow(parentElem, selector, null, function() {
-    this.classList.add(hideSpoilersDisabled_ ? "fp_spoilerblack_disabled" : "fp_spoilerblack");
-  });
-};
 
 // Retrieves cached text (and caches if it wasn't already)
 var getCachedText = function(obj) {
@@ -51,9 +22,8 @@ var getCachedText = function(obj) {
   return origText;
 };
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// Create a div that can be clicked to toggle spoilers (used by Flix Plus keyboard code)
+// Create a div that can be clicked to toggle spoilers (used by Flix Plus keyboard script)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 var elem = document.createElement('div');
 elem.id = "fp_spoilers_toggle_button";
@@ -79,102 +49,171 @@ $(elem).on('click', function() {
 // Selection pages
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Replacing rotating image with show image (or black)
-// TODO: resolution is low; doesn't show for posters before they come big or for the top movie/show
-arriveAndNow(document.body, ".image-rotator-image, .jawBoneBackground", null, function() {
-//  console.log("updating rotating image for ");
-//  console.log(this);
-
-  if (!hideSpoilersDisabled_) {
-    this.classList.remove("image-rotator-image");
-    this.classList.add("fp-image-rotator-image-spoiler");
-    this.style.backgroundImage = ""; // just hide the image
-  //  this.classList.remove("image-rotator");
-/*
-    var ancestors = $(this).parents(".smallTitleCard");
-//    console.log("!@#");
-//    console.log(ancestors);
-//    console.log(ancestors.length);
-
-    if (ancestors.length) {
-
-//      console.log('there is an ancestor');
-//      console.log(ancestors[0]);
-//      console.log(ancestors[0].getElementsByClassName("video-artwork"));
-//      console.log(ancestors[0].getElementsByClassName("video-artwork")[0].style.backgroundImage);
-
-      this.style.backgroundImage = ancestors[0].getElementsByClassName("video-artwork")[0].style.backgroundImage;
+// Replacing rotating image (big and small) with black.  (Attempted replacing it with show image but the one I found is too low res)
+// Also, if this is the small popup, then hide the other content there.
+fplib.addMutationAndNow("synopsis imagerotatorimage", {element: ".image-rotator-image"}, function(summary) {
+  summary.added.forEach(function(elem) {
+    if (!hideSpoilersDisabled_) {
+      elem.classList.remove("image-rotator-image");
+      elem.classList.add("fp-image-rotator-image-spoiler");
+      elem.style.backgroundImage = ""; // just hide the image
     }
-    else {
-      if ($(".smallTitleCard.highlighted .video-artwork").length) {
-        this.style.backgroundImage = $(".smallTitleCard.highlighted .video-artwork")[0].style.backgroundImage;
+
+    // Hide other popup spoilers here
+    var className = hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler";
+    var bobCards = $(elem).closest(".bob-card");
+    if (bobCards.length) {
+      var synopses = bobCards[0].getElementsByClassName("synopsis");
+      if (synopses.length)
+        synopses[0].classList.add(className);
+      var episodeTitles = bobCards[0].getElementsByClassName("watched-title");
+      if (episodeTitles.length)
+        episodeTitles[0].classList.add(className);
+    }
+  });
+});
+
+// Episode summaries
+fplib.addMutation("episodeLockup", {element: ".episodeLockup"}, function(summary) {
+  var className = hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler";
+  summary.added.forEach(function(elem) {
+    try {
+      elem.getElementsByClassName("episodeArt")[0].classList.add(className);
+      elem.getElementsByClassName("episodeSynopsis")[0].classList.add(className);
+      elem.getElementsByClassName("episodeTitle")[0].classList.add(className);
+    } catch (ex) {
+      console.error(ex);
+    }
+  });
+});
+
+fplib.addMutationAndNow("jawbone-overview-info - hidesynopsis", {element: ".jawbone-overview-info"}, function(summary) {
+  var className = hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler";
+
+  function moreLikeThisClick() {
+    var count = 0;
+
+    var moreLikeThisInterval = setInterval(function() {
+      count++;
+      var className = hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler";
+      // This applies the class to all .simsSynopsis, which should be fast and is not incorrect
+      [].slice.call(document.getElementsByClassName("simsSynopsis")).forEach(function(elem) {
+        elem.classList.add(className);
+      });
+      if (count > 20)
+        clearInterval(moreLikeThisInterval);
+    }, 50);
+  }
+  function showDetailsClick() {
+    var count = 0;
+    var detailsInterval = setInterval(function() {
+      count++;
+      var className = hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler";
+      // This applies the class to all .simsSynopsis, which should be fast and is not incorrect
+      [].slice.call(document.getElementsByClassName("reviewText")).forEach(function(elem) {
+        elem.classList.add(className);
+      });
+      if (count > 20)
+        clearInterval(detailsInterval);
+    }, 50);
+  }
+
+  summary.added.forEach(function(elem) {
+    try {
+      var synopses = elem.getElementsByClassName("synopsis");
+      if (synopses.length)
+        synopses[0].classList.add(className);
+      var episodeTitles = elem.getElementsByClassName("episodeTitle");
+      if (episodeTitles.length) {
+        // TODO: split off text into a div and some static text
+        var origText = getCachedText(episodeTitles[0]) || "";
+        episodeTitles[0].innerText = (hideSpoilersDisabled_) ? origText : origText.split("\"")[0];
       }
+
+      var moreLikeThisClasses = $(elem).closest(".jawBone")[0].getElementsByClassName("MoreLikeThis");
+      if (moreLikeThisClasses.length) {
+        moreLikeThisClasses[0].removeEventListener("click", moreLikeThisClick);
+        moreLikeThisClasses[0].addEventListener("click", moreLikeThisClick);
+      }
+
+      var showDetailsClasses = $(elem).closest(".jawBone")[0].getElementsByClassName("ShowDetails");
+      if (showDetailsClasses.length) {
+        showDetailsClasses[0].removeEventListener("click", showDetailsClick);
+        showDetailsClasses[0].addEventListener("click", showDetailsClick);
+      }
+
+    } catch (ex) {
+      console.error(ex);
     }
-    this.style.backgroundSize = "100% 100%"; */
-  }
+  });
 });
 
-var selectors = [".episodeArt", ".episodeSynopsis", ".synopsis", ".episodeLockup .episodeTitle", ".simsSynopsis", ".watched-title", ".hero"];
-selectors.forEach(function(selector) {
-  try {
-    addSpoilerClassToSelector(document.body, selector);
-  } catch (ex) {
-    console.error(ex);
-  }
+// billboard
+fplib.addMutationAndNow("hide_synopsis - billboard", {element: ".hero"}, function(summary) {
+  summary.added.forEach(function(elem) {
+    elem.classList.add(hideSpoilersDisabled_ ? "fp_spoilerblack_disabled" : "fp_spoilerblack");
+  });
 });
-
-var selectors = [".hero"];
-selectors.forEach(function(selector) {
-  try {
-    addSpoilerBlackClassToSelector(document.body, selector);
-  } catch (ex) {
-    console.error(ex);
-  }
-});
-
-// TODO: try to also add a div with the title in a spoiler afterward
-arriveAndNow(document.body, ".jawbone-overview-info .watched .episodeTitle", null, function() {
-  var origText = getCachedText(this) || "";
-  this.innerText = (hideSpoilersDisabled_) ? origText : origText.split("\"")[0];
-});
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Player (HTML5)
 ////////////////////////////////////////////////////////////////////////////////////////////////
-arriveAndNow(document.body, "#playerWrapper .player-loading-background", null, function() {
-  this.style.opacity = hideSpoilersDisabled_ ? 100 : 0;
+// TODO: all of this should only run when the player is active
+
+fplib.addMutationAndNow("hide_synopsis player - loading background", {element: ".player-loading-background"}, function(summary) {
+  summary.added.forEach(function(elem) {
+    elem.style.opacity = hideSpoilersDisabled_ ? 100 : 0;
+  });
 });
 
-arriveAndNow(document.body, "#playerWrapper .description h2", null, function() {
-  var origText = getCachedText(this) || "";
-  this.innerText = (hideSpoilersDisabled_) ? origText : origText.split("“")[0];
+fplib.addMutation("hide_synopsis player - description on start", {element: ".description"}, function(summary) {
+  summary.added.forEach(function(elem) {
+    var h2s = elem.getElementsByTagName("h2");
+    [].slice.call(h2s).forEach(function(h2) {
+      var origText = getCachedText(h2) || "";
+      h2.innerText = (hideSpoilersDisabled_) ? origText : origText.split("“")[0];
+    });
+  });
 });
 
-document.body.arrive("#playerWrapper .playback-longpause-container", null, function() {
+fplib.addMutation("hide_synopsis player - longpause", {element: ".playback-longpause-container"}, function(summary) {
   var paragraphs = $(".playback-longpause-container .content p");
   paragraphs[paragraphs.length - 1].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
 
-  var h3s = this.getElementsByTagName("h3");
-  h3s[h3s.length - 1].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
+  summary.added.forEach(function(elem) {
+    var h3s = elem.getElementsByTagName("h3");
+    h3s[h3s.length - 1].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
+  });
 });
 
-document.body.arrive("#playerWrapper .player-status", null, function() {
-  var spans = this.getElementsByTagName("span");
-  if (spans.length >= 3)
-    spans[2].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
+fplib.addMutation("hide_synopsis player - player status", {element: ".player-status"}, function(summary) {
+  summary.added.forEach(function(elem) {
+    var spans = elem.getElementsByTagName("span");
+    if (spans.length >= 3)
+      spans[2].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
+  });
 });
 
-document.body.arrive("#playerWrapper .description h2", null, function() {
-  var origText = getCachedText(this) || "";
-  this.innerText = (hideSpoilersDisabled_) ? origText : origText.split("“")[0];
+fplib.addMutation("hide_synopsis player - episode list", {element: ".episode-list-container"}, function(summary) {
+  if (summary.added) {
+    $.each($(".episode-list-title"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
+    $.each($(".episode-list-image"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
+    $.each($(".episode-list-synopsis"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
+  }
 });
 
-var selectors = ["#playerWrapper .episode-list-image", "#playerWrapper .episode-list-synopsis", "#playerWrapper .next-episode-image",
-                "#playerWrapper .episode-list-title", "#playerWrapper .player-next-episode-description",
-                "#playerWrapper .player-postplay-episode-synopsis", "#playerWrapper .player-postplay-episode-title",
-                "#playerWrapper .player-postplay-autoplay-still"];
-selectors.forEach(function(selector) {
-  addSpoilerClassToSelector(document.body, selector);
+fplib.addMutation("hide_synopsis player - next episode", {element: ".player-next-episode-info"}, function(summary) {
+  if (summary.added) {
+    $.each($(".next-episode-image"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
+    $.each($(".player-next-episode-description"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
+  }
 });
 
+fplib.addMutation("hide_synopsis player - post play episode info", {element: ".player-postplay"}, function(summary) {
+  if (summary.added) {
+    $.each($(".player-postplay-background-image"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoilerblack_disabled" : "fp_spoilerblack") });
+    $.each($(".player-postplay-episode-synopsis"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
+    $.each($(".player-postplay-autoplay-still"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
+    $.each($(".player-postplay-episode-title"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
+  }
+});

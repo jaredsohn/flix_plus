@@ -104,8 +104,8 @@ var getListNewMyList = function() {
   return exportData;
 };
 
-
-// The arrive is needed for the newer style My List because when a user goes
+// The mutation observer is needed for the newer style My List because when a user goes
 // to /my-list, there isn't necessary a page reload.
-addExportListButton();
-document.body.arrive(".galleryHeader", addExportListButton);
+fplib.addAndNowMutation("add Export List button", {"element": ".galleryHeader" }, function(summary) {
+  addExportListButton();
+});

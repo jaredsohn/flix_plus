@@ -5,7 +5,6 @@ var enabledScripts_ = null;
 var keyboard_id_to_shortcut_dict_;
 
 $(document).ready(function() {
-        console.log("1");
     document.getElementById("speed_up_homepage").addEventListener("click", function(e)
     {
         var text = "Speed up homepage.\n\nThis will disable the following scripts: {hide sections, remove scrollbars, fade/tint/hide duplicates, fade/tint/hide watched, fade/tint/hide rated, clicking on poster shows details instead of playing} and remove the keyboard navigation keys.\n\nAre you sure you want to do this?";

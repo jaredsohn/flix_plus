@@ -1,8 +1,8 @@
-// random_ep userscript for Netflix
+// previewlink userscript for Netflix
 // Code was originally from https://github.com/michaelschade/netflix-trailers
 // Updated by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
-// Depends on: jquery, arrive.js, fplib
+// Depends on: jquery, mutation-summary.js, fplib
 
 // YouTube URL for trailer
 var trailerURL = function(movieName) {
@@ -42,7 +42,7 @@ var createPreviewLink = function(overviewInfoElem) {
   var infoElems = jawBoneContainerElems[0].getElementsByClassName("overviewPlay");
   if (infoElems.length) {
 //    console.log("adding!");
-    $(infoElems[0]).after(previewElem);
+    $(infoElems[0]).after(previewElem); //TODO: this will cause crashing
     infoElems[0].id = "fp_overviewPlay_" + infoElems[0].parentNode.id; // Name this so we can identify it when removed
   }
 };
@@ -50,10 +50,14 @@ var createPreviewLink = function(overviewInfoElem) {
 $(".jawbone-overview-info").each(function() {
   createPreviewLink(this);
 });
-document.body.arrive(".overviewPlay.playLink", function() {
-  createPreviewLink(this);
-});
 
+fplib.addMutation("previewlink - creation", {"element": ".overviewPlay.playLink" }, function(summary) {
+  summary.added.forEach(function(elem) {
+    console.log("previewlink creation");
+    console.log(elem);
+    createPreviewLink(elem);
+  });
+});
 
 var removePreviewLinks = function(elem) {
   var previewLinks = elem.getElementsByClassName("fp_preview_link");
@@ -91,16 +95,17 @@ var addMenuListener = function(elem) {
   });
 };
 
-console.log("~!~");
-document.body.arrive(".jawBone .menu li", function() {
-  addMenuListener(this);
-});
-var menuLis = $(".jawBone .menu li");
-if (menuLis.length) {
-  [].slice.call(menuLis).forEach(function(menuLi) {
-    addMenuListener(menuLi);
+fplib.addMutationAndNow("previewlink - add menu event listeners", {"element": ".jawBone" }, function(summary) {
+  summary.added.forEach(function(elem) {
+    var menus = elem.getElementsByClassName("menu");
+    [].slice.call(menus).forEach(function(menu) {
+      var lis = menu.getElementsByTagName("li");
+      [].slice.call(lis).forEach(function(li) {
+        addMenuListener(li);
+      });
+    });
   });
-}
+});
 
 extlib.addGlobalStyle(".overviewPlay { margin-right: -55px }");
 

@@ -2,22 +2,29 @@
 // Script originally written by Dustin Luck (https://github.com/DustinLuck) and found at http://userscripts.org:8080/scripts/show/124120 as version 1.10.2012.418
 // Heavily rewritten by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
-// Depends on: jquery, arrive.js, extlib.js, fplib.js
+// Depends on: jquery, extlib.js, fplib.js
 //
 // Changes include:
-// * Supporting changeds to the Netflix site
-// * Supporting more pages
+// * Supporting changes to the Netflix site and generally supports more pages
 // * Letting a user custom define keys
 // * A lot of new commands (especially in the player and some Flix Plus-specific ones)
-
+//
+// Missing functionality after June 2015 update (TODO):
+// * support moving left, up, home, end
+// * click on right arrow if current title not visible to show all posters
+// * episode navigation, play random
+// * add/remove mylist, play, play trailer, rate, hide section
+//
+// * search
+// * support who's watching dialog
+// * support older pages (perhaps via copy of old version of script for just those urls)
+// * should we always show details like this?
 
 // Since exclude support is disabled in compiler, do it manually here
 if (window.location.pathname.indexOf("/KidsCharacter") === 0)
   return;
 
-var elemsInfo_ = null;
-var savedElemsInfo_ = null;
-var savedSelectors_ = {};
+var smallTitleCard_ = null;
 
 var keyboardCommandsShown_ = false;
 var alreadyHasShiftChars_ = ["~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
@@ -273,36 +280,16 @@ var rateMovie = function(rating) {
 // Highlight in UI location of keyboard selection
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-var updateKeyboardSelection = function(elem, selected) {
-  if ((profilesMode_ === false) && (((window.location.pathname.indexOf("/WiMovie") === 0) || (window.location.pathname.indexOf("/KidsMovie") === 0))))
-    return;
+var updateKeyboardSelection = function(elem) {
+  smallTitleCard_ = elem;
 
-  return; // TODO - also don't show for Who's Watchig dialog since buttons otherwise disabled due to June 2015 update
+  if ((keyboardIdToShortcutDict_["prev_section"] !== "None") ||
+      (keyboardIdToShortcutDict_["next_section"] !== "None") ||
+      (keyboardIdToShortcutDict_["section_home"] !== "None") ||
+      (keyboardIdToShortcutDict_["section_end"] !== "None")) {
 
-  if ((keyboardIdToShortcutDict_["move_right"] === "None") &&
-      (keyboardIdToShortcutDict_["move_left"] === "None") &&
-      (keyboardIdToShortcutDict_["move_home"] === "None") &&
-      (keyboardIdToShortcutDict_["move_end"] === "None")) {
-    // Don't show border if associated keys aren't set.
-    return;
-  }
-
-  var borderElem = elem;
-  if (selectors_["borderedElement"] !== null)
-    borderElem = $(selectors_["borderedElement"], elem)[0];
-
-  if (
-    (window.location.pathname.indexOf("/Search") === 0) || (window.location.pathname.indexOf("/WiSearch") === 0)
-  ) {
-    if (selected)
-      borderElem.classList.add("fp_keyboard_search_selected");
-    else
-      borderElem.classList.remove("fp_keyboard_search_selected");
-  } else {
-    if (selected)
-      borderElem.classList.add("fp_keyboard_selected");
-    else
-      borderElem.classList.remove("fp_keyboard_selected");
+    var ptrackContentElem = elem.getElementsByClassName("ptrack-content")[0];
+    extlib.simulateClick(ptrackContentElem);
   }
 };
 
@@ -311,132 +298,57 @@ var updateKeyboardSelection = function(elem, selected) {
 // Cycle through selections
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+// from: http://stackoverflow.com/questions/11560028/get-the-next-element-with-a-specific-class-after-a-specific-element
+function nextInDOM(_selector, _subject) {
+    var next = getNext(_subject);
+    while(next.length != 0) {
+        var found = searchFor(_selector, next);
+        if(found != null) return found;
+        next = getNext(next);
+    }
+    return null;
+}
+function getNext(_subject) {
+    if(_subject.next().length > 0) return _subject.next();
+    return getNext(_subject.parent());
+}
+function searchFor(_selector, _subject) {
+    if(_subject.is(_selector)) return _subject;
+    else {
+        var found = null;
+        _subject.children().each(function() {
+            found = searchFor(_selector, $(this));
+            if(found != null) return false;
+        });
+        return found;
+    }
+    return null; // will/should never get here
+}
+
 function nextPreviousListContainer(direction) {
-  if (!listHasItems(elemsInfo_.elemsListContainers)) {
-    return;
-  }
+  if (direction === 1) {
+    var $lolomoRow = $(smallTitleCard_).closest(".lolomoRow");
+    var nextLolomoRow = nextInDOM(".lolomoRow", $lolomoRow)[0];
 
-  try {
-    if (elemsInfo_.elemsListContainers || null !== null) {
-      if ((elemsInfo_.elemsListContainers.length - 1 >= elemsInfo_.currListContainer) && (elemsInfo_.currListContainer !== -1)) {
-        elemsInfo_.elemsListContainers[elemsInfo_.currListContainer].style["border-style"] = "none";
-      }
-    }
-  } catch (ex) {
-    console.log(ex);
-  }
+    console.log("nextLolomoRow");
+    console.log(nextLolomoRow);
 
-  if (direction == 0)
-    return;
+    smallTitleCard_ = nextLolomoRow.getElementsByClassName("smallTitleCard")[0];
 
-  while (true) {
-    elemsInfo_.currListContainer += direction;
-    if (elemsInfo_.currListContainer < 0) {
-      elemsInfo_.currListContainer = 0;
-    } else if (elemsInfo_.currListContainer >= elemsInfo_.elemsListContainers.length - 1) {
-      elemsInfo_.currListContainer = elemsInfo_.elemsListContainers.length - 1;
-      break;
-    }
+    console.log("smalltitlecard_");
+    console.log(smallTitleCard_);
 
-    if (!extlib.isHidden(elemsInfo_.elemsListContainers[elemsInfo_.currListContainer]))
-      break;
-  }
-
-  nextPreviousListItem(0);
-  elemsInfo_.currElem = elemsInfo_.elemsListContainers[elemsInfo_.currListContainer];
-  scrollMiddle(elemsInfo_.currElem);
-  elemsInfo_.elemsNPList = elemsInfo_.currElem.getElementsByClassName("agMovie"); // TODO: should use fplib to find selector for active page
-  elemsInfo_.currListItem = -1;
-  nextPreviousListItem(1);
-
-  try {
-    if (elemsInfo_.elemsListContainers || null !== null) {
-      if (elemsInfo_.elemsListContainers.length - 1 >= elemsInfo_.currListContainer) {
-        if ((keyboardIdToShortcutDict_["prev_section"] !== "None") ||
-            (keyboardIdToShortcutDict_["next_section"] !== "None") ||
-            (keyboardIdToShortcutDict_["section_home"] !== "None") ||
-            (keyboardIdToShortcutDict_["section_end"] !== "None")) {
-
-            // only draw border if a section navigation-related key was set
-            elemsInfo_.elemsListContainers[elemsInfo_.currListContainer].style["border-style"] = "solid";
-        }
-      }
-    }
-  } catch (ex) {
-    console.log(ex);
+    updateKeyboardSelection(smallTitleCard_);
+  } else if (direction === -1) {
+    console.log("cannot go up yet..."); // TODO
   }
 }
 
 function nextPreviousListItem(direction) {
-  if (!listHasItems(elemsInfo_.elemsNPList)) {
-    return;
-  }
-  elemsInfo_.currElem = null;
-  var lastIndex = elemsInfo_.elemsNPList.length - 1;
-  try {
-    elemsInfo_.currElem = elemsInfo_.elemsNPList[elemsInfo_.currListItem];
-    updateKeyboardSelection(elemsInfo_.currElem, false);
-  } catch (err) {
-      //ignore error
-  }
-
-  if (direction == 0) {
-    return;
-  }
-  var oldListitem = elemsInfo_.currListItem;
-  while (true) {
-    elemsInfo_.currListItem += direction;
-
-    if (elemsInfo_.currListItem < 0) {
-        elemsInfo_.currListItem = oldListitem;
-        break;
-    }
-    if (elemsInfo_.currListItem > lastIndex) {
-        elemsInfo_.currListItem = oldListitem;
-        break;
-    }
-
-    if (!extlib.isHidden(elemsInfo_.elemsNPList[elemsInfo_.currListItem]))
-        break;
-  }
-
-  if (elemsInfo_.currListItem < 0) {
-    elemsInfo_.currListItem = 0;
-  } else if (elemsInfo_.currListItem > lastIndex) {
-    elemsInfo_.currListItem = lastIndex;
-  } else {
-    elemsInfo_.currElem = elemsInfo_.elemsNPList[elemsInfo_.currListItem];
-    try {
-      if (((elemsInfo_.elemsListContainers || []).length === 0) ||
-          !(extlib.isHidden($("#" + elemsInfo_.elemsListContainers[elemsInfo_.currListContainer].id + " .bd")[0]))) {
-        console.log("mouseover...");
-        console.log(elemsInfo_.currElem);
-        extlib.simulateEvent(elemsInfo_.currElem, "mouseover"); // done for /search since another element is also in the bobbable class
-        extlib.simulateEvent($(".bobbable", $(elemsInfo_.currElem))[0], "mouseover");
-        scrollMiddle(elemsInfo_.currElem);
-      } else
-        scrollMiddle(elemsInfo_.elemsListContainers[elemsInfo_.currListContainer]);
-    } catch (ex) {
-      console.log(ex);
-    }
-
-    updateKeyboardSelection(elemsInfo_.currElem, true);
-
-    var elemsLinks = elemsInfo_.currElem.getElementsByTagName("a");
-    if (elemsLinks.length == 0) {
-      switch (elemsInfo_.currListItem) {
-        case 0:
-          nextPreviousListItem(1);
-          break;
-        case lastIndex:
-          nextPreviousListItem(-1);
-          break;
-        default:
-          nextPreviousListItem(direction);
-          break;
-      }
-        //nextPreviousListItem(-direction);
-    }
+  if (direction === 1) {
+    updateKeyboardSelection(nextInDOM(".smallTitleCard", $(smallTitleCard_))[0]);
+  } else if (direction === -1) {
+    console.log("cannot go left yet..."); // TODO
   }
 }
 
@@ -677,7 +589,7 @@ var runCommand = function(command) {
         rateMovie(command); break;
       case "move_right": nextPreviousListItem(1); break;
       case "move_left": nextPreviousListItem(-1); break;
-      case "move_home": updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], false); elemsInfo_.currListItem = -1; nextPreviousListItem(1); break;
+      case "move_home": break;
       case "move_end": updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], false); elemsInfo_.currListItem = elemsInfo_.elemsNPList.length; nextPreviousListItem(-1); break;
       case "play": playOrZoomMovie(command); break;
       case "to_my_list": addToQueue(); break;
@@ -686,15 +598,7 @@ var runCommand = function(command) {
       case "open_link": openCurrentLink(); break;
       case "next_section": nextPreviousListContainer(1); break;
       case "prev_section": nextPreviousListContainer(-1); break;
-      case "section_home":
-        updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], false);
-        elemsInfo_.currListContainer = -1;
-        nextPreviousListContainer(1);
-
-        updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], false);
-        elemsInfo_.currListItem = -1;
-        nextPreviousListItem(1);
-        break;
+      case "section_home": var $smallTitleCards = $(".smallTitleCard"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[0]); } break;
       case "section_end":
         updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], false);
         elemsInfo_.currListContainer = elemsInfo_.elemsListContainers.length - 1;
@@ -846,80 +750,12 @@ var setSpeed = function() {
   document.getElementsByTagName('video')[0].playbackRate = speed_;
 };
 
-var initForSelectors = function(selectors) {
-  console.log("our selectors =");
-  console.log(selectors);
-
-  elemsInfo_ = { elemsListContainers: [], currListContainer: -1, elemsNPList: [], currListItem: -1, currElem: null };
-
-  if ((keyboardIdToShortcutDict_["prev_section"] === "None") &&
-      (keyboardIdToShortcutDict_["next_section"] === "None") &&
-      (keyboardIdToShortcutDict_["section_home"] === "None") &&
-      (keyboardIdToShortcutDict_["section_end"] === "None") &&
-      (keyboardIdToShortcutDict_["move_right"] === "None") &&
-      (keyboardIdToShortcutDict_["move_left"] === "None") &&
-      (keyboardIdToShortcutDict_["move_home"] === "None") &&
-      (keyboardIdToShortcutDict_["move_end"] === "None")) {
-    navigationDisabled_ = true;
-    console.log("Data loading skipped since navigation keys not defined.");
-    return;
-  }
-
-  if (selectors["elementsList"] === ".mrow") {
-    elemsInfo_.elemsListContainers = document.getElementsByClassName("mrow");
-    if ((elemsInfo_.elemsListContainers.length > 0) && (elemsInfo_.elemsListContainers[0].classList.contains("characterRow"))) {
-      newList = [];
-      for (var i = 1; i < elemsInfo_.elemsListContainers.length; i++) {
-        newList.push(elemsInfo_.elemsListContainers[i]);
-      }
-      elemsInfo_.elemsListContainers = newList;  // now an array instead of htmlcollection
-    }
-
-    if ($(".emptyYourListRow").length) {
-      nextPreviousListContainer(1);
-    }
-
-    document.body.arrive(selectors["elementsList"], function() {
-      //console.log(".");
-      elemsInfo_.elemsListContainers.push(this);
-    });
-  } else {
-    elemsInfo_.elemsNPList = $(selectors["elements"]).get();
-    console.log(elemsInfo_.elemsNPList);
-
-    document.body.arrive(selectors["elements"], function() {
-      //console.log(".");
-      elemsInfo_.elemsNPList.push(this);
-    });
-  }
-  if (elemsInfo_.elemsNPList) {
-    nextPreviousListItem(1);
-  }
-  if (elemsInfo_.elemsListContainers) {
-    nextPreviousListContainer(1);
-  }
-  console.log("elems info is ");
-  console.log(elemsInfo_);
-};
-
-var addWhoWatchingInstructions = function() {
-/* TODO
-  var profilesSelector = "#profiles-gate, .profilesGate";
-  if ($(profilesSelector).length) {
-    text = "You can disable this dialog by enabling 'Prevent Who's Watching interruptions' in Flix Plus preferences.";
-    var elem = document.createElement("div"); elem.style.cssText = "text-align:center"; elem.innerText = text;
-    $(profilesSelector)[0].appendChild(elem);
-    var elem = document.createElement("br");
-    $(profilesSelector)[0].appendChild(elem);
-  } */
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Startup
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Update keyboard shortcuts based on the active page
-document.body.arrive("#playerWrapper, .mainView", function() {
+fplib.addMutation("hide_synopsis player - player loaded/unloaded", {element: "#playerWrapper, .mainView"}, function(summary) {
   keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName() + " keyboard_shortcuts", function(keyboardShortcutToIdDict, keyboardIdToShortcutDict) {
     console.log("changing out keyboard shortcuts");
     keyboardShortcutToIdDict_ = keyboardShortcutToIdDict;
@@ -927,146 +763,19 @@ document.body.arrive("#playerWrapper, .mainView", function() {
   });
 });
 
-
 keyboard_shortcuts_info.load_shortcut_keys("flix_plus " + fplib.getProfileName() + " keyboard_shortcuts", function(keyboardShortcutToIdDict, keyboardIdToShortcutDict) {
-  //console.log(keyboardShortcutToIdDict);
-  //console.log(keyboardIdToShortcutDict);
   keyboardShortcutToIdDict_ = keyboardShortcutToIdDict;
   keyboardIdToShortcutDict_ = keyboardIdToShortcutDict;
 
-/*
-  fplib.idMrows();
-
-// Commented out because it needs to be revisited for Netflix June 2015 layout
-//TODO  selectors_ = fplib.getSelectorsForPath();
-//TODO  initForSelectors(selectors_);
-
-  // Show instructions on Who's Watching; we're assuming this is the only dialog with the show class for now
-  addWhoWatchingInstructions();
-
-  // Track when dialog is shown for most pages
-  var MutationObserver2 = window.MutationObserver || window.WebKitMutationObserver;
-  var observer2 = new MutationObserver2(function(mutations) {
-    if ((document.getElementById("profiles-gate")).style["display"] !== "none") {
-      if (!profilesMode_) {
-        console.log("who's watching arrive");
-        profilesMode_ = true;
-        savedElemsInfo_ = elemsInfo_;
-        savedSelectors_ = selectors_;
-
-        selectors_ = fplib.getSelectors("/ProfilesGate");
-        selectors_["elements"] = "#profiles-gate .profiles li";
-        initForSelectors(selectors_);
-      }
-    } else {
-      if (profilesMode_) {
-        profilesMode_ = false;
-        elemsInfo_ = savedElemsInfo_;
-        selectors_ = savedSelectors_;
-        $(".fp_keyboard_selected").removeClass("fp_keyboard_selected");
-        updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], true);
-        scrollMiddle(elemsInfo_.elemsNPList[elemsInfo_.currListItem]);
-      }
-    }
-  });
-  var elem = document.getElementById("profiles-gate");
-  if (elem || null !== null)
-    observer2.observe(elem, { attributes: true });
-
-  // Track when dialog is shown for newer pages
-  document.body.arrive("#profiles-gate, .profilesGate", function() {
-    console.log("who's watching arrive");
-    profilesMode_ = true;
-    savedElemsInfo_ = elemsInfo_;
-    savedSelectors_ = selectors_;
-
-    selectors_ = fplib.getSelectors("/ProfilesGate");
-    initForSelectors(selectors_);
-
-    addWhoWatchingInstructions();
-  });
-
-  document.body.leave("#profiles-gate, .profilesGate", function() {
-    elemsInfo_ = savedElemsInfo_;
-    selectors_ = savedSelectors_;
-    $(".fp_keyboard_selected").removeClass("fp_keyboard_selected");
-    updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], true);
-    profilesMode_ = false;
-    scrollMiddle(elemsInfo_.elemsNPList[elemsInfo_.currListItem]);
-  });*/
+  // TODO
+  //// Highlight the first title
+  //var $smallTitleCards = $(".smallTitleCard");
+  //if ($smallTitleCards.length) {
+  //  updateKeyboardSelection($smallTitleCards[0]);
+  //}
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   document.addEventListener('keypress', handleKeypress, false);
   document.addEventListener('keydown', handleKeydown, false);
-
-/* // TODO: update for new Netflix layut
-  if ($("#searchField").length) {
-    $("#searchField")[0].addEventListener("input", function(e) {
-      if ($("#searchField")[0].value === "") {
-        if (searchMode_) {
-          console.log("search mode done");
-          searchMode_ = false;
-          elemsInfo_ = savedElemsInfo_;
-          selectors_ = savedSelectors_;
-          $(".fp_keyboard_selected").removeClass("fp_keyboard_selected");
-          updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], true);
-          scrollMiddle(elemsInfo_.elemsNPList[elemsInfo_.currListItem]); // this doesn't work as I'd like, but if user presses arrow things are okay
-        }
-      } else {
-        if (!searchMode_) {
-          console.log("search mode start");
-          searchMode_ = true;
-          savedElemsInfo_ = elemsInfo_;
-          savedSelectors_ = selectors_;
-
-          selectors_ = fplib.getSelectors("/search");
-          initForSelectors(selectors_);
-        }
-      }
-    });
-  }
-*/
-/* // TODO: not needed since there aren't any borders right now
-  // Make borders more visible on many pages
-  extlib.addGlobalStyle(".agMovieGallery {position: relative; top: 20px; left:10px}");
-  extlib.addGlobalStyle(".instantSearchGallery .gallery {position: relative; top: 10px; left:10px}");
-  if ((window.location.pathname.indexOf("/KidsAltGenre") === 0) || (window.location.pathname.indexOf("/Kids") === 0))
-    extlib.addGlobalStyle(".agMovieSetSlider {padding: 0px 0px 10px 0px}");
-*/
-/* // TODO: probably not needed with new Netflix layout
-  // Fix top border; changing CSS via above easily gets undone in some cases (such as doing a search from wiMovie)
-  document.body.arrive(".agMovieGallery", function() {
-    $(".agMovieGallery").before("<br>");
-  });
-  document.body.arrive(".instantSearchGallery .gallery", function() {
-    $(".instantSearchGallery .gallery").before("<br>");
-  });
-
-  if (window.location.pathname.indexOf("/watch") === 0) {
-    document.body.arrive(".player-next-episode", function() {
-      console.log("updating speed!");
-      if (speed_ !== 1)
-        setSpeed();
-    });
-  }
-
-  // Don't break keyboard shortcuts if user also has Netflix Enhancer installed (just rearrange the elements)
-  if (!navigationDisabled_) {
-    var tileRatingContainers = $(".tileRatingContainer");
-    var len = tileRatingContainers.length;
-    for (var tileIndex = 0; tileIndex < len; tileIndex++) {
-      var elem = tileRatingContainers[tileIndex];
-      var parentNode = elem.parentNode;
-      var temp = parentNode.removeChild(elem);
-      parentNode.appendChild(temp);
-    }
-    document.body.arrive(".tileRatingContainer", function() {
-      console.log("moving tileratingcontainer");
-      var elem = this;
-      var parentNode = elem.parentNode;
-      var temp = parentNode.removeChild(elem);
-      parentNode.appendChild(temp);
-    });
-  }*/
 });

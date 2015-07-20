@@ -1,7 +1,7 @@
 // mylist_to_top userscript for Netflix
 // Built by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
-// Depends on: jquery, arrive.js
+// Depends on: jquery, mutation-summary.js, fplib.js
 //
 // Moves Continue Watching and MyList to the top of the page
 //
@@ -17,26 +17,18 @@ var moveToTop = function(elem) {
 				console.log("moving continueWatching");
 		    $gp.detach().insertBefore($firstRow);
 			} else {
-				console.log("will not move continue watching over itself");
+				console.log("will not move continueWatching over itself");
 			}
 		} else if (attrType === "queue") {
 			var $firstRow = $(".lolomoRow:first")
 			var $continueWatchingRow = $(".lolomoRow span[type=continueWatching]");
-			console.log("condition is ");
-			console.log(($firstRow[0] === $continueWatchingRow.parent().parent()[0]));
 			var $targetRow = ($firstRow[0] === $continueWatchingRow.parent().parent()[0])
 		  	? $(".lolomoRow:nth-child(3)")
 		  	: $firstRow;
 			var $gp = $(elem).parent().parent();
 
-			console.log("targetrow:");
-	  	console.log($targetRow[0]);
-	  	console.log("current mylist");
-	  	console.log($gp[0]);
-
 			if ($targetRow[0] !== $gp[0]) {
-				console.log("moving mylist");
-				console.log($targetRow);
+				console.log("moving My List");
 		    $gp.detach().insertBefore($targetRow);
 			} else {
 				console.log("will not move My List over itself");
@@ -47,23 +39,12 @@ var moveToTop = function(elem) {
 	}
 };
 
-var myListElemChanged = function(summaries) {
-	summaries[0].added.forEach(function(elem) {
-		moveToTop(elem);
-	});
-};
-
 // Move Continue Watching and My List to top if already present
 $(".rowTitle").each(function() { moveToTop(this); });
 
 // Do the same if they come later
-document.body.arrive(".rowTitle", null, function() {
-	moveToTop(this);
+fplib.addMutation("detect rowTitle for My List to Top", {"element": ".rowTitle"}, function(summary) {
+	summary.added.forEach(function(elem) {
+	  moveToTop(elem);
+	});
 });
-
-/*
-var observer = new MutationSummary({
-  callback: myListElemChanged,
-  queries: [{ element: '.rowTitle'}]
-});
-*/

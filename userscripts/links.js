@@ -2,7 +2,7 @@
 // Script originally written by Ricardo Mendonça Ferreira (see original comments below)
 // Included as a part of Flix Plus by Lifehacker, 2014-2015.
 // http://www.github.com/jaredsohn/flixplus
-// Depends on: arrive.js, fplib.js
+// Depends on: mutation-summary.js, fplib.js
 //
 // Changes made to Flix Plus were minimal.  They include:
 // * changed Spanish text to English
@@ -47,6 +47,8 @@
 // 2011.09.30  [1.1] Acrescentado include p/ /Movie/*
 // 2011.09.28  [1.0] 1ª versão
 //}
+
+"use strict";
 
 var getData = function(src, className, regex) {
   var result = "";
@@ -106,19 +108,28 @@ var createLinks = function() {
     linksDiv.classList.add("fp_links");
     linksDiv.innerHTML = newHTML;
     var panesElem = tw.getElementsByClassName("jawBonePane");
-    if (panesElem.length)
-      $(panesElem[0]).prepend(linksDiv);
+
+    if (panesElem.length) {
+      var $paneElem = $(panesElem[0]);
+      $paneElem.prepend(linksDiv);
+      var overviewInfos = $paneElem[0].getElementsByClassName(".jawbone-overview-info");
+      if (overviewInfos.length)
+        fplib.ensureEverythingFits(overviewInfos[0]);
+    }
   });
   console.log("fp_links loaded");
 }
 
-document.body.arrive(".jawbone-overview-info", function() {
+console.log("going to add mutation events");
+fplib.addMutation("detect movie info for links", {"element": ".jawbone-overview-info" }, function(summary) {
   createLinks();
 });
 createLinks();
 
-document.body.arrive(".galleryHeader", function() {
-  if (window.location.pathname.startsWith("/browse/person/"))
-    createPersonLinks(this);
+fplib.addMutation("detect person for links", {"element": ".galleryHeader" }, function(summary) {
+  if (window.location.pathname.startsWith("/browse/person/")) {
+    summary.added.forEach(function(elem) {
+      createPersonLinks(elem);
+    });
+  }
 });
-

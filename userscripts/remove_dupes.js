@@ -31,7 +31,7 @@ for (var i = 0; i < imgsLength; i++) {
   else {
     dupeCount++;
     imgs[i].parentNode.classList.add("fp_duplicate"); // technically this is parent herex
-    imgs[i].parentNode.parentNode.parentNode.classList.add("fp_duplicate_gp"); // technically is ggp now
+    imgs[i].parentNode.parentNode.parentNode.classList.add("fp_duplicate_p"); // technically is ggp now
   }
 }
 
@@ -42,7 +42,7 @@ var len = myListImgs.length;
 for (var i = 0; i < len; i++) {
   if (myListImgs[i].classList.contains("fp_duplicate")) {
     myListImgs[i].classList.remove("fp_duplicate");
-    myListImgs[i].parentNode.parentNode.classList.remove("fp_duplicate_gp");
+    myListImgs[i].parentNode.parentNode.classList.remove("fp_duplicate_p");
     dupe_count--;
   }
 }*/
@@ -51,4 +51,4 @@ for (var i = 0; i < len; i++) {
 console.log("Found " + dupeCount + " duplicate posters (of " + imgs.length + ")");
 
 fplib.idMrows(); // TODO: not all mrows are ided on page load
-fplib.rolloverVisibleImages(["fp_duplicate_gp"]);
+fplib.rolloverVisibleImages(["fp_duplicate_p"]);

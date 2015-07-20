@@ -91,10 +91,10 @@ var createUniqueIdsDict = function(idArray, resultsJson, matchesFilter) {
 };
 
 var updateUniques = function(keyName, results, matchesFilter) {
-  var prevArray = (localStorage[keyname] || "").split(",");
+  var prevArray = (localStorage[keyName] || "").split(",");
 
   var updatedArray = Object.keys(createUniqueIdsDict(prevArray, results, matchesFilter));
-  localStorage[keyname] = updatedArray;
+  localStorage[keyName] = updatedArray;
   return updatedArray;
 }
 
@@ -127,8 +127,8 @@ chrome.storage.sync.get(obj, function(items) {
   }
   ignoreTv_ = newIgnoreTv;
 
-  var keyname = keyPrefix_ + "viewingactivity";
-  extlib.checkForNewData([keyname],
+  var keyName = keyPrefix_ + "viewingactivity";
+  extlib.checkForNewData([keyName],
     5 * 60, // five minutes
     7 * 24 * 60 * 60, // one week
     function(historyLastChecked, callback) { // request data if stale
@@ -151,7 +151,7 @@ chrome.storage.sync.get(obj, function(items) {
                             return ignoreTv_ ? (result.series === null) : true;
                           });
 
-                          console.log(keyname + " counts = " + uniqueArray.length);
+                          console.log(keyName + " counts = " + uniqueArray.length);
 
                           callback([uniqueArray.toString()]);
                       }

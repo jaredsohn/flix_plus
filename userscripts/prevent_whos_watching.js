@@ -1,7 +1,7 @@
 // prevent_whos_watching userscript for Netflix
 // Built by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
-// Depends on: jquery, arrive.js
+// Depends on: jquery, mutation-summary.js, fplib.js
 
 // Current knowledge of when the Who's Watching dialog gets shown:
 // -- when first logging in (normal or Facebook)
@@ -27,7 +27,7 @@ var userActionTimeStamp_ = 0;
 var ALLOWABLE_DELAY = 10000 ; // 10 seconds
 
 function handleWhosWatchingDialog(profilesGateContainer) {
-  var profileNameElems = Array.prototype.slice.call(profilesGateContainer.getElementsByClassName("profileName")) || [];
+  var profileNameElems = Array.prototype.slice.call(profilesGateContainer.getElementsByClassName("profile-name")) || [];
   console.log("profilenameelems = ");
   console.log(profileNameElems);
   if (profileNameElems.length) {
@@ -52,38 +52,30 @@ function handleWhosWatchingDialog(profilesGateContainer) {
 	}
 }
 
-var setExcludeClickEventListener = function(selector) {
-	if (($(selector) || null) !== null) {
-		$(selector).each(function(e) {
-			console.log("registered event listener for " + selector);
-			this.addEventListener("click", function() {
-				userActionTimeStamp_ = new Date().getTime();
-				console.log("user clicked " + selector + " at " + userActionTimeStamp_);
-			});
+var setExcludeClickEventListener = function(elem) {
+	if (elem !== null) {
+		console.log("registered event listener for ");
+		console.log(elem);
+		elem.addEventListener("click", function() {
+			userActionTimeStamp_ = new Date().getTime();
+			console.log(elem);
+			console.log("user clicked above at " + userActionTimeStamp_);
 		});
 	}
 };
 
-// Create an event listener either now or when possible
-var arriveAndNowExcludeClick = function(selector) {
-	$(selector).each(function() {
-		setExcludeClickEventListener(selector);
-	});
-	document.body.arrive(selector, null, function() {
-		setExcludeClickEventListener(selector);
-	});
-};
-
 var main = function() {
-	arriveAndNowExcludeClick(".btn-exitKids");
-	arriveAndNowExcludeClick(".kidsHeaderAvatar");
-	arriveAndNowExcludeClick(".icon-kids");
-	arriveAndNowExcludeClick(".profilesGateContainer .profileName");
-	arriveAndNowExcludeClick(".profilesGateContainer .profileIcon");
+	fplib.addMutationAndNow("preventWhosWatching add listener to kids", {"element": ".icon-kids"}, function(summary) {
+		summary.added.forEach(function(elem) {
+			setExcludeClickEventListener(elem);
+		});
+	});
 
-	document.body.arrive(".profilesGateContainer", null, function() {
-		console.log("handleWhosWatchingDialog arrive");
-		handleWhosWatchingDialog(this);
+	fplib.addMutation("preventWhosWatching mutationAndNowExcludeClick .profilesGateContainer", {"element": ".profilesGateContainer"}, function(summary) {
+		summary.added.forEach(function(elem) {
+			console.log("handleWhosWatchingDialog mutation");
+			handleWhosWatchingDialog(elem);
+		});
 	});
 
 	var profilesGateContainerElems = document.getElementsByClassName("profilesGateContainer") || [];
