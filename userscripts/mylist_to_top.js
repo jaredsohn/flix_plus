@@ -39,11 +39,8 @@ var moveToTop = function(elem) {
 	}
 };
 
-// Move Continue Watching and My List to top if already present
-$(".rowTitle").each(function() { moveToTop(this); });
-
-// Do the same if they come later
-fplib.addMutation("detect rowTitle for My List to Top", {"element": ".rowTitle"}, function(summary) {
+// Move Continue Watching and My List to top
+fplib.addMutationAndNow("detect rowTitle for My List to Top", {"element": ".rowTitle"}, function(summary) {
 	summary.added.forEach(function(elem) {
 	  moveToTop(elem);
 	});

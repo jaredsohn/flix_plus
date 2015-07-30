@@ -1,9 +1,3 @@
-return; // disabled for now
-
-// TODO: this is a copy-paste of faderated right now with a few additions for watch-specific logic (in the main code)
-// Should move much of the shared code into a library.
-// TODO: did a search/replace for ratingItems to viewedItems; change code to not make this necessary
-
 // fade_watched userscript for Netflix
 // Built by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
@@ -11,6 +5,10 @@ return; // disabled for now
 //
 // This script will make AJAX requests to get a Netflix user's watched history.
 // When making changes to this code, consider also making them in fade_rated.js
+//
+// Note: this is a copy-paste of faderated right now with a few additions for
+// watch-specific logic in the main code and a search/replace of ratingItems
+// to viewedItems.
 
 var keyPrefix_ = "flix_plus " + fplib.getProfileName() + " ";
 
@@ -72,6 +70,9 @@ var getHistory = function(settings, callback) {
 var createUniqueIdsDict = function(idArray, resultsJson, matchesFilter) {
   var dict = {};
 
+  console.log("createUniqueIdsDict");
+  console.log(resultsJson);
+
   for (var i = 0; i < idArray.length; i++) {
     if (idArray[i].trim() !== "")
       dict[idArray[i]] = true;
@@ -98,7 +99,6 @@ var updateUniques = function(keyName, results, matchesFilter) {
   return updatedArray;
 }
 
-// TODO: merge into definePosterCss???
 var initCss = function(name, defaultVal) {
   var keysDict = {};
   keysDict[keyPrefix_ + name + "_style"] = defaultVal;
@@ -113,7 +113,7 @@ fplib.showProgressBar("fade_watched");
 
 initCss("fp_watched", "fade");
 
-var ignoreTv_ = false;
+var ignoreTv_ = localStorage[keyPrefix_ + "fp_ignore_tv"] !== "false";
 var obj = {};
 obj[keyPrefix_ + "fp_ignore_tv"] = ignoreTv_;
 
@@ -125,7 +125,12 @@ chrome.storage.sync.get(obj, function(items) {
     delete localStorage[keyPrefix_ + "viewingactivity_last_checked"];
     console.log("viewing history changed since ignoreTv is now " + newIgnoreTv);
   }
-  ignoreTv_ = newIgnoreTv;
+
+  // We store the ignoreTv value used to load data in localStorage
+  if (ignoreTv_ !== newIgnoreTv) {
+    localStorage[keyPrefix_ + "fp_ignore_tv"] = newIgnoreTv;
+    ignoreTv_ = newIgnoreTv;
+  }
 
   var keyName = keyPrefix_ + "viewingactivity";
   extlib.checkForNewData([keyName],
@@ -148,7 +153,7 @@ chrome.storage.sync.get(obj, function(items) {
                           console.log(results);
 
                           var uniqueArray = updateUniques(keyName, results, function(result) {
-                            return ignoreTv_ ? (result.series === null) : true;
+                            return ignoreTv_ ? ((result.series || null) === null) : true;
                           });
 
                           console.log(keyName + " counts = " + uniqueArray.length);

@@ -1,7 +1,7 @@
 // section_hider userscript for Netflix
 // Built by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
-// Depends on: jquery, arrive.js, fplib.js, extlib.js, some images
+// Depends on: jquery, arrive-summary.js, fplib.js, extlib.js, some images
 //
 // Derived from Flix Plus customizations made to Scrollbuster, but with different behavior
 // (hides/shows sections instead of removing/adding scrollbars)

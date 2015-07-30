@@ -1,5 +1,3 @@
-return; // disabled for now
-
 // fade_rated userscript for Netflix
 // Built by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
@@ -16,8 +14,9 @@ var keyPrefix_ = "flix_plus " + fplib.getProfileName() + " ";
 //  netflixApiBase: URL for Netflix API (extract from existing webpages)
 //  authURL: authentication to use Netflix API (extract from existing webpages)
 //  pageNo: used within next query.  Defaults to 0.
-//  resultsJSON: results from a query.  ratingItems will get updated after multiple requests (but other fields will)
-//               be data from first request.  Created after first call to method.
+//  resultsJSON: results from a query.  ratingItems will get updated after multiple
+//               requests (but other fields will) be data from first request.
+//               Created after first call to method.
 // The callback will be returned when all data has been collected.
 var getHistory = function(settings, callback) {
   if ((settings === null) ||
@@ -131,7 +130,7 @@ extlib.checkForNewData([keyName, keyName + "_notinterested"],
                         console.log(results);
 
                         var notInterestedArray = updateUniques(keyName + "_notinterested", results, function(result) {
-                          return result.yourRating === -3;
+                          return ((result.yourRating === -3) || (result.yourRating === 1));
                         });
                         var uniqueArray = updateUniques(keyName, results, function(result) {
                           return true;
@@ -151,7 +150,6 @@ extlib.checkForNewData([keyName, keyName + "_notinterested"],
       console.error(ex);
     }
   }, function(datas, callback) { // update UI based on data
-
     console.log(datas);
 
     // Remove class from existing elements in case something was removed

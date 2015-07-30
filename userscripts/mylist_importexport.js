@@ -1,7 +1,7 @@
 // mylist_importexport userscript for Netflix
 // Written by Jared Sohn as a part of Flix Plus by Lifehacker, 2014-2015
 // http://www.github.com/jaredsohn/flixplus
-// Depends on: jquery, arrive.js, extlib.js, fplib.js
+// Depends on: jquery, mutation-summary.js, extlib.js, fplib.js
 
 // This script allows exporting My List.
 // Previous versions of the code would make AJAX requests to import a Netlfix user's My List history (hence, the name)

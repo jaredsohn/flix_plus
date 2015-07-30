@@ -13,6 +13,8 @@ var fplib = fplib || {};
 var fplib_ = function() {
   var self = this;
   var profileName_ = "";
+  var keepPosterClasses_ = false;
+  var progressScripts_ = {};
 
   //////////////////////////////////////////////////////////////////////
   // Mutation Summaries
@@ -379,7 +381,51 @@ var fplib_ = function() {
     });
   };
 
+  // Maintains fp_rated, fp_watched, fp_duplicate, and fp_ratednotinterested after showing the rotating
+  // image when the parent nodes are found
+  this.keepPosterClasses = function() {
+    // handle when poster is highlighted
+    self.addMutationAndNow("keepPosterClasses - image-rotator-image", {element: ".image-rotator-image"}, function(summary) {
+      summary.added.forEach(function(imageRotatorElem) {
+        var posterElems = $(imageRotatorElem).closest(".smallTitleCard");
+        if (posterElems.length) {
+          var parentElem = posterElems[0].parentNode;
+          parentElem.classList.forEach(function(className) {
+            if ((className.substring(0, 3) == "fp_") && (className.slice(-2) == "_p")) {
+              posterElems[0].classList.add(className.substring(0, className.length - 2));
+            }
+          });
+        }
+      });
+    });
+    // handle when showing a jawBone
+    self.addMutationAndNow("keepPosterClasses - jawBone", {element: ".jawBone"}, function(summary) {
+      summary.added.forEach(function(imageRotatorElem) {
+        var ptrackContainers = $(imageRotatorElem).closest(".ptrack-container");
+        if (ptrackContainers.length) {
+          var smallTitleCards = ptrackContainers[0].getElementsByClassName("smallTitleCard");
+          if (smallTitleCards.length) {
+            [].slice.call(smallTitleCards).forEach(function(posterElem) {
+              var parentElem = posterElem.parentNode;
+              parentElem.classList.forEach(function(className) {
+                if ((className.substring(0, 3) == "fp_") && (className.slice(-2) == "_p")) {
+                  posterElem.classList.add(className.substring(0, className.length - 2));
+                  posterElem.classList.remove("not-highlighted");
+                }
+              });
+            });
+          }
+        }
+      });
+    });
+  };
+
   this.applyClassnameToPostersOnArrive = function(idsArray, className) {
+    if (!keepPosterClasses_) {
+      this.keepPosterClasses();
+      keepPosterClasses_ = true;
+    }
+
     var dataDict = {};
     idsArray.forEach(function(elem) {
       dataDict[elem] = true;
@@ -391,13 +437,16 @@ var fplib_ = function() {
 
     var selector = selectors["borderedElement"];
 
-    document.arrive(selector, function() {
-      //consolelog("arrive (applyClassnameToPostersOnArrive)");
-      var movieId = fplib.getMovieIdFromField(this.id);
-      if (dataDict.hasOwnProperty(movieId)) {
-        this.parentNode.classList.add(className + "_p");
-        this.classList.add(className);
-      }
+    self.addMutationAndNow("applyClassnameToPostersOnArrive - " + className, {element: selector}, function(summary) {
+      summary.added.forEach(function(elem) {
+        //consolelog("arrive (applyClassnameToPostersOnArrive)");
+        var movieId = fplib.getMovieIdFromField(elem.id);
+        if (dataDict.hasOwnProperty(movieId)) {
+          elem.parentNode.classList.add(className + "_p");
+          elem.classList.add(className);
+          elem.classList.remove("not-highlighted");
+        }
+      });
     });
   };
 
@@ -452,21 +501,23 @@ var fplib_ = function() {
 
   this.definePosterCss = function(className, behavior) {
     consolelog("posterCss " + className + " " + behavior);
-    if (behavior === "hide") {
-        extlib.addGlobalStyle("." + className + "_p { display: none !important }");
+    if ((behavior === "fade") || (behavior === "hide")) {
+      extlib.addGlobalStyle("." + className + "{ opacity: 0.2; -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
     } else if (behavior === "tint") {
-        extlib.addGlobalStyle("." + className + "{ -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
-    } else if (behavior === "fade") {
-        extlib.addGlobalStyle("." + className + "{ opacity: 0.2; -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
+      extlib.addGlobalStyle("." + className + "{ -webkit-filter: sepia(90%) hue-rotate(90deg); box-shadow: inset 0px 0px 64px 64px; cornflowerblue, 0px 0px 4px 4px cornflowerblue; }");
     } else if (behavior == "normal") {
-        extlib.addGlobalStyle("." + className + "{ }");
+      extlib.addGlobalStyle("." + className + "{ }");
     }
   };
 
   this.hideProgressBar = function(scriptId) {
+    progressScripts_ = {};
+    console.log("hideprogressbar - " + scriptId);
     if ($("#fp_progress").length === 1) {
       var elem = $("#fp_progress")[0];
       elem.classList.remove("fp_active_" + scriptId);
+      console.log("classlist length = ");
+      console.log(elem.classList.length);
       if (elem.classList.length === 1) { // leave navitem
         elem.style.display = "none";
       }
@@ -474,20 +525,39 @@ var fplib_ = function() {
   };
 
   this.showProgressBar = function(scriptId) {
-    if ($("#fp_progress").length === 1) {
-      $("#fp_progress")[0].classList.add("fp_active_" + scriptId);
-      return;
-    }
+    progressScripts_[scriptId] = true;
+    try {
+      console.log("showprogressbar - " + scriptId);
+      if ($("#fp_progress").length === 1) {
+        $("#fp_progress")[0].classList.add("fp_active_" + scriptId);
+        $("#fp_progress")[0].style.display = "";
+        console.log($("#fp_progress")[0].classList.length);
+        return;
+      }
 
-    var elem = document.createElement("li");
-    elem.innerHTML = "<div class='fp_button_text'>Flix Plus <img class='fp_button' title='Getting rated and/or watched history; try to let it finish (should take at most 30 seconds) so it does not have to start over on next page load.' width='100' height='15px' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'></div>";
-    elem.id = 'fp_progress';
+      self.addMutationAndNow("showProgressBar", {element: "#hdPinTarget"}, function(summary) {
+        summary.added.forEach(function(progressParent) {
+          if ($("#fp_progress").length === 0) {
+            var progressParentUls = progressParent.getElementsByTagName("ul");
+            if (progressParentUls.length) {
+              var elem = document.createElement("li");
+              elem.innerHTML = "<div class='fp_button_text'>Flix Plus <img class='fp_button' title='Getting rated and/or watched history; try to let it finish (should take at most 30 seconds) so it does not have to start over on next page load.' width='100' height='15px' src='" + chrome.extension.getURL('../src/img/ajax-loader.gif') + "'></div>";
+              elem.id = 'fp_progress';
+              console.log("display set to ");
+              console.log(elem.style.display);
+              progressParentUls[0].appendChild(elem);
 
-    var progressParents = $("#hdPinTarget ul, #global-header") || [];
-    if (progressParents.length) {
-      progressParents[0].appendChild(elem);
-      $("#fp_progress")[0].classList.add('nav-item');
-      $("#fp_progress")[0].classList.add('fp_active_' + scriptId);
+              $("#fp_progress")[0].classList.add('nav-item');
+              Object.keys(progressScripts_).forEach(function(scriptName) {
+                $("#fp_progress")[0].classList.add('fp_active_' + scriptName);
+              });
+              console.log($("#fp_progress")[0].classList.length);
+            }
+          }
+        });
+      });
+    } catch(ex) {
+      console.error(ex);
     }
   };
 
