@@ -14,7 +14,6 @@ fplib.addMutation("hide_synopsis player - player loaded/unloaded", {element: "#p
 });
 
 fplib.addMutation("hide_synopsis player - postplay episode info", {element: ".player-postplay"}, function(summary) {
-  console.log(summary);
   if (summary.added.length) {
     console.log("hiding post play...");
     console.log($(".player-postplay-background-gradient"));

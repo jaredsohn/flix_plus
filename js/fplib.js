@@ -108,7 +108,7 @@ var fplib_ = function() {
       if (titleElem.getElementsByTagName("img").length) {
         movieName = titleElem.getElementsByTagName("img")[0].getAttribute("alt") || "(unknown)";
       } else {
-        movieName = tw.getElementsByClassName("title")[0].innerHTML;
+        movieName = tw.getElementsByClassName("title")[0].innerText;
       }
     } catch (ex) {
       consolelog(tw);
