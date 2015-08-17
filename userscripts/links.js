@@ -122,7 +122,8 @@ var createLinks = function() {
 
 console.log("going to add mutation events");
 fplib.addMutation("detect movie info for links", {"element": ".jawbone-overview-info" }, function(summary) {
-  createLinks();
+  if (summary.added.length)
+    createLinks();
 });
 createLinks();
 

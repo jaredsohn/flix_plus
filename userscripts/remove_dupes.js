@@ -13,9 +13,6 @@
 // Thus, we store a list of unique poster ids per row and never mark those poster ids
 // as duplicates when the poster list is updated.
 //
-// TODO: various issues if style is 'hidden' (including offset when zooming, black spots (use rolloverImages), not showing all posters that it should)
-// TODO: need to apply style again after zooming in
-//
 // Tests (Note: easiest to notice it is working if style is not hidden)
 // -- verify that no posters have style applied within My List and Continue Watching
 // -- toggle left/right and verify that dupes have style updated
@@ -23,6 +20,7 @@
 
 var keyPrefix = "flix_plus " + fplib.getProfileName() + " ";
 var alreadyShown_ = {};
+var uniquesForRow_ = {};
 
 // Set CSS for duplicates
 var keysDict = {};
@@ -44,36 +42,64 @@ var updateCard = function(smallTitleCard, uniquesForRow, alwaysShowRow) {
 };
 
 var clearDupes = function() {
-  fplib.addMutationAndNow("remove_dupes lolomoRow", {element: ".lolomoRow"}, function(summary) {
-    var uniquesForRow = {};
-    var alwaysShowRow;
+  console.log("clearing dupes lists");
+  uniquesForRow_ = {};
+  alreadyShown_ = {};
+};
 
-    summary.added.forEach(function(lolomoRow) {
-      var rowTitleElems = lolomoRow.getElementsByClassName("rowTitle");
-      if (rowTitleElems.length) {
-        var attrType = rowTitleElems[0].getAttribute("type") || "";
+// Ensure posters remain faded/tinted when moused over
+fplib.applyClassnameToPostersOnArrive([], "fp_duplicate");
+
+fplib.addMutationAndNow("remove_dupes lolomoRow", {element: ".lolomoRow"}, function(summary) {
+  // We check if the .lolomo is different than before.  If so, we clear our dupes history
+  // We do this here rather than a separate mutation observer for .lolomo because that observer runs
+  // after the rows are loaded.  (Another possible solution might be to set up observers with the lolomo
+  // as a parent, but this requires not using our addMutationAndNow code since it doesn't allow scoping
+  // to a parent node).
+  var $lolomo = $(".lolomo");
+  if (($lolomo.length) && (!$lolomo[0].classList.contains("fp_lolomo_visited"))) {
+    $lolomo[0].classList.add("fp_lolomo_visited");
+    clearDupes();
+  }
+
+  summary.added.forEach(function(lolomoRow) {
+    var rowTitle = "";
+    var alwaysShowRow = "";
+    var rowTitleElems = lolomoRow.getElementsByClassName("rowTitle");
+    if (rowTitleElems.length) {
+      var attrType = rowTitleElems[0].getAttribute("type") || "";
+      var rowTitleSpans = rowTitleElems[0].getElementsByTagName("span");
+      rowTitle = (rowTitleSpans.length) ? rowTitleSpans[0].innerHTML : "";
+      if (rowTitle !== "") {
         alwaysShowRow = ((attrType === "queue") || (attrType === "continueWatching"));
-        if (alwaysShowRow)
-          console.log("always show row!");
         var smallTitleCards = lolomoRow.getElementsByClassName("smallTitleCard");
         [].slice.call(smallTitleCards).forEach(function(smallTitleCard) {
-          updateCard(smallTitleCard, uniquesForRow, alwaysShowRow);
+          uniquesForRow_[rowTitle] = uniquesForRow_[rowTitle] || {};
+          updateCard(smallTitleCard, uniquesForRow_[rowTitle], alwaysShowRow);
         });
-      } else {
-        console.error("No rowTitle");
-        console.error(lolomoRow);
       }
+    }
+    if (rowTitle === "") {
+//      console.log("No rowTitle");
+//      console.log(lolomoRow);
+      return;
+    }
 
+    (function() {
+      var rowTitleSaved = rowTitle;
+      var alwaysShowRowSaved = alwaysShowRow;
       var sliderContents = lolomoRow.getElementsByClassName("sliderContent");
       if (sliderContents.length) {
         var sliderContentObserver = new MutationObserver(function(mutationRecords) {
+          //console.log("raw observer mutation");
           [].slice.call(mutationRecords).forEach(function(mutationRecord) {
             if (mutationRecord.addedNodes !== null) {
               [].slice.call(mutationRecord.addedNodes).forEach(function(node) {
                 if (node.className === "slider-item") {
                   var smallTitleCards = node.getElementsByClassName("smallTitleCard");
                   if (smallTitleCards.length) {
-                    updateCard(smallTitleCards[0], uniquesForRow, alwaysShowRow);
+                    uniquesForRow_[rowTitleSaved] = uniquesForRow_[rowTitleSaved] || {};
+                    updateCard(smallTitleCards[0], uniquesForRow_[rowTitleSaved], alwaysShowRowSaved);
                   }
                 }
               });
@@ -85,15 +111,9 @@ var clearDupes = function() {
           subtree: false,
           childList: true,
           characterData: false,
-          attributes: false,
+          attributes: false
         });
       }
-    });
+    })();
   });
-};
-
-fplib.addMutationAndNow("remove_dupes for clear history", {element: ".lolomo"}, function(summary) {
-  alreadyShown_ = {};
-  console.log("clearing history");
-  clearDupes();
 });

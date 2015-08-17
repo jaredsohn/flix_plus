@@ -61,12 +61,12 @@ fplib.addMutationAndNow("synopsis imagerotatorimage", {element: ".image-rotator-
 
     // Hide other popup spoilers here
     var className = hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler";
-    var bobCards = $(elem).closest(".bob-card");
-    if (bobCards.length) {
-      var synopses = bobCards[0].getElementsByClassName("synopsis");
+    var $bobCards = $(elem).closest(".bob-card");
+    if ($bobCards.length) {
+      var synopses = $bobCards[0].getElementsByClassName("synopsis");
       if (synopses.length)
         synopses[0].classList.add(className);
-      var episodeTitles = bobCards[0].getElementsByClassName("watched-title");
+      var episodeTitles = $bobCards[0].getElementsByClassName("watched-title");
       if (episodeTitles.length)
         episodeTitles[0].classList.add(className);
     }
@@ -130,16 +130,16 @@ fplib.addMutationAndNow("jawbone-overview-info - hidesynopsis", {element: ".jawb
         episodeTitles[0].innerText = (hideSpoilersDisabled_) ? origText : origText.split("\"")[0];
       }
 
-      var moreLikeThisClasses = $(elem).closest(".jawBone")[0].getElementsByClassName("MoreLikeThis");
-      if (moreLikeThisClasses.length) {
-        moreLikeThisClasses[0].removeEventListener("click", moreLikeThisClick);
-        moreLikeThisClasses[0].addEventListener("click", moreLikeThisClick);
+      var $moreLikeThisClasses = $(elem).closest(".jawBone")[0].getElementsByClassName("MoreLikeThis");
+      if ($moreLikeThisClasses.length) {
+        $moreLikeThisClasses[0].removeEventListener("click", moreLikeThisClick);
+        $moreLikeThisClasses[0].addEventListener("click", moreLikeThisClick);
       }
 
-      var showDetailsClasses = $(elem).closest(".jawBone")[0].getElementsByClassName("ShowDetails");
-      if (showDetailsClasses.length) {
-        showDetailsClasses[0].removeEventListener("click", showDetailsClick);
-        showDetailsClasses[0].addEventListener("click", showDetailsClick);
+      var $showDetailsClasses = $(elem).closest(".jawBone")[0].getElementsByClassName("ShowDetails");
+      if ($showDetailsClasses.length) {
+        $showDetailsClasses[0].removeEventListener("click", showDetailsClick);
+        $showDetailsClasses[0].addEventListener("click", showDetailsClick);
       }
 
     } catch (ex) {
@@ -177,8 +177,9 @@ fplib.addMutation("hide_synopsis player - description on start", {element: ".des
 });
 
 fplib.addMutation("hide_synopsis player - longpause", {element: ".playback-longpause-container"}, function(summary) {
-  var paragraphs = $(".playback-longpause-container .content p");
-  paragraphs[paragraphs.length - 1].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
+  var $paragraphs = $(".playback-longpause-container .content p");
+  if ($paragraphs.length)
+    $paragraphs[paragraphs.length - 1].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
 
   summary.added.forEach(function(elem) {
     var h3s = elem.getElementsByTagName("h3");
@@ -195,7 +196,7 @@ fplib.addMutation("hide_synopsis player - player status", {element: ".player-sta
 });
 
 fplib.addMutation("hide_synopsis player - episode list", {element: ".episode-list-container"}, function(summary) {
-  if (summary.added) {
+  if (summary.added.length) {
     $.each($(".episode-list-title"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
     $.each($(".episode-list-image"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
     $.each($(".episode-list-synopsis"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
@@ -203,14 +204,14 @@ fplib.addMutation("hide_synopsis player - episode list", {element: ".episode-lis
 });
 
 fplib.addMutation("hide_synopsis player - next episode", {element: ".player-next-episode-info"}, function(summary) {
-  if (summary.added) {
+  if (summary.added.length) {
     $.each($(".next-episode-image"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
     $.each($(".player-next-episode-description"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
   }
 });
 
 fplib.addMutation("hide_synopsis player - post play episode info", {element: ".player-postplay"}, function(summary) {
-  if (summary.added) {
+  if (summary.added.length) {
     $.each($(".player-postplay-background-image"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoilerblack_disabled" : "fp_spoilerblack") });
     $.each($(".player-postplay-episode-synopsis"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });
     $.each($(".player-postplay-autoplay-still"), function(index, value) { this.classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler") });

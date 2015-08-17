@@ -28,6 +28,9 @@ header.appendChild(extlib.createButton("export_ratings", "Export JSON", false, f
   dialogText +=    " were found, you probably need to scroll down if you want to export all ratings.\n\n";
   dialogText +=    "Are you sure you want to export just these 100 ratings?";
 
+  var ratingsHistory = document.getElementById("ratingHistorySection");
+  var elems = ratingsHistory.getElementsByTagName("li");
+
   if ((elems.length !== 100) || confirm(dialogText))
     exportRatings();
 }));

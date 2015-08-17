@@ -31,17 +31,24 @@
 	outline-offset: 0px !important
 }
 
+
+.fp_episode_selected {
+}
+
+.fp_episode_selected:before {
+	content: "";
+	background-color: #444444;
+	position: absolute;
+	z-index: -1;
+	top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
 .fp_keyboard_mylist_selected {
 	border-style: solid !important;
 	border-color: #b9090b !important;
 	border-width: 5px !important
-}
-
-.fp_keyboard_search_selected {
-	border-style: solid !important;
-	border-color: #b9090b !important;
-	top: 10px !important;
-	border-width: 10px !important
 }
 
 /* from http://davidwalsh.name/spoiler-filter */
@@ -82,7 +89,7 @@
 	color: #EEEEEE; !important;
 }
 
-/* Most of new Netflix is dark  */
+/* Most of Netflix (as of June 2015 update) is dark  */
 .fp_button, .fp_button_text, .flix_plus_shownsectionbutton, .flix_plus_hiddensectionbutton, .flix_plus_scrolls_shown_button, .flix_plus_all_shown_button, #fp_progress {
 	-webkit-filter: invert(100%);
 }
@@ -91,11 +98,6 @@
 	margin-bottom: -25px;
 	min-height:60px;
 }
-
-/*.jawbone-overview-info {
-	height: 250px;
-	overflow-y:scroll;
-}*/
 
 .fp_preview_link {
     top: 45%;

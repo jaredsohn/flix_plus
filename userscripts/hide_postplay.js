@@ -13,9 +13,11 @@ fplib.addMutation("hide_synopsis player - player loaded/unloaded", {element: "#p
   restorePostPlay_ = 0;
 });
 
-fplib.addMutation("hide_synopsis player - post play episode info", {element: ".player-postplay"}, function(summary) {
-  if (summary.added) {
+fplib.addMutation("hide_synopsis player - postplay episode info", {element: ".player-postplay"}, function(summary) {
+  console.log(summary);
+  if (summary.added.length) {
     console.log("hiding post play...");
+    console.log($(".player-postplay-background-gradient"));
     if (!$("#netflix-player")[0].classList.contains("video-ended")) {
       $("#netflix-player").removeClass("player-postplay");
 
@@ -27,7 +29,7 @@ fplib.addMutation("hide_synopsis player - post play episode info", {element: ".p
     }
 
     if (restorePostPlay_ === 0) {
-      console.log("waiting for player end...");
+      console.log("waiting for video-ended...");
       restorePostPlay_ = setInterval(function() {
         if ($("#netflix-player")[0].classList.contains("video-ended")) {
           $("#netflix-player").addClass("player-postplay");
@@ -36,6 +38,7 @@ fplib.addMutation("hide_synopsis player - post play episode info", {element: ".p
           $(".player-postplay-recommend-text").show();
           clearInterval(restorePostPlay_);
           restorePostPlay_ = 0;
+          console.log("video-ended");
         }
       }, 1000);
     }
