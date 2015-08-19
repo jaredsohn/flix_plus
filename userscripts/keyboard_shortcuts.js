@@ -19,7 +19,6 @@ if (window.location.pathname.indexOf("/KidsCharacter") === 0)
   return;
 
 var smallTitleCard_ = null;
-var episodeLockup_ = null;
 
 var keyboardCommandsShown_ = false;
 var alreadyHasShiftChars_ = ["~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "{", "}", "|", ":", "\"", "<", ">", "?"];
@@ -71,7 +70,17 @@ var playOrZoomMovie = function(command) {
   if (movieId !== "0") {
     switch (command) {
       case "play":
-        window.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movieId;
+        var elemContainer = getElemContainer();
+        console.log("elemContainer");
+        console.log(elemContainer);
+        var $episodesSelected = $(".episodeLockup.current .episodePlay", elemContainer);
+        console.log("$episodesSelected");
+        console.log($episodesSelected);
+        if ($episodesSelected.length) {
+          $episodesSelected[0].click();
+        } else {
+          window.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movieId;
+        }
         break;
       case "zoom_into_details":
         if (window.location.pathname.indexOf("/Kids") === 0) // this also matches other Kids pages, but changing the URL for that is okay
@@ -132,8 +141,8 @@ var mouseOverQueue = function(elemContainer) {
 };
 
 var getElemContainer = function() {
-  console.log("getting elem container from");
-  console.log(smallTitleCard_);
+//  console.log("getting elem container from");
+//  console.log(smallTitleCard_);
   var containers = nextInDOM(".jawBone", $(smallTitleCard_));
   return (containers.length) ? containers[0] : null;
 };
@@ -214,6 +223,69 @@ var prevSeason = function() {
   }
 };
 
+var nextPreviousEpisode = function(direction) {
+  var container = getElemContainer();
+  var $curEpisodes = $(".episodeLockup.current", container);
+  if ($curEpisodes.length) {
+    if (direction === 1) {
+      var $nextEpisodes = nextInDOM(".episodeLockup", $curEpisodes);
+      if ($nextEpisodes.length) {
+        if ($nextEpisodes[0].parentNode.parentNode == $curEpisodes[0].parentNode.parentNode) {
+          console.log("Matches!");
+          $nextEpisodes[0].classList.add("current");
+          $curEpisodes[0].classList.remove("current");
+        }
+      }
+    } else if (direction === -1) {
+      var $prevEpisodes = prevInDOM(".episodeLockup", $curEpisodes);
+      if ($prevEpisodes.length) {
+        if ($prevEpisodes[0].parentNode.parentNode == $curEpisodes[0].parentNode.parentNode) {
+          console.log("Matches!");
+          $prevEpisodes[0].classList.add("current");
+          $curEpisodes[0].classList.remove("current");
+        }
+      }
+    }
+  }
+
+  $curEpisodes = $(".episodeLockup.current", container);
+  console.log("current episode is ");
+  console.log($curEpisodes);
+
+  // If episode isn't visible, we scroll left/right a screen, wait for the episode
+  // to reload and then select it
+  if (($curEpisodes.length) && (!extlib.isElementInViewport($($curEpisodes)[0]))) {
+    var id = $($curEpisodes)[0].getAttribute("data-reactid");
+    console.log("no longer in viewport; id is");
+    console.log(id);
+
+    var iterSelector = (direction == 1) ? ".handleRight" : ".handleLeft";
+    var iterSelectorElems = container.querySelectorAll(iterSelector);
+
+    if (iterSelectorElems.length) {
+      fplib.addMutation("keyboard_shortcuts scrollEpisodes", {element: ".episodeLockup"}, function(summaries) {
+        summaries.added.forEach(function(summary) {
+          console.log("new data loaded!");
+          var selector = "[data-reactid='" + id + "']";
+          console.log(selector);
+          var posterElems = $(selector, container);
+          if (posterElems.length) {
+            console.log("cancelling mutation event since element found");
+            fplib.removeMutation("keyboard_shortcuts scrollEpisodes");
+
+            $curEpisodes = $(".episodeLockup.current", container);
+            $curEpisodes[0].classList.remove("current");
+
+            posterElems[0].classList.add("current");
+          }
+        });
+      });
+      iterSelectorElems[0].click();
+      console.log("clicking to make animation happen!!!");
+    }
+  }
+}
+
 var nextTab = function() {
   var elemContainer = getElemContainer();
   if (elemContainer) {
@@ -253,33 +325,15 @@ var updateKeyboardSelection = function(elem, selected) {
   }
 };
 
-var updateEpisodeSelection = function(elem, selected) {
-  if ((elem || null) === null)
-    return;
-
-  var ptrackContentElem = elem.getElementsByClassName("ptrack-content")[0];
-  if (selected) {
-    updateEpisodeElection(elem, false); // Unselect what was selected first
-    episodeLockup_ = elem;
-
-    console.log("elem is");
-    console.log(elem);
-    ptrackContentElem.classList.add("fp_episode_selected");
-  } else {
-    ptrackContentElem.classList.remove("fp_episode_selected");
-  }
-};
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Cycle through selections
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // from: http://stackoverflow.com/questions/11560028/get-the-next-element-with-a-specific-class-after-a-specific-element
 function nextInDOM(_selector, _subject) {
-  console.log("nextindom");
-  console.log(_selector);
-  console.log(_subject);
+//  console.log("nextindom");
+//  console.log(_selector);
+//  console.log(_subject);
   var next = getNext(_subject);
   while(next.length != 0) {
     var found = searchFor(_selector, next);
@@ -289,8 +343,8 @@ function nextInDOM(_selector, _subject) {
   return null;
 }
 function prevInDOM(_selector, _subject) {
-  console.log("prevInDOM");
-  console.log(_subject);
+//  console.log("prevInDOM");
+//  console.log(_subject);
   var prev = getPrev(_subject);
   while(prev.length != 0) {
     var found = searchFor(_selector, prev);
@@ -334,13 +388,9 @@ function findElemForVisibility(firstElem, selector, isVisible) {
   }
 }
 
-//TODO
-//// code for highlighting an episode:
-//var $episodes = $(".episodeLockup");
-//findElemForVisibility($(
-
-
 function scrollToBeginningofRow() {
+//  findElemForVisibility()
+
   // TODO: find first visible poster and set it as current.
   // go left one more and then click on teh scroll button
   // wait for new data to load and then repeat.
@@ -504,8 +554,8 @@ var toggleKeyboardCommands = function() {
 
 // We use this for 'normal' (a-z, 0-9, special characters) keys since we don't want to deal with repeating
 var handleKeypress = function(e) {
-  console.log("handleKeypress");
-  console.log(e);
+//  console.log("handleKeypress");
+//  console.log(e);
 
   if (e.target.nodeName.match(/^(textarea|input)$/i)) {
     return;
@@ -523,7 +573,7 @@ var handleKeypress = function(e) {
   if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
 
   if ((keyCombo || null) !== null) {
-    console.log("keypress: keycombo is " + keyCombo);
+//    console.log("keypress: keycombo is " + keyCombo);
 
     var command = keyLookup(keyCombo);
     if ((command !== null) && (command !== "")) {
@@ -593,7 +643,7 @@ var determineKeydown = function(e) {
 
 // While this code supports ctrl, alt, and shift modifiers, most use is restricted by the shortcuts editor. (But a user could maybe get such support by modifying their shortcuts JSON in localstorage.)
 var handleKeydown = function(e) {
-  console.log("handleKeydown");
+//  console.log("handleKeydown");
 
   var keyCombo = determineKeydown(e);
 
@@ -626,13 +676,13 @@ var handleKeydown = function(e) {
 
 var keyLookup = function(keyCombo) {
   var command = "";
-  console.log("looking up: " + keyCombo);
+//  console.log("looking up: " + keyCombo);
   if ((keyboardShortcutToIdDict_[keyCombo] || null) !== null)
     command = keyboardShortcutToIdDict_[keyCombo];
 
 //  console.log(keyboardShortcutToIdDict_);
 
-  console.log("command found: " + command);
+//  console.log("command found: " + command);
 
   return command;
 };
@@ -654,7 +704,7 @@ var undoBuiltinKey = function(keyCombo, e) {
 };
 
 var runCommand = function(command) {
-  console.log("runcommand - " + command);
+//  console.log("runcommand - " + command);
   try {
     var elem = null;
 

@@ -31,20 +31,6 @@
 	outline-offset: 0px !important
 }
 
-
-.fp_episode_selected {
-}
-
-.fp_episode_selected:before {
-	content: "";
-	background-color: #444444;
-	position: absolute;
-	z-index: -1;
-	top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-}
 .fp_keyboard_mylist_selected {
 	border-style: solid !important;
 	border-color: #b9090b !important;
