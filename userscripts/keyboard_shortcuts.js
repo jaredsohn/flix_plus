@@ -61,26 +61,34 @@ var scrollMiddle = function(elem) {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 var getMovieIdFromSelection = function(element) {
-  var jawBoneContainers = nextInDOM(".jawBoneContainer", $(smallTitleCard_));
-  return (jawBoneContainers.length) ? jawBoneContainers[0].id : "0";
+  if (element === null)
+    return "0";
+  else if (element.classList.contains("billboard-row")) {
+    console.log("billboard-row!!!");
+    var $billboardPlay = $(".billboard-play", $(element));
+    var urlParts = $billboardPlay[0].href.split("?");
+    var urlParts2 = urlParts[0].split("/");
+    return urlParts2[urlParts2.length - 1];
+  } else {
+    var jawBoneContainers = nextInDOM(".jawBoneContainer", $(smallTitleCard_));
+    return (jawBoneContainers.length) ? jawBoneContainers[0].id : "0";
+  }
 };
 
 var playOrZoomMovie = function(command) {
+  console.log("playOrZoomMovie smalltitlecard");
+  console.log(smallTitleCard_);
   var movieId = getMovieIdFromSelection(smallTitleCard_);
+  console.log("movieId is " + movieId);
   if (movieId !== "0") {
     switch (command) {
       case "play":
         var elemContainer = getElemContainer();
-        console.log("elemContainer");
-        console.log(elemContainer);
         var $episodesSelected = $(".episodeLockup.current .episodePlay", elemContainer);
-        console.log("$episodesSelected");
-        console.log($episodesSelected);
-        if ($episodesSelected.length) {
+        if ($episodesSelected.length)
           $episodesSelected[0].click();
-        } else {
+        else
           window.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movieId;
-        }
         break;
       case "zoom_into_details":
         if (window.location.pathname.indexOf("/Kids") === 0) // this also matches other Kids pages, but changing the URL for that is okay
@@ -110,24 +118,6 @@ var openSectionLink = function() {
   }
 };
 
-// Find random index of nonhidden element within a list.  Return -1 if there are none.
-var findRandomNonhiddenInList = function(list) {
-  console.log("findrandom");
-  console.log(list);
-  if (!listHasItems(list))
-    return -1;
-
-  var count = list.length;
-  while (true) {
-    rnd = Math.floor(Math.random() * count);
-
-    if (!extlib.isHidden(list[rnd]))
-      break;
-  }
-
-  return rnd;
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Add/remove from queue, assign rating
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,9 +131,14 @@ var mouseOverQueue = function(elemContainer) {
 };
 
 var getElemContainer = function() {
+  if (smallTitleCard_.classList.contains("billboard-row"))
+    return smallTitleCard_; // billboard rows are their own container
+
 //  console.log("getting elem container from");
 //  console.log(smallTitleCard_);
-  var containers = nextInDOM(".jawBone", $(smallTitleCard_));
+  var containers = nextInDOM(".billboard-row, .jawBone", $(smallTitleCard_));
+  console.log("elem container is ");
+  console.log(containers);
   return (containers.length) ? containers[0] : null;
 };
 
@@ -179,6 +174,9 @@ var rateMovie = function(rating) {
 };
 
 var nextSeason = function() {
+  if (switchToEpisodeViewIfBillboard())
+    return;
+
   var elemContainer = getElemContainer();
   if (elemContainer) {
     var $dropDowns = $(".nfDropDown .label", $(elemContainer));
@@ -201,6 +199,9 @@ var nextSeason = function() {
   }
 };
 var prevSeason = function() {
+  if (switchToEpisodeViewIfBillboard())
+    return;
+
   var elemContainer = getElemContainer();
   if (elemContainer) {
     var $dropDowns = $(".nfDropDown .label", $(elemContainer));
@@ -223,7 +224,17 @@ var prevSeason = function() {
   }
 };
 
+var switchToEpisodeViewIfBillboard = function() {
+  var $iconButtonEpisodes = $(".icon-button-episodes");
+  if ($iconButtonEpisodes.length)
+    $iconButtonEpisodes[0].click();
+
+  return false;
+}
+
 var nextPreviousEpisode = function(direction) {
+  if (switchToEpisodeViewIfBillboard())
+    return;
   var container = getElemContainer();
   var $curEpisodes = $(".episodeLockup.current", container);
   if ($curEpisodes.length) {
@@ -255,51 +266,147 @@ var nextPreviousEpisode = function(direction) {
   // If episode isn't visible, we scroll left/right a screen, wait for the episode
   // to reload and then select it
   if (($curEpisodes.length) && (!extlib.isElementInViewport($($curEpisodes)[0]))) {
-    var id = $($curEpisodes)[0].getAttribute("data-reactid");
-    console.log("no longer in viewport; id is");
-    console.log(id);
+    var $episodeNumbers = $(".episodeNumber", $($curEpisodes)[0]);
+    if ($episodeNumbers.length) {
+      var episodeNumber = $episodeNumbers[0].innerHTML;
+      console.log("no longer in viewport; episodeNumber is");
+      console.log(episodeNumber);
 
-    var iterSelector = (direction == 1) ? ".handleRight" : ".handleLeft";
-    var iterSelectorElems = container.querySelectorAll(iterSelector);
+      var iterSelector = (direction == 1) ? ".handleRight" : ".handleLeft";
+      var iterSelectorElems = container.querySelectorAll(iterSelector);
 
-    if (iterSelectorElems.length) {
-      fplib.addMutation("keyboard_shortcuts scrollEpisodes", {element: ".episodeLockup"}, function(summaries) {
-        summaries.added.forEach(function(summary) {
-          console.log("new data loaded!");
-          var selector = "[data-reactid='" + id + "']";
-          console.log(selector);
-          var posterElems = $(selector, container);
-          if (posterElems.length) {
-            console.log("cancelling mutation event since element found");
-            fplib.removeMutation("keyboard_shortcuts scrollEpisodes");
+      if (iterSelectorElems.length) {
+        fplib.addMutation("keyboard_shortcuts scrollEpisodes", {element: ".episodeLockup"}, function(summaries) {
+          summaries.added.forEach(function(summary) {
+            var $episodeNumbers = $(".episodeNumber", $(summary));
+            if ($episodeNumbers.length) {
+              if ($episodeNumbers[0].innerHTML === episodeNumber) {
+                console.log("cancelling mutation event since element found");
+                fplib.removeMutation("keyboard_shortcuts scrollEpisodes");
 
-            $curEpisodes = $(".episodeLockup.current", container);
-            $curEpisodes[0].classList.remove("current");
+                $curEpisodes = $(".episodeLockup.current", container);
+                if ($curEpisodes.length)
+                  $curEpisodes[0].classList.remove("current");
 
-            posterElems[0].classList.add("current");
-          }
+                summary.classList.add("current");
+              }
+            }
+          });
         });
-      });
-      iterSelectorElems[0].click();
-      console.log("clicking to make animation happen!!!");
+        iterSelectorElems[0].click();
+        console.log("clicking to make animation happen!!!");
+      }
     }
   }
 }
 
 var nextTab = function() {
   var elemContainer = getElemContainer();
+  console.log("elemcontainer returned is");
+  console.log(elemContainer);
   if (elemContainer) {
-    $(".menu .current", $(elemContainer)).next().click()
+    console.log("found");
+    console.log(elemContainer);
+    console.log("curTab is");
+    console.log($(".menu .current", $(elemContainer)));
+    console.log("nextTab is");
+    var $nextTabs = $(".menu .current", $(elemContainer)).next();
+    console.log($nextTabs);
+    if ($nextTabs.length)
+      $nextTabs[0].click();
   }
 };
 var prevTab = function() {
   var elemContainer = getElemContainer();
   if (elemContainer) {
-
-    $(".menu .current", $(elemContainer)).prev().click()
+    $(".menu .current", $(elemContainer)).prev()[0].click();
   }
 };
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Logic for counting posters and highlighting by index
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+var getPosterPageNo = function() {
+  var index = -1;
+  var container = getElemContainer();
+  var $activePaginationIndicators = $(".pagination-indicator .active", $(container));
+  if ($activePaginationIndicators.length)
+    index = paginationIndicators.index();
+
+  return index;
+};
+
+var getPostersPerPage = function() {
+  var postersPerPage = 0;
+  if ($(".smallTitleCard").length > 0)
+    postersPerPage = Math.floor(window.innerWidth / $(".smallTitleCard")[0].offsetWidth);
+
+  return postersPerPage;
+};
+
+// This is approximate since it assumes the last page is full of posters
+var getApproxPosterCount = function() {
+  var container = getElemContainer();
+  var $activePaginationIndicators = $(".pagination-indicator", $(container));
+  var pageCount = $activePaginationIndicators.length;
+
+  return pageCount * getPostersPerPage();
+};
+
+var getVisiblePosterIndex = function() {
+  // TODO
+  // 1. find the selected poster
+  // 2. if not visible, return -1
+  // 3. if is visible, then go backwards until we find something not visible
+};
+
+var getSelectedPosterIndex = function() {
+  var index = 0;
+  var container = getElemContainer();
+  var $activePaginationIndicators = $(".pagination-indicator .active", $(container));
+  if ($activePaginationIndicators.length)
+    index = $activePaginationIndicators.index();
+
+  var visibleIndex = getVisiblePosterIndex();
+  if (visibleIndex < 0)
+    visibleIndex = 0;
+
+  return (getPostersPerPage() * index) + visibleIndex;
+};
+
+var selectPosterOfIndex = function(desiredIndex) {
+  // TODO ... return false if poster doesn't exist at that index
+  // also look at current visible index and compare with desiredIndex and scroll left/right as needed
+
+  return true;
+};
+
+function selectFirstPosterInRow() {
+  selectPosterOfIndex(0);
+}
+
+function selectLastPosterInRow() {
+  var approxPosterCount = getApproxPosterCount();
+  selectPosterOfIndex(approxPosterCount - 1);
+  var elemContainer = getElemContainer();
+  var $smallTitleCards = $(".smallTitleCard", $(elemContainer));
+  if ($smallTitleCards.length) {
+    var lastPosterElem = $smallTitleCards[$smallTitleCards.length - 1];
+    // TODO: get count of visible posters.  Calculate index of the last poster and call selectPostersOfIndex on it
+  }
+}
+
+var selectRandomPosterInRow = function() {
+  var approxPosterCount = getApproxPosterCount();
+  while (true) {
+    var randomIdx = Math.floor(Math.random() * approxPosterCount);
+    if (selectPosterOfIndex(randomIdx)) {
+      break;
+    }
+  }
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Highlight in UI location of keyboard selection
@@ -334,6 +441,12 @@ function nextInDOM(_selector, _subject) {
 //  console.log("nextindom");
 //  console.log(_selector);
 //  console.log(_subject);
+
+  // Updated for Flix Plus by Lifehacker to also check children (needed for top /title jawBone)
+  var $children = _subject.children(_selector);
+  if ($children.length)
+    return $children;
+
   var next = getNext(_subject);
   while(next.length != 0) {
     var found = searchFor(_selector, next);
@@ -357,7 +470,10 @@ function prevInDOM(_selector, _subject) {
   return null;
 }
 function getNext(_subject) {
+//  console.log("getnext1");
+//  console.log(_subject);
   if(_subject.next().length > 0) return _subject.next();
+//  console.log("getnext2");
   return getNext(_subject.parent());
 }
 function getPrev(_subject) {
@@ -380,6 +496,7 @@ function searchFor(_selector, _subject) {
 function findElemForVisibility(firstElem, selector, isVisible) {
   var elem = firstElem;
   while (true) {
+    // TODO: verify that old and new elem are in same row
     var $elems = $(elem).next(selector);
     if ($elems.length === 0)
       return null;
@@ -388,28 +505,36 @@ function findElemForVisibility(firstElem, selector, isVisible) {
   }
 }
 
-function scrollToBeginningofRow() {
-//  findElemForVisibility()
-
-  // TODO: find first visible poster and set it as current.
-  // go left one more and then click on teh scroll button
-  // wait for new data to load and then repeat.
-}
-
-function scrollToEndofRow() {
-  // opposite of other method
-}
-
 function nextPreviousListContainer(direction) {
+console.log("nextprevlistcontainer1");
   updateKeyboardSelection(smallTitleCard_, false);
 
-  var $lolomoRow = $(smallTitleCard_).closest(".lolomoRow, .billboard-row"); //, .billboard-row
+  var $lolomoRows = $(smallTitleCard_).closest(".lolomoRow, .billboard-row, .jawBoneContainer");
   var newLolomoRow = null;
 
+  console.log("$lolomorows = ");
+  console.log($lolomoRows);
+  console.log($lolomoRows.length);
+
   if (direction === 1) {
-    newLolomoRow = nextInDOM(".lolomoRow, .billboard-row", $lolomoRow)[0];
+        console.log("~1");
+
+    if ($lolomoRows.length > 0) {
+        console.log("~2");
+
+      if (($lolomoRows[0].classList.contains(".billboard-row")) ||
+          ($lolomoRows[0].classList.contains(".jawBoneContainer"))) {
+        console.log("~3");
+        $lolomoRows = $(".lolomoRow");
+        if ($lolomoRows.length) {
+          newLolomoRow = $lolomoRows[0];
+        }
+      } else {
+        newLolomoRow = nextInDOM(".lolomoRow, .billboard-row", $lolomoRows)[0];
+      }
+    }
   } else if (direction === -1) {
-    newLolomoRow = prevInDOM(".lolomoRow, .billboard-row", $lolomoRow)[0];
+    newLolomoRow = prevInDOM(".lolomoRow, .billboard-row, .jawBoneContainer", $lolomoRows)[0];
   }
 
   console.log("newLolomoRow");
@@ -422,6 +547,11 @@ function nextPreviousListContainer(direction) {
     else
       smallTitleCard_ = newLolomoRow;
 
+    // Collapse the previous jawBone (normally it gets collapsed when we open up another)
+    if ((smallTitleCard_.classList.contains("billboard-row")) ||
+        (smallTitleCard_.classList.contains("jawBoneContainer")))
+      $.each($(".close-button"), function(index, value) { this.click() });
+
     console.log("smalltitlecard_");
     console.log(smallTitleCard_);
 
@@ -430,8 +560,28 @@ function nextPreviousListContainer(direction) {
 }
 
 function nextPreviousListItem(direction) {
+  console.log("direction = ");
+  console.log(direction);
   if ((direction !== -1) && (direction !== 1))
     return;
+  var elemContainer = getElemContainer();
+
+  if ((smallTitleCard_ !== null) && (smallTitleCard_.classList.contains("jawBoneContainer"))) {
+    // do nothing if top row
+    return;
+  } else if ((elemContainer !== null) && (elemContainer.classList.contains("billboard-row"))) {
+    if (direction === 1) {
+      var $navArrowRights = $(".nav-arrow-right");
+      if ($navArrowRights.length)
+        $navArrowRights[0].click();
+    } else if (direction === -1) {
+      var $navArrowLefts = $(".nav-arrow-left");
+      if ($navArrowLefts.length)
+        $navArrowLefts[0].click();
+    }
+
+    return;
+  }
 
   updateKeyboardSelection(smallTitleCard_, false);
 
@@ -501,9 +651,9 @@ var getKeyboardCommandsHtml = function() {
   console.log(keyboardIdToShortcutDict_);
 
   var context = "nonplayer";
-  if ((window.location.pathname.indexOf("/WiPlayer") === 0) || (window.location.pathname.indexOf("/watch") === 0))
+  if (isPlayer())
     context = "player";
-  else if ((window.location.pathname.indexOf("/WiMovie") === 0) || (window.location.pathname.indexOf("/KidsMovie") === 0))
+  else if (window.location.pathname.indexOf("/KidsMovie") === 0)
     context = "show_details";
   html += keyboardShortcutsInfo.getHelpText(keyboardIdToShortcutDict_, context);
   html += "</div>";
@@ -641,6 +791,10 @@ var determineKeydown = function(e) {
 };
 
 
+var isPlayer = function() {
+  return ($("#playerWrapper").length !== 0);
+}
+
 // While this code supports ctrl, alt, and shift modifiers, most use is restricted by the shortcuts editor. (But a user could maybe get such support by modifying their shortcuts JSON in localstorage.)
 var handleKeydown = function(e) {
 //  console.log("handleKeydown");
@@ -659,15 +813,15 @@ var handleKeydown = function(e) {
     if ((command !== null) && (command !== "")) {
       runCommand(command);
 
-      // don't do this for player; but this code is hacky and won't work for new Netflix layout TODO
-      if ((window.location.pathname.indexOf("/WiPlayer") !== 0) && (window.location.pathname.indexOf("/watch") !== 0)) {
+      // don't do this for player
+      if (!isPlayer()) {
         if (preventDefaultKeys_.indexOf(keyCombo) !== -1)
           e.preventDefault();
       }
     }
   }
 
-  if ((window.location.pathname.indexOf("/WiPlayer") === 0) || (window.location.pathname.indexOf("/watch") === 0)) {
+  if (isPlayer()) {
     // This undoes what the keys normally do
     if (keyCombo || null !== null)
       undoBuiltinKey(keyCombo, e);
@@ -728,8 +882,8 @@ var runCommand = function(command) {
         rateMovie(command); break;
       case "move_right": nextPreviousListItem(1); break;
       case "move_left": nextPreviousListItem(-1); break;
-      case "move_home": scrollToBeginningOfRow(); break;
-      case "move_end": scrollToEndOfRow(); break;
+      case "move_home": selectFirstPosterInRow(); break;
+      case "move_end": selectLastPosterInRow(); break;
       case "play": playOrZoomMovie(command); break;
       case "to_my_list": addToQueue(); break;
       case "remove_from_my_list": removeFromQueue(); break;
@@ -743,26 +897,23 @@ var runCommand = function(command) {
       case "prev_episode": nextPreviousEpisode(-1); break;
       case "next_tab": nextTab(); break;
       case "prev_tab": prevTab(); break;
-      case "section_home": var $smallTitleCards = $(".smallTitleCard"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[0], true); scrollToBeginningOfRow(); } break;
-      case "section_end": var $smallTitleCards = $(".smallTitleCard"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[$smallTitleCards.length - 1], true); scrollToEndOfRow();  } break;
-      case "section_show_random": // Note: if page dynamically adds posters (or things that look like posters), this occasionally will select nothing
-        if (window.location.pathname.indexOf("/WiMovie") === 0) {
+      case "section_home": var $smallTitleCards = $(".smallTitleCard"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[0], true); selectFirstPosterInRow(); } break;
+      case "section_end": var $smallTitleCards = $(".smallTitleCard"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[$smallTitleCards.length - 1], true); selectLastPosterInRow();  } break;
+      case "section_show_random":
+        // There are three modes for this key:
+        // * random episode in player
+        // * random episode current season button if shown in poster details
+        // * random show within a section otherwise
+        var elemContainer = getElemContainer();
+        var $fpRandomSeasonButton = $("fp_random_sameseason_button", $(elemContainer));
+
+        if (isPlayer()) {
           if ($("#random_button").length)
             $("#random_button")[0].click();
+        } else if ($fpRandomSeasonButton.length) {
+          $fpRandomSeasonButton[0].click();
         } else {
-          rnd = findRandomNonhiddenInList(elemsInfo_.elemsNPList);
-          console.log("random = " + rnd);
-          if (rnd >= 0) {
-            try {
-              updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], false);
-            } catch (ex) {
-              console.log(ex);
-            }
-            elemsInfo_.currListItem = rnd;
-            updateKeyboardSelection(elemsInfo_.elemsNPList[elemsInfo_.currListItem], true);
-            extlib.simulateEvent(elemsInfo_.elemsNPList[elemsInfo_.currListItem], "mouseover");
-            scrollMiddle(elemsInfo_.elemsNPList[elemsInfo_.currListItem]);
-          }
+          selectRandomPosterInRow();
         }
         break;
       case "player_random_episode": if ($("#fp_random_episode").length) { $("#fp_random_episode")[0].click(); } break; // div added by random episode script
@@ -801,14 +952,6 @@ var runCommand = function(command) {
         $.each($(".profiles-gate-container .nfdclose"), function(index, value) { this.click(); }); // saw this on /search
         if (($(".continue-playing span").length > 0) && ($(".continue-playing span")[0].innerText.indexOf("Continue Playing") !== -1))
            $(".continue-playing span")[0].click();
-
-// TODO
-/*          if ($(".searchTab .label").length) {
-            var elem = $(".searchTab .label")[0];
-            if (elem === document.activeElement)
-              elem.blur();
-          }*/
-
         break;
       case "update_rated_watched":
         delete localStorage["flix_plus " + fplib.getProfileName() + " ratingactivity_last_checked"];
@@ -925,8 +1068,7 @@ keyboardShortcutsInfo.loadShortcutKeys("flix_plus " + fplib.getProfileName() + "
       console.log("lolomo or gallerylockups loaded");
       updateKeyboardSelection(smallTitleCard_, false);
 
-      // TODO: only do so if any of the relevant keys are defined
-      var $smallTitleCards = $(".smallTitleCard");
+      var $smallTitleCards = $(".smallTitleCard, .billboard-row, .jawBoneContainer");
       if ($smallTitleCards.length) {
         updateKeyboardSelection($smallTitleCards[0], true);
       }

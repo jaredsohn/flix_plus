@@ -4,7 +4,7 @@ var keyboardShortcutsInfo = keyboardShortcutsInfo_ || {};
 var keyboardShortcutsInfo_ = function() {
   var self = this;
 
-  this.DISABLE_NAV_KEYBOARD = true;
+  this.DISABLE_NAV_KEYBOARD = false;
 
   var categoriesInOrder_ = ["Posters", "Sections", "Player", "Jump to page", "Misc"];
 
