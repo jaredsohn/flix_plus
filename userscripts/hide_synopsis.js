@@ -179,7 +179,7 @@ fplib.addMutation("hide_synopsis player - description on start", {element: ".des
 fplib.addMutation("hide_synopsis player - longpause", {element: ".playback-longpause-container"}, function(summary) {
   var $paragraphs = $(".playback-longpause-container .content p");
   if ($paragraphs.length)
-    $paragraphs[paragraphs.length - 1].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
+    $paragraphs[$paragraphs.length - 1].classList.add(hideSpoilersDisabled_ ? "fp_spoiler_disabled" : "fp_spoiler");
 
   summary.added.forEach(function(elem) {
     var h3s = elem.getElementsByTagName("h3");

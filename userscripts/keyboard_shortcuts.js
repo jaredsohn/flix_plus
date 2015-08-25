@@ -26,52 +26,48 @@ var preventDefaultKeys_ = ["Home", "End", "Ctrl-Home", "Ctrl-End", "Space"];
 var speed_ = 1;
 var keyboardShortcutToIdDict_ = {};
 var keyboardIdToShortcutDict_ = {};
-var searchIsFocused_ = false;
 
 var selectors_ = {};
 
-var searchMode_ = false;
 var profilesMode_ = false;
+var selectedProfile_ = null;
+
 var statusClearer_ = null;
-var autoShowDetails_ = true;
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Scrolling to element with keyboard focus
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-Element.prototype.documentOffsetTop = function() {
-  return this.offsetTop + (this.offsetParent ? this.offsetParent.documentOffsetTop() : 0);
-};
-
-// Adapted from http://stackoverflow.com/questions/8922107/javascript-scrollintoview-middle-alignment.  Using instead of just scrollIntoView
-var scrollMiddle = function(elem) {
-  console.log("scrollmiddle:");
-  console.log(elem);
-  if (elem || null === null)
-    return;
-  elem.scrollIntoView(true);
-  var pos = elem.documentOffsetTop() - (window.innerHeight / 2);
-  console.log("pos = ");
-  console.log(pos);
-  window.scrollTo(0, pos);
-};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Open a link based on selection
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 var getMovieIdFromSelection = function(element) {
+  console.log("getmovieidfromselection");
+  console.log(element);
+  console.log(getElemContainer());
   if (element === null)
     return "0";
-  else if (element.classList.contains("billboard-row")) {
-    console.log("billboard-row!!!");
-    var $billboardPlay = $(".billboard-play", $(element));
-    var urlParts = $billboardPlay[0].href.split("?");
-    var urlParts2 = urlParts[0].split("/");
-    return urlParts2[urlParts2.length - 1];
+  else if ((element.classList.contains("billboard-row")) || (element.classList.contains("billboard-motion"))) {
+    var $ptrackContent = $(".info .ptrack-content", $(element));
+    if ($ptrackContent.length === 0)
+      return "0";
+    var id = "";
+    var parts = $ptrackContent[0].getAttribute("data-ui-tracking-context").split(",");
+    parts.forEach(function(part) {
+      var parts2 = part.split(":");
+      if (parts2[0] === "%22video_id%22") {
+        var parts3 = parts2[1].split("%");
+        id = parts3[0];
+      }
+    });
+    return id;
   } else {
-    var jawBoneContainers = nextInDOM(".jawBoneContainer", $(smallTitleCard_));
-    return (jawBoneContainers.length) ? jawBoneContainers[0].id : "0";
+    var jawBoneContainer = null;
+    if (element.classList.contains("jawBoneContainer"))
+      jawBoneContainer = element;
+    else {
+      var $jawBoneContainers = nextInDOM(".jawBoneContainer", $(smallTitleCard_));
+      if ($jawBoneContainers.length)
+        jawBoneContainer = $jawBoneContainers[0];
+    }
+    return (jawBoneContainer !== null) ? jawBoneContainer.id : "0";
   }
 };
 
@@ -80,7 +76,9 @@ var playOrZoomMovie = function(command) {
   console.log(smallTitleCard_);
   var movieId = getMovieIdFromSelection(smallTitleCard_);
   console.log("movieId is " + movieId);
-  if (movieId !== "0") {
+  var isBillboardEpisode = $(".billboard-pane-episodes", $(smallTitleCard_)).length; // Doesn't matter if id is zero
+
+  if ((movieId !== "0") || isBillboardEpisode) {
     switch (command) {
       case "play":
         var elemContainer = getElemContainer();
@@ -91,6 +89,8 @@ var playOrZoomMovie = function(command) {
           window.location = window.location.protocol + "//www.netflix.com/WiPlayer?movieid=" + movieId;
         break;
       case "zoom_into_details":
+        if (isBillboardEpisode)
+          return;
         if (window.location.pathname.indexOf("/Kids") === 0) // this also matches other Kids pages, but changing the URL for that is okay
           window.location = window.location.protocol + "//www.netflix.com/KidsMovie/" + movieId;
         else
@@ -101,7 +101,7 @@ var playOrZoomMovie = function(command) {
 };
 
 var clickSelectorForLolomorow = function(selector) {
-  var $lolomoRows = $(smallTitleCard_).closest(".lolomoRow, .billboard-row");
+  var $lolomoRows = $(smallTitleCard_).closest(".lolomoRow, .billboard-row, .billboard-motion");
   if ($lolomoRows.length) {
     var selected = $(selector, $($lolomoRows[0]));
     if (selected.length)
@@ -110,7 +110,7 @@ var clickSelectorForLolomorow = function(selector) {
 };
 
 var openSectionLink = function() {
-  var $lolomowRow = $(smallTitleCard_).closest(".lolomoRow, .billboard-row");
+  var $lolomowRow = $(smallTitleCard_).closest(".lolomoRow, .billboard-row, .billboard-motion");
   if ($lolomowRow.length) {
     var rowTitles = $lolomowRow[0].getElementsByClassName("rowTitle");
     if (rowTitles.length)
@@ -131,12 +131,12 @@ var mouseOverQueue = function(elemContainer) {
 };
 
 var getElemContainer = function() {
-  if (smallTitleCard_.classList.contains("billboard-row"))
+  if ((smallTitleCard_.classList.contains("billboard-row")) || (smallTitleCard_.classList.contains("billboard-motion")))
     return smallTitleCard_; // billboard rows are their own container
 
 //  console.log("getting elem container from");
 //  console.log(smallTitleCard_);
-  var containers = nextInDOM(".billboard-row, .jawBone", $(smallTitleCard_));
+  var containers = nextInDOM(".billboard-row, .jawBone, .billboard-motion", $(smallTitleCard_));
   console.log("elem container is ");
   console.log(containers);
   return (containers.length) ? containers[0] : null;
@@ -225,9 +225,13 @@ var prevSeason = function() {
 };
 
 var switchToEpisodeViewIfBillboard = function() {
-  var $iconButtonEpisodes = $(".icon-button-episodes");
-  if ($iconButtonEpisodes.length)
-    $iconButtonEpisodes[0].click();
+  if ((smallTitleCard_ !== null) &&
+      ((smallTitleCard_.classList.contains("billboard-row")) || (smallTitleCard_.classList.contains("billboard-motion")))) {
+    var $iconButtonEpisodes = $(".icon-button-episodes");
+    if ($iconButtonEpisodes.length) {
+      $iconButtonEpisodes[0].click();
+    }
+  }
 
   return false;
 }
@@ -415,21 +419,32 @@ var selectRandomPosterInRow = function() {
 var updateKeyboardSelection = function(elem, selected) {
   if (((elem || null) === null) || (!supportsNavigationKeys()))
     return;
-
-  var ptrackContentElem = elem.getElementsByClassName("ptrack-content")[0];
   if (selected) {
-    updateKeyboardSelection(elem, false); // Unselect what was selected first
+    updateKeyboardSelection(smallTitleCard_, false); // Unselect what was selected first
     smallTitleCard_ = elem;
-
-    console.log("elem is");
-    console.log(elem);
-    if (autoShowDetails_)
-      ptrackContentElem.click();
-    else
-      ptrackContentElem.classList.add("fp_keyboard_selected");
-  } else {
-      ptrackContentElem.classList.remove("fp_keyboard_selected");
   }
+
+  var shouldScroll = selected;
+
+  if ((elem.classList.contains("billboard-row")) || (elem.classList.contains("billboard-motion"))) {
+    if (selected)
+      $(".billboard")[0].classList.add("fp_keyboard_selected");
+    else
+      $(".billboard")[0].classList.remove("fp_keyboard_selected");
+  } else if (elem.classList.contains("jawBoneContainer")) {
+    if (selected)
+      elem.classList.add("fp_keyboard_selected");
+    else
+      elem.classList.remove("fp_keyboard_selected");
+  } else {
+    shouldScroll = false;
+    var ptrackContentElem = elem.getElementsByClassName("ptrack-content")[0];
+    if (selected) {
+      ptrackContentElem.click();
+    }
+  }
+  if (shouldScroll)
+    elem.scrollIntoView(false);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -509,7 +524,7 @@ function nextPreviousListContainer(direction) {
 console.log("nextprevlistcontainer1");
   updateKeyboardSelection(smallTitleCard_, false);
 
-  var $lolomoRows = $(smallTitleCard_).closest(".lolomoRow, .billboard-row, .jawBoneContainer");
+  var $lolomoRows = $(smallTitleCard_).closest(".lolomoRow, .billboard-row, .billboard-motion, .jawBoneContainer");
   var newLolomoRow = null;
 
   console.log("$lolomorows = ");
@@ -517,24 +532,19 @@ console.log("nextprevlistcontainer1");
   console.log($lolomoRows.length);
 
   if (direction === 1) {
-        console.log("~1");
-
     if ($lolomoRows.length > 0) {
-        console.log("~2");
-
       if (($lolomoRows[0].classList.contains(".billboard-row")) ||
+          ($lolomoRows[0].classList.contains(".billboard-motion")) ||
           ($lolomoRows[0].classList.contains(".jawBoneContainer"))) {
-        console.log("~3");
         $lolomoRows = $(".lolomoRow");
-        if ($lolomoRows.length) {
+        if ($lolomoRows.length)
           newLolomoRow = $lolomoRows[0];
-        }
       } else {
-        newLolomoRow = nextInDOM(".lolomoRow, .billboard-row", $lolomoRows)[0];
+        newLolomoRow = nextInDOM(".lolomoRow, .billboard-row, .billboard-motion", $lolomoRows)[0];
       }
     }
   } else if (direction === -1) {
-    newLolomoRow = prevInDOM(".lolomoRow, .billboard-row, .jawBoneContainer", $lolomoRows)[0];
+    newLolomoRow = prevInDOM(".lolomoRow, .billboard-row, .billboard-motion, .billboard-motion, .jawBoneContainer", $lolomoRows)[0];
   }
 
   console.log("newLolomoRow");
@@ -549,6 +559,7 @@ console.log("nextprevlistcontainer1");
 
     // Collapse the previous jawBone (normally it gets collapsed when we open up another)
     if ((smallTitleCard_.classList.contains("billboard-row")) ||
+        (smallTitleCard_.classList.contains("billboard-motion")) ||
         (smallTitleCard_.classList.contains("jawBoneContainer")))
       $.each($(".close-button"), function(index, value) { this.click() });
 
@@ -564,20 +575,45 @@ function nextPreviousListItem(direction) {
   console.log(direction);
   if ((direction !== -1) && (direction !== 1))
     return;
+
+
+  if (profilesMode_) {
+    oldSelectedProfile = selectedProfile_;
+    if (direction === 1) {
+      var $next = nextInDOM(".profile-icon", $(selectedProfile_));
+      if ($next.length) {
+        selectedProfile_ = $next[0];
+      }
+    } else if (direction === -1) {
+      var $prev = prevInDOM(".profile-icon", $(selectedProfile_));
+      if ($prev.length) {
+        selectedProfile_ = $prev[0];
+      }
+    }
+    if (supportsNavigationKeys()) {
+      oldSelectedProfile.classList.remove("fp_keyboard_selected_profile");
+      selectedProfile_.classList.add("fp_keyboard_selected_profile");
+    }
+
+    return;
+  }
+
   var elemContainer = getElemContainer();
 
   if ((smallTitleCard_ !== null) && (smallTitleCard_.classList.contains("jawBoneContainer"))) {
     // do nothing if top row
     return;
-  } else if ((elemContainer !== null) && (elemContainer.classList.contains("billboard-row"))) {
+  } else if ((elemContainer !== null) && (elemContainer.classList.contains("billboard-row")) || (elemContainer.classList.contains("billboard-motion"))) {
     if (direction === 1) {
       var $navArrowRights = $(".nav-arrow-right");
-      if ($navArrowRights.length)
+      if ($navArrowRights.length) {
         $navArrowRights[0].click();
+      }
     } else if (direction === -1) {
       var $navArrowLefts = $(".nav-arrow-left");
-      if ($navArrowLefts.length)
+      if ($navArrowLefts.length) {
         $navArrowLefts[0].click();
+      }
     }
 
     return;
@@ -595,7 +631,7 @@ function nextPreviousListItem(direction) {
 
   updateKeyboardSelection(iteratorFunc(".smallTitleCard", $(smallTitleCard_))[0], true);
 
-  var $lolomoRows = $(smallTitleCard_).closest(".lolomoRow, .billboard-row");
+  var $lolomoRows = $(smallTitleCard_).closest(".lolomoRow, .billboard-row, .billboard-motion");
   if ($lolomoRows.length === 0)
     return;
 
@@ -662,7 +698,7 @@ var getKeyboardCommandsHtml = function() {
 };
 
 var supportsNavigationKeys = function() {
-  return (!keyboardShortcutsInfo.DISABLE_NAV_KEYBOARD &&
+  var supports = (!keyboardShortcutsInfo.DISABLE_NAV_KEYBOARD &&
           ((keyboardIdToShortcutDict_.hasOwnProperty("move_left")) ||
           (keyboardIdToShortcutDict_.hasOwnProperty("move_right")) ||
           (keyboardIdToShortcutDict_.hasOwnProperty("move_home")) ||
@@ -672,6 +708,9 @@ var supportsNavigationKeys = function() {
           (keyboardIdToShortcutDict_.hasOwnProperty("section_home")) ||
           (keyboardIdToShortcutDict_.hasOwnProperty("section_end"))
         ));
+  console.log(keyboardIdToShortcutDict_);
+  console.log("supports = " + supports);
+  return supports;
 };
 
 var toggleKeyboardCommands = function() {
@@ -803,8 +842,8 @@ var handleKeydown = function(e) {
 
   // hack; keys aren't user-definable.
   if (profilesMode_ && ((keyCombo === "Space") || (keyCombo === "Enter"))) {
-    console.log("profile space!");
-    extlib.simulateClick($(".profileIcon", elemsInfo_.elemsNPList[elemsInfo_.currListItem])[0]);
+    console.log("profiles - space/enter!");
+    extlib.simulateClick(selectedProfile_);
     return;
   }
 
@@ -864,7 +903,7 @@ var runCommand = function(command) {
 
     if ((keyboardCommandsShown_) && (command !== "help") && (command !== "close_window"))
       return;
-    if ((profilesMode_) && (command !== "move_left") && (command !== "move_right") && (command !== "move_home") && (command !== "move_end") && (command !== "close_window"))
+    if ((profilesMode_) && (command !== "move_left") && (command !== "move_right") && (command !== "close_window"))
       return;
 
     switch (command) {
@@ -1048,6 +1087,26 @@ fplib.addMutation("keyboard shortcuts - player loaded/unloaded", {element: "#pla
   }
 });
 
+fplib.addMutationAndNow("keyboard shortcuts - who's watching", {"element": ".profilesGateContainer, .profiles-gate-container"}, function(summary) {
+    if ((window.location.pathname.indexOf("/WiViewingActivity") === 0) ||
+        (window.location.pathname.indexOf("/MoviesYouveSeen") === 0) || 
+        fplib.isOldMyList()) {
+      return;
+    }
+
+  if (summary.hasOwnProperty("added") && summary.added.length) {
+    console.log("Profiles mode!");
+    profilesMode_ = true;
+    selectedProfile_ = $(".profile-icon")[0];
+    if (supportsNavigationKeys())
+      selectedProfile_.classList.add("fp_keyboard_selected_profile");
+  }
+  if (summary.hasOwnProperty("removed") && summary.removed.length) {
+    console.log("Profiles mode done!");
+    profilesMode_ = false;
+  }
+});
+
 // Select a poster if its jawBone gets shown; does not handle if a user just zooms in on the rotating image
 fplib.addMutation("keyboard shortcuts - jawbone", {element: ".jawBone" }, function(summary) {
   if (summary.added.length) {
@@ -1062,16 +1121,35 @@ keyboardShortcutsInfo.loadShortcutKeys("flix_plus " + fplib.getProfileName() + "
   keyboardShortcutToIdDict_ = keyboardShortcutToIdDict;
   keyboardIdToShortcutDict_ = keyboardIdToShortcutDict;
 
+
+  // Add borders to billboard whenever the billboard changes
+  if (supportsNavigationKeys()) {
+    fplib.addMutationAndNow("keyboard shortcuts - billboard border", {element: ".billboard" }, function(summary) {
+      if (summary.added.length) {
+        updateKeyboardSelection($(".billboard-row")[0]);
+      }
+    });
+  }
+
   // Highlight the first title
   fplib.addMutationAndNow("keyboard shortcuts - lolomo or galleryLockups loaded", {element: ".lolomo, .galleryLockups" }, function(summary) {
     if (summary.added.length) {
       console.log("lolomo or gallerylockups loaded");
       updateKeyboardSelection(smallTitleCard_, false);
 
-      var $smallTitleCards = $(".smallTitleCard, .billboard-row, .jawBoneContainer");
-      if ($smallTitleCards.length) {
-        updateKeyboardSelection($smallTitleCards[0], true);
+      var $smallTitleCards = $(".smallTitleCard, .billboard-row, .billboard-motion, .jawBoneContainer");
+      var firstSmallTitleCard = null;
+      for (var i = 0; i < $smallTitleCards.length; i++) {
+        console.log("~~~");
+        console.log($smallTitleCards[i]);
+        console.log($smallTitleCards[i].style.display);
+        if ($smallTitleCards[i].style.display !== "none") {
+          firstSmallTitleCard = $smallTitleCards[i];
+          break;
+        }
       }
+      if (firstSmallTitleCard !== null)
+        updateKeyboardSelection(firstSmallTitleCard, true);
     }
   });
 

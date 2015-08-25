@@ -26,9 +26,15 @@
 	border-color: white;
 }
 
-.fp_keyboard_selected {
+.fp_keyboard_selected_profile {
 	outline: 10px solid #b9090b !important;
 	outline-offset: 0px !important
+}
+
+.fp_keyboard_selected {
+	outline: 5px solid white !important;
+	outline-offset: 0px !important;
+	margin: 5px !important
 }
 
 .fp_keyboard_mylist_selected {
