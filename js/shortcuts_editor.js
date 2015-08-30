@@ -314,7 +314,7 @@ var shortcutsEditor_ = function() {
 
       var commands = ["prev_section", "next_section", "section_home",
                       "section_end", "move_right", "move_left", "move_home",
-                      "move_end"];
+                      "show_prev_set_posters", "show_next_set_posters"];
       commands.forEach(function(command) {
         var keyName = $("#" + command)[0].value;
         console.log(keyName);

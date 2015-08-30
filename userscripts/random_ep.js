@@ -166,6 +166,8 @@ var getEpisodeList = function(seasons, seasonFilter, callback) {
 document.body.arrive(".jawBone .episodeWrapper", function() {
   var showId = $(this).closest(".jawBoneContainer")[0].id;
   var self = this;
+  console.log("arrived:");
+  console.log(self);
   // We remove all other episodeWrappers for this title because our addition of random buttons causes Netflix
   // to remove them instead of the old episodeWrapper.
   self.classList.add("fp_temp");

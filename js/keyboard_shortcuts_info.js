@@ -4,18 +4,29 @@ var keyboardShortcutsInfo = keyboardShortcutsInfo_ || {};
 var keyboardShortcutsInfo_ = function() {
   var self = this;
 
-  this.DISABLE_NAV_KEYBOARD = true;
+  this.DISABLE_NAV_KEYBOARD = false;
 
   var categoriesInOrder_ = ["Posters", "Sections", "Player", "Jump to page", "Misc"];
 
   // Any new keys created after Flix Plus 2.0 should be included here so that existing users
   // will have keys assigned to default value (if still available)
   var newerKeyIds_ = ["player_slower", "player_faster", "next_tab", "prev_tab",
-                      "next_season", "prev_season", "next_episode", "prev_episode"];
+                      "next_season", "prev_season", "next_episode", "prev_episode",
+                      "show_prev_set_posters", "show_next_set_posters"];
 
   var obsoleteKeyIdsDict_ = { "jump_whos_watching" : true, "open_link": true };
 
   var keyboardShortcutsDefs_ = {
+    show_prev_set_posters: {
+      defaultKey: 'PgDn',
+      description: 'Show previous set of posters',
+      category: 'Posters',
+      order: 15 },
+    show_next_set_posters: {
+      defaultKey: 'PgUp',
+      description: 'Show next set of posters',
+      category: 'Posters',
+      order: 16 },
     reveal_spoilers: {
       defaultKey: 'e',
       description: 'Toggle Spoilers',
@@ -35,7 +46,7 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: 'r',
       description: 'Random show/episode',
       category: 'Posters',
-      order: 101 },
+      order: 1010 },
     player_toggle_audio: {
       defaultKey: 'u',
       description: 'Toggle audio tracks',
@@ -65,7 +76,7 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: '`',
       description: 'Rate Clear',
       category: 'Posters',
-      order: 8 },
+      order: 80 },
     jump_viewing_activity: {
       defaultKey: 'a',
       description: 'Viewing activity',
@@ -85,7 +96,7 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: '-',
       description: 'Remove from My List',
       category: 'Posters',
-      order: 6 },
+      order: 60 },
     open_section_link: {
       defaultKey: 'o',
       description: 'Open section link',
@@ -100,52 +111,52 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: '1',
       description: 'Rate 1',
       category: 'Posters',
-      order: 10 },
+      order: 100 },
     rate_0: {
       defaultKey: '0',
       description: 'Rate 0',
       category: 'Posters',
-      order: 9 },
+      order: 90 },
     rate_3: {
       defaultKey: '3',
       description: 'Rate 3',
       category: 'Posters',
-      order: 12 },
+      order: 120 },
     rate_2: {
       defaultKey: '2',
       description: 'Rate 2',
       category: 'Posters',
-      order: 11 },
+      order: 110 },
     rate_5: {
       defaultKey: '5',
       description: 'Rate 5',
       category: 'Posters',
-      order: 14 },
+      order: 140 },
     rate_4: {
       defaultKey: '4',
       description: 'Rate 4',
       category: 'Posters',
-      order: 13 },
+      order: 130 },
     move_left: {
       defaultKey: 'Left',
       description: 'Move left',
       category: 'Posters',
-      order: 1 },
+      order: 10 },
     to_my_list: {
       defaultKey: '+',
       description: 'To My List',
       category: 'Posters',
-      order: 5 },
+      order: 50 },
     zoom_into_details: {
       defaultKey: 'Enter',
       description: 'Zoom into details',
       category: 'Posters',
-      order: 7 },
+      order: 70 },
     rate_4_5: {
       defaultKey: '9',
       description: 'Rate 4.5',
       category: 'Posters',
-      order: 18 },
+      order: 180 },
     jump_new_arrivals: {
       defaultKey: 'v',
       description: 'New arrivals',
@@ -155,12 +166,12 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: 'p',
       description: 'Play',
       category: 'Posters',
-      order: 4 },
+      order: 40 },
     move_end: {
       defaultKey: 'End',
       description: 'Go to section ending',
       category: 'Posters',
-      order: 3 },
+      order: 30 },
     jump_instant_home: {
       defaultKey: 'i',
       description: 'Instant Home',
@@ -180,7 +191,7 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: 'Home',
       description: 'Go to section beginning',
       category: 'Posters',
-      order: 2 },
+      order: 20 },
     prev_section: {
       defaultKey: 'Up',
       description: 'Previous section',
@@ -200,7 +211,7 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: '8',
       description: 'Rate 3.5',
       category: 'Posters',
-      order: 17 },
+      order: 170 },
     jump_your_ratings: {
       defaultKey: 't',
       description: 'Your Ratings',
@@ -215,12 +226,12 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: 'o', // Note: key now used for open section link
       description: 'Open link',
       category: 'Posters',
-      order: 19 },*/
+      order: 190 },*/
     rate_2_5: {
       defaultKey: '7',
       description: 'Rate 2.5',
       category: 'Posters',
-      order: 16 },
+      order: 160 },
     toggle_scrollbars: {
       defaultKey: 's',
       description: 'Toggle scrollbars',
@@ -230,7 +241,7 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: '6',
       description: 'Rate 1.5',
       category: 'Posters',
-      order: 15 },
+      order: 150 },
     next_section: {
       defaultKey: 'Down',
       description: 'Next section',
@@ -325,32 +336,32 @@ var keyboardShortcutsInfo_ = function() {
       defaultKey: 'j',
       description: 'Next tab',
       category: 'Posters',
-      order: 200 },
+      order: 2000 },
     prev_tab: {
       defaultKey: 'k',
       description: 'Previous Tab',
       category: 'Posters',
-      order: 201 },
+      order: 2010 },
     next_season: {
       defaultKey: 'z',
       description: 'Next season',
       category: 'Posters',
-      order: 202 },
+      order: 2020 },
     prev_season: {
       defaultKey: 'x',
       description: 'Previous season',
       category: 'Posters',
-      order: 203 },
+      order: 2030 },
     next_episode: {
       defaultKey: 'n',
       description: 'Next episode',
       category: 'Posters',
-      order: 204 },
+      order: 2040 },
     prev_episode: {
       defaultKey: 'm',
       description: 'Previous episode',
       category: 'Posters',
-      order: 205 }
+      order: 2050 }
   };
 
   this.generateDefaults = function() {
@@ -528,7 +539,7 @@ var keyboardShortcutsInfo_ = function() {
     if (!self.DISABLE_NAV_KEYBOARD) {
       if ((context !== "player") && (context !== "nonplayer-no-navigation") && (context !== "show_details")) {
         text += "<br><br>";
-        text += "Move around items: " + self.getKeysString([s["move_right"], s["move_left"], s["move_home"], s["move_end"]]);
+        text += "Move around items: " + self.getKeysString([s["move_right"], s["move_left"], s["show_prev_set_posters"], s["show_next_set_posters"], s["move_home"], s["move_end"]]);
         text += "<br>&nbsp;&nbsp;&nbsp;Play: " + s["play"];
         text += "<br>&nbsp;&nbsp;&nbsp;Zoom into details: " + s["zoom_into_details"];
         text += "<br>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"];

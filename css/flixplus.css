@@ -33,8 +33,7 @@
 
 .fp_keyboard_selected {
 	outline: 5px solid white !important;
-	outline-offset: 0px !important;
-	margin: 5px !important
+	outline-offset: 5px !important;
 }
 
 .fp_keyboard_mylist_selected {
