@@ -14,16 +14,16 @@ var keyboardShortcutsInfo_ = function() {
                       "next_season", "prev_season", "next_episode", "prev_episode",
                       "show_prev_set_posters", "show_next_set_posters"];
 
-  var obsoleteKeyIdsDict_ = { "jump_whos_watching" : true, "open_link": true };
+  var obsoleteKeyIdsDict_ = { "jump_whos_watching" : true, "open_link": true, "toggle_scrollbars": true };
 
   var keyboardShortcutsDefs_ = {
     show_prev_set_posters: {
-      defaultKey: 'PgDn',
+      defaultKey: 'PgUp',
       description: 'Show previous set of posters',
       category: 'Posters',
       order: 15 },
     show_next_set_posters: {
-      defaultKey: 'PgUp',
+      defaultKey: 'PgDn',
       description: 'Show next set of posters',
       category: 'Posters',
       order: 16 },
@@ -232,11 +232,6 @@ var keyboardShortcutsInfo_ = function() {
       description: 'Rate 2.5',
       category: 'Posters',
       order: 160 },
-    toggle_scrollbars: {
-      defaultKey: 's',
-      description: 'Toggle scrollbars',
-      category: 'Sections',
-      order: 5 },
     rate_1_5: {
       defaultKey: '6',
       description: 'Rate 1.5',
@@ -549,7 +544,7 @@ var keyboardShortcutsInfo_ = function() {
         text += "<br>&nbsp;&nbsp;&nbsp;Next season: " + s["next_season"] + ", prev season: " + s["prev_season"];
         text += "<br>&nbsp;&nbsp;&nbsp;Next episode: " + s["next_episode"] + ", prev episode: " + s["prev_episode"];
 
-        text += "<br><br>Move around sections: " + self.getKeysString([s["next_section"], s["prev_section"], s["section_home"], s["section_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Open section link: " + s["open_section_link"] + "<br>&nbsp;&nbsp;&nbsp;Toggle scrollbars: " + s["toggle_scrollbars"] + "<br>";
+        text += "<br><br>Move around sections: " + self.getKeysString([s["next_section"], s["prev_section"], s["section_home"], s["section_end"]]) + "<BR>&nbsp;&nbsp;&nbsp;Open section link: " + s["open_section_link"] + "<br>";
         text += "&nbsp;&nbsp;&nbsp;Toggle hiding: " + s["toggle_hiding"];
       } else if (context === "nonplayer-no-navigation") {
         text += "<br><br>Many commands are not shown here because navigation is disabled.";
