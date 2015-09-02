@@ -79,7 +79,7 @@
         'user-button-config': []
     };
     Constants.DEFAULTS['detail-page-url-' + Constants.QUEUE_DVD] = window.location.protocol + '//{hostName}/Movie/{movieId}';
-    Constants.DEFAULTS['detail-page-url-' + Constants.QUEUE_INSTANT] = window.location.protocol + '//{hostName}/movie/{movieId}?fdvd=true';
+    Constants.DEFAULTS['detail-page-url-' + Constants.QUEUE_INSTANT] = window.location.protocol + '//{hostName}/title/{movieId}';
 
 
 
@@ -656,18 +656,18 @@
             // e.g. because of series discs.
             // These are for internal-use only.
             // Their name must be queue field name + '2'.
-            starRating2:       { extractFn: 'extractStarRating2',       selectable: false, display: 'Star Rating (Backup)' },
+            //disabled for Flix Plus by Lifehacker - starRating2:       { extractFn: 'extractStarRating2',       selectable: false, display: 'Star Rating (Backup)' },
 
             // All other fields that only appear on the details page.
             year:              { extractFn: 'extractYear',              selectable:  true, display: 'Year' },
-            language:          { extractFn: 'extractLanguage',          selectable:  true, display: 'Language' },
+            //disabled for Flix Plus by Lifehacker - language:          { extractFn: 'extractLanguage',          selectable:  true, display: 'Language' },
             length:            { extractFn: 'extractLength',            selectable:  true, display: 'Length' },
-            avgRating:         { extractFn: 'extractAvgRating',         selectable:  true, display: 'Average Rating' },
+            //disabled for Flix Plus by Lifehacker - avgRating:         { extractFn: 'extractAvgRating',         selectable:  true, display: 'Average Rating' },
             mpaaRating:        { extractFn: 'extractMpaaRating',        selectable:  true, display: 'MPAA Rating' },
             commonSenseRating: { extractFn: 'extractCommonSenseRating', selectable:  true, display: 'Common Sense Rating' },
-            numRatings:        { extractFn: 'extractNumRatings',        selectable:  true, display: 'Number of Ratings' },
-            numDiscs:          { extractFn: 'extractNumDiscs',          selectable:  true, display: 'Number of Discs' },
-            mediaFormat:       { extractFn: 'extractMediaFormat',       selectable:  true, display: 'Media Format' },
+            //disabled for Flix Plus by Lifehacker - numRatings:        { extractFn: 'extractNumRatings',        selectable:  true, display: 'Number of Ratings' },
+            //disabled for Flix Plus by Lifehacker - numDiscs:          { extractFn: 'extractNumDiscs',          selectable:  true, display: 'Number of Discs' },
+            //disabled for Flix Plus by Lifehacker - mediaFormat:       { extractFn: 'extractMediaFormat',       selectable:  true, display: 'Media Format' },
             dateAdded:         { extractFn: 'extractDateAdded',         selectable:  true, display: 'Date Added' }
     /* TODO: FUTURE: member reviews are loaded after page load; check later if it's changed
             reviews:           { extractFn: 'extractReviews',           selectable:  true, display: 'Reviews' }
@@ -801,48 +801,28 @@
             txt,
             len;
 
-        // Movies soon-to-be-released may not have a length yet.
+        // Rewritten for Flix Plus by Lifehacker to support Netflix's June 2015 update.
+        // If it doesn't show the duration within the title page (i.e. a tv show, etc.)
+        // just set it to zero.  (This is not as good as this used to work, but it is
+        // harder toget episode info now; and that method wasn't necessarily accurate
+        // anyway.)
+
+        var minutes = 0;
+
         if (elts.length > 0) {
-            txt = elts[0].innerHTML;
-            if (/(\d+)hr (\d+)m/.test(txt)) {
-                len = parseInt(RegExp.$1, 10) * 60 + parseInt(RegExp.$2, 10);
+            var str = elts[0].innerHTML;
+            console.log(str);
 
-            } else if (/(\d+)hr/.test(txt) || /(\d+) minutes/.test(txt)) {
-                len = parseInt(RegExp.$1, 10) * 60;
-
-            } else if (/(\d+)m/.test(txt) || /(\d+) minutes/.test(txt)) {
-                len = parseInt(RegExp.$1, 10);
-
-            // "Old" style page (regular size box image).
-            } else if (/(\d+) discs/.test(txt)) {
-                // Find duration of first episode, if any.
-                // Skip first elt as we already looked at that.
-                for (ee = 1; ee < elts.length; ee += 1) {
-                    if (elts[ee].getAttribute('class').indexOf('ep-1') >= 0) {
-                        // Unwatched episode contain just '54 minutes', but if user
-                        // started watching the episode, "4 of 53 mins watched".
-                        if (/(\d+) min/.test(elts[ee].innerHTML)) {
-                            len = parseInt(RegExp.$1, 10);
-                            break;
-                        }
-                    }
-                }
-
-            // "New" style page (oversized image).
-            // Could be Series, Seasons, Episodes, Volumes, Chapters, Collections.
-            } else {
-                // Find duration of first episode, if any.
-                // Skip first elt as we already looked at that.
-                for (ee = 1; ee < elts.length; ee += 1) {
-                    if (/(\d+)\s?m/.test(elts[ee].innerHTML)) {
-                        len = parseInt(RegExp.$1, 10);
-                        break;
-                    }
-                }
-            }
+            var parts = str.split(" ");
+            parts.forEach(function(part) {
+                if (part[part.length - 1] === "h")
+                    minutes += parseInt(part.substring(0, part.length - 1)) * 60;
+                if (part[part.length - 1] === "m")
+                    minutes += parseInt(part.substring(0, part.length - 1));
+            });
         }
 
-        return len;
+        return minutes;
     };
 
     NetflixDetailsPageRetriever.prototype.extractMaturityRating = function (dom, className) {
@@ -2766,7 +2746,7 @@
                 title: 'Sort your queue by star rating from high to low',
                 queues: [Constants.QUEUE_INSTANT, Constants.QUEUE_DVD],
                 config: [{command: 'sort', fields: ['starRating', 'title'], sortFns: ['defaultSortFn', 'defaultSortFn'], dirs: [QueueManager.SORT_DESC, QueueManager.SORT_ASC]}]
-            },
+            },/* // Removed for Flix Plus by Lifehacker
             {
                 // Add sort by title to make sure series discs are in asc order.
                 id: 'd20',
@@ -2782,7 +2762,7 @@
                 title: 'Sort your queue by star rating (primary) and by average rating (secondary) from high to low',
                 queues: [Constants.QUEUE_INSTANT, Constants.QUEUE_DVD],
                 config: [{command: 'sort', fields: ['starRating', 'avgRating', 'title'], sortFns: ['defaultSortFn', 'defaultSortFn', 'defaultSortFn'], dirs: [QueueManager.SORT_DESC, QueueManager.SORT_DESC, QueueManager.SORT_ASC]}]
-            },
+            }, */
             {
                 id: 'd40',
                 text: 'Shuffle',
@@ -2861,7 +2841,7 @@
                 title: 'Sort your queue by year from new to old',
                 queues: [Constants.QUEUE_INSTANT, Constants.QUEUE_DVD],
                 config: [{command: 'sort', fields: ['year', 'title'], sortFns: ['defaultSortFn', 'defaultSortFn'], dirs: [QueueManager.SORT_DESC, QueueManager.SORT_ASC]}]
-            },
+            },/* // Removed for Flix Plus by Lifehacker
             {
                 // Format sort for Instant queue.
                 id: 'd140',
@@ -2887,7 +2867,7 @@
                 title: 'Sort your queue alphabetically by language',
                 queues: [Constants.QUEUE_INSTANT, Constants.QUEUE_DVD],
                 config: [{command: 'sort', fields: ['language', 'title'], sortFns: ['defaultSortFn', 'defaultSortFn'], dirs: [QueueManager.SORT_ASC, QueueManager.SORT_ASC]}]
-            },
+            },*/
             {
                 id: 'd170',
                 text: 'Date Added',
