@@ -862,7 +862,7 @@ var determineKeydown = function(e) {
   if ((e.ctrlKey)) keyCombo = "Ctrl-" + keyCombo;
   if (!ignoreShift && (e.shiftKey)) keyCombo = "Shift-" + keyCombo;
 
-  e.preventDefault();
+//  e.preventDefault();
 
   return keyCombo;
 };
@@ -876,11 +876,17 @@ var isPlayer = function() {
 // restricted by the shortcuts editor. (But a user could maybe get such
 // support by modifying their shortcuts JSON in localstorage.)
 var handleKeydown = function(e) {
-//  console.log("handleKeydown");
+  console.log("handleKeydown");
 
   var keyCombo = determineKeydown(e);
   console.log("handleKeyDown - ");
   console.log(keyCombo);
+
+  if ((keyCombo === "Space") && $(".search-focused").length) {
+    console.log("abandoning...")
+    return; // Allow typing ' ' in the search box
+  }
+
   // hack; keys aren't user-definable.
   if (profilesMode_ && ((keyCombo === "Space") || (keyCombo === "Enter"))) {
     console.log("profiles - space/enter!");
@@ -1901,7 +1907,7 @@ var determineKeydown = function(e)
 // While this code supports ctrl, alt, and shift modifiers, most use is restricted by the shortcuts editor. (But a user could maybe get such support by modifying their shortcuts JSON in localstorage.)
 var handleKeydown = function(e)
 {
-    console.log("handleKeydown");
+    //console.log("handleKeydown");
 
     var keyCombo = determineKeydown(e);
 

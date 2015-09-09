@@ -366,6 +366,7 @@ var fplib_ = function() {
         [].slice.call(elems).forEach(function(elem) {
           elem.classList.add(className);
           elem.parentNode.classList.add(className + "_p");
+          elem.parentNode.parentNode.classList.add(className + "_gp"); // Used for hiding (not supported in UI right now)
         });
       } catch (ex) {
         console.error(ex);
