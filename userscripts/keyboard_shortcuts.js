@@ -883,7 +883,6 @@ var handleKeydown = function(e) {
   console.log(keyCombo);
 
   if ((keyCombo === "Space") && $(".search-focused").length) {
-    console.log("abandoning...")
     return; // Allow typing ' ' in the search box
   }
 

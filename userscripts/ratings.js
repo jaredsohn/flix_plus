@@ -20,7 +20,7 @@
 
 var keyName_ = "flix_plus " + fplib.getProfileName() + " ratings2";
 var IMDB_API = "http://www.omdbapi.com/?tomatoes=true";
-var TOMATO_LINK = "http://www.rottentomatoes.com/alias?type=imdbid&s=";
+var TOMATO_LINK= "http://www.rottentomatoes.com/search/?search=";
 var IMDB_LINK = "http://www.imdb.com/title/";
 
 var CACHE = localStorage[keyName_];
@@ -98,9 +98,8 @@ function getIMDBLink(title) {
   return IMDB_LINK + title.trim();
 }
 
-function getTomatoLink(imdbID) {
-  imdbID = imdbID.slice(2); //convert tt123456 -> 123456
-  return TOMATO_LINK + imdbID;
+function getTomatoLink(query) {
+  return TOMATO_LINK + query;
 }
 
 
@@ -598,7 +597,7 @@ function getIMDBHtml(movieInfo, klass) {
 }
 
 function getTomatoHtml(movieInfo, klass) {
-  var htmlText = '<a class="fp_rt_rating_link" target="_blank" href="' + extlib.escapeHTML(getTomatoLink(movieInfo.imdbID)) + '">';
+  var htmlText = '<a class="fp_rt_rating_link" target="_blank" href="' + extlib.escapeHTML(getTomatoLink(movieInfo.title)) + '">';
   htmlText += '<span class="fp_rt_tomato fp_rt_tomato_wrapper" title="Rotten Tomato Rating - ' + movieInfo.title.trim() + '">';
 
   if (movieInfo.tomatoMeter)
