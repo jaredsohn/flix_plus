@@ -422,7 +422,7 @@ var fplib_ = function() {
     // handle when showing a jawBone
     self.addMutationAndNow("keepPosterClasses - jawBone", {element: ".jawBone"}, function(summary) {
       summary.added.forEach(function(imageRotatorElem) {
-        console.log("keepPosterClasses - jawbone")
+        consolelog("keepPosterClasses - jawbone")
         var ptrackContainers = $(imageRotatorElem).closest(".ptrack-container");
         if (ptrackContainers.length) {
           var smallTitleCards = ptrackContainers[0].getElementsByClassName("smallTitleCard");
@@ -513,8 +513,8 @@ var fplib_ = function() {
       if (elem.classList.length === 1) { // leave navitem
         elem.style.display = "none";
       } else {
-        console.log("not hiding progress bar since more classes associated with it");
-        console.log(elem.classList);
+        consolelog("not hiding progress bar since more classes associated with it");
+        consolelog(elem.classList);
       }
     }
   };

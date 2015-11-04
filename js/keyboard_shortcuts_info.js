@@ -440,8 +440,8 @@ var keyboardShortcutsInfo_ = function() {
 
   // key is the storage.sync key
   this.loadShortcutKeys = function(key, callback) {
-    console.log("loadshortcutkeys key = ");
-    console.log(key);
+    //console.log("loadshortcutkeys key = ");
+    //console.log(key);
     chrome.storage.sync.get(key, function(items) {
       var keyboardShortcuts = "";
 
