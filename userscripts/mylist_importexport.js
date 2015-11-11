@@ -106,6 +106,9 @@ var getListNewMyList = function() {
 
 // The mutation observer is needed for the newer style My List because when a user goes
 // to /my-list, there isn't necessary a page reload.
-fplib.addAndNowMutation("add Export List button", {"element": ".galleryHeader" }, function(summary) {
-  addExportListButton();
+fplib.addMutationAndNow("add Export List button", {"element": ".galleryHeader" }, function(summary) {
+  if (summary.added.length) {
+    console.log("addexportlistbutton");
+    addExportListButton();
+  }
 });
