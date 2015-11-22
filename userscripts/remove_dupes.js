@@ -31,7 +31,8 @@ fplib.syncGet(keysDict, function(items) {
 });
 
 var updateCard = function(smallTitleCard, uniquesForRow, alwaysShowRow) {
-  var movieId = fplib.getMovieIdFromField(smallTitleCard.id);
+  var movieId = fplib.getMovieIdFromReactId(smallTitleCard.getAttribute("data-reactid"));
+
   if (alwaysShowRow || (uniquesForRow.hasOwnProperty(movieId)) || (!alreadyShown_.hasOwnProperty(movieId))) {
     uniquesForRow[movieId] = true;
     alreadyShown_[movieId] = true;

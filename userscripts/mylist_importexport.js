@@ -112,3 +112,9 @@ fplib.addMutationAndNow("add Export List button", {"element": ".galleryHeader" }
     addExportListButton();
   }
 });
+
+if (fplib.isOldMyList()) {
+  console.log("addexportlistbutton");
+  addExportListButton();
+}
+

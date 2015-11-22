@@ -69,6 +69,14 @@ var fplib_ = function() {
     self.restartMutationSummary();
   };
 
+  this.getMovieIdFromReactId = function(reactId) {
+    var startIndex = reactId.indexOf("title_") + "title_".length;
+    var lastPart = reactId.substr(startIndex);
+    var endIndex = lastPart.indexOf(":$") + 1;
+    var titleStr = lastPart.substr(0, endIndex - 1);
+    return this.getMovieIdFromField(titleStr);
+  };
+
   // Returns zero if not able to get id
   this.getMovieIdFromField = function(attrStr) {
     if ((attrStr || null) === null)
@@ -353,16 +361,9 @@ var fplib_ = function() {
     consolelog("applyClassnameToPosters(" + className + "):");
     consolelog(idsArray);
 
-    var selectors = fplib.getSelectorsForPath();
-    if (!selectors)
-      return;
-
-    var selector = selectors["borderedElement"];
-    var infoSelector = selectors["id_info"];
-
     idsArray.forEach(function(movieId) {
       try {
-        var elems = $("#" + infoSelector["prefix"] + movieId);
+        var elems = $(".smallTitleCard[data-reactid*='title_" + movieId + "_']"); // hard-coded for now instead of using getSelectorsForPath
         [].slice.call(elems).forEach(function(elem) {
           elem.classList.add(className);
           elem.parentNode.classList.add(className + "_p");
@@ -402,7 +403,7 @@ var fplib_ = function() {
       }
       summary.added.forEach(function(elem) {
         //consolelog("arrive (applyClassnameToPostersOnArrive)");
-        var movieId = fplib.getMovieIdFromField(elem.id);
+        var movieId = self.getMovieIdFromReactId(elem.getAttribute("data-reactid"));
         if (dataDict.hasOwnProperty(movieId)) {
           elem.parentNode.classList.add(className + "_p");
           elem.classList.add(className);
