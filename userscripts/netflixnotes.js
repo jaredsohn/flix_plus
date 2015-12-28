@@ -4,7 +4,7 @@
 // Depends on: (none)
 //
 // Local modifications include using fewer storage keys and using
-// Chrome's sync storage.
+// Chrome's sync storage. Also, updated for Netflix November 2015 My list update.
 // Found at found at http://userscripts.org:8080/scripts/review/30744/
 
 
@@ -14,10 +14,6 @@
 // Copyright (c) 2008-2014, Mike Morearty
 // Released under the MIT license
 // http://www.opensource.org/licenses/mit-license.php
-//
-// Except for the getElementsByClassName function, which is:
-//   Developed by Robert Nyman, http://www.robertnyman.com
-//   Code/licensing: http://code.google.com/p/getelementsbyclassname/
 //
 // --------------------------------------------------------------------
 //
@@ -53,90 +49,11 @@ var KEY_NAME = "flix_plus " + fplib.getProfileName() + " notes";
 
 var defaultNote = 'add note';  // displayed next to movies that don't have a note
 
-var noteColor = 'black';       // text color for the note
-var defaultNoteColor = 'gray'; // text color for "add note" default text
+var noteColor = 'yellow';       // text color for the note
+var defaultNoteColor = 'dimgray'; // text color for "add note" default text
 
 var all_notes = {};
 
-/*
-    getElementsByClassName:
-    Developed by Robert Nyman, http://www.robertnyman.com
-    Code/licensing: http://code.google.com/p/getelementsbyclassname/
-*/
-var getElementsByClassName = function(className, tag, elm) {
-    if (document.getElementsByClassName) {
-        getElementsByClassName = function(className, tag, elm) {
-            elm = elm || document;
-            var elements = elm.getElementsByClassName(className),
-                nodeName = (tag) ? new RegExp("\\b" + tag + "\\b", "i") : null,
-                returnElements = [],
-                current;
-            for (var i = 0, il = elements.length; i < il; i += 1) {
-                current = elements[i];
-                if (!nodeName || nodeName.test(current.nodeName)) {
-                    returnElements.push(current);
-                }
-            }
-            return returnElements;
-        };
-    }
-    else if (document.evaluate) {
-        getElementsByClassName = function(className, tag, elm) {
-            tag = tag || "*";
-            elm = elm || document;
-            var classes = className.split(" "),
-                classesToCheck = "",
-                xhtmlNamespace = "http://www.w3.org/1999/xhtml",
-                namespaceResolver = (document.documentElement.namespaceURI === xhtmlNamespace) ? xhtmlNamespace : null,
-                returnElements = [],
-                elements,
-                node;
-            for (var j = 0, jl = classes.length; j < jl; j += 1) {
-                classesToCheck += "[contains(concat(' ', @class, ' '), ' " + classes[j] + " ')]";
-            }
-            try {
-                elements = document.evaluate(".//" + tag + classesToCheck, elm, namespaceResolver, 0, null);
-            }
-            catch (e) {
-                elements = document.evaluate(".//" + tag + classesToCheck, elm, null, 0, null);
-            }
-            while ((node = elements.iterateNext())) {
-                returnElements.push(node);
-            }
-            return returnElements;
-        };
-    }
-    else {
-        getElementsByClassName = function(className, tag, elm) {
-            tag = tag || "*";
-            elm = elm || document;
-            var classes = className.split(" "),
-                classesToCheck = [],
-                elements = (tag === "*" && elm.all) ? elm.all : elm.getElementsByTagName(tag),
-                current,
-                returnElements = [],
-                match;
-            for (var k = 0, kl = classes.length; k < kl; k += 1) {
-                classesToCheck.push(new RegExp("(^|\\s)" + classes[k] + "(\\s|$)"));
-            }
-            for (var l = 0, ll = elements.length; l < ll; l += 1) {
-                current = elements[l];
-                match = false;
-                for (var m = 0, ml = classesToCheck.length; m < ml; m += 1) {
-                    match = classesToCheck[m].test(current.className);
-                    if (!match) {
-                        break;
-                    }
-                }
-                if (match) {
-                    returnElements.push(current);
-                }
-            }
-            return returnElements;
-        };
-    }
-    return getElementsByClassName(className, tag, elm);
-};
 
 // This is called when the user begins editing a note, by clicking on it.
 // It turns the <span> of text into an edit box.
@@ -152,14 +69,21 @@ function onEditMovieNote(event)
     // If the user clicks outside the edit box, he is done editing:
     input.addEventListener('blur', onDoneEditingMovieNote, true);
 
+/*  // This was removed in December 2015 since it conflicted with keyboard shortcuts
     // If the user presses Return, he is done editing:
     input.addEventListener('keydown',
         function(event) {
-            if (event.keyCode == 13)
+            if (event.keyCode == 13) {
+                event.preventDefault();
                 onDoneEditingMovieNote(event);
+                return false;
+            }
         }, true);
-
+*/
     input.value = noteText;
+    input.style.backgroundColor = "black";
+    input.style.color = "yellow";
+
     elem.innerHTML = "";
     elem.appendChild(input);
     input.focus();
@@ -246,19 +170,21 @@ function initialize()
 {
     loadAllNotes(function()
     {
-        insertNotesByClass('qtbl');
+        insertNotesByClass('title');
     });
 }
 
 function insertNotesByClass(className)
 {
-    var q = getElementsByClassName(className, null, document);
-    if (q)
-    {
-        // Loop changed from "for each" to for loop so that it works in Chrome (jaredsohn-lifehacker)
-        for (var i = 0; i < q.length; i++)
+    var rowListElems = document.getElementsByClassName("rowList");
+    if (rowListElems.length) {
+        var q = rowListElems[0].getElementsByClassName(className, null, document);
+        if (q)
         {
-            insertNotesInElem(q[i]);
+            for (var i = 0; i < q.length; i++)
+            {
+                insertNotesInElem(q[i]);
+            }
         }
     }
 }
@@ -272,39 +198,25 @@ function insertNotes(idOfSection)
 
 function insertNotesInElem(elem)
 {
-    // Each movie is inside <span class="title">
-    var spans = elem.getElementsByTagName('span');
-    var foundTitle = false;
-    for (var s = 0; s < spans.length; ++s)
-    {
-        if (spans[s].className.match(/\btitle\b/))
-        {
-            foundTitle = true;
-            var anchors = spans[s].getElementsByTagName('a');
-            if (anchors.length == 1)
-            {
-                // Load the movie's note
-                var title = anchors[0].text;
-                var noteText = loadNote(title, defaultNote);
+    var title = elem.innerText;
+    var noteText = loadNote(title, defaultNote);
 
-                // Create a <span> and insert it
-                var innerSpan = makeNoteSpan(noteText);
+    // Create a <span> and insert it
+    var innerSpan = makeNoteSpan(noteText);
 
-                var outerSpan = document.createElement("span");
-                outerSpan.appendChild(innerSpan);
+    var outerSpan = document.createElement("span");
+    outerSpan.appendChild(innerSpan);
 
-                spans[s].appendChild(document.createElement("br"));
-                spans[s].appendChild(outerSpan);
-            }
+    elem.appendChild(document.createElement("br"));
+    elem.appendChild(outerSpan);
+}
+
+// The mutation observer is needed for the newer style My List because when a user goes
+// to /my-list, there isn't necessary a page reload.
+fplib.addMutationAndNow("add Neflix notes button", {"element": ".rowList" }, function(summary) {
+    if (summary.added.length) {
+        if (fplib.isOldMyList()) {
+            initialize();
         }
     }
-}
-
-if (!fplib.isOldMyList())
-{
-    console.log("Script disabled since it requires Netflix Suggests mode.");
-} else
-{
-    // this is executed when this script loads:
-    initialize();
-}
+});

@@ -41,7 +41,8 @@
 }
 
 .fp_keyboard_mylist_selected {
-	outline: 5px solid #b9090b !important;
+	outline: 2px solid white !important;
+	outline-offset: -2px !important;
 }
 
 /* from http://davidwalsh.name/spoiler-filter */

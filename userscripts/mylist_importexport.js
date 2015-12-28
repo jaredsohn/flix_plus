@@ -14,16 +14,14 @@ var addExportListButton = function() {
   var buttonParent = null;
 
   if (fplib.isOldMyList()) {
-    var headers = $(".listQueueHead");
+    var headers = $(".galleryHeader .title");
     if (headers && headers.length) {
-      if ($(".listQueueHead br").length === 0)
-        headers[0].appendChild(document.createElement("br"));
-
       buttonParent = headers[0];
     }
-  } else {
+  } else if (fplib.isNewMyList()) {
     var galleryHeaders = [].slice.call($(".galleryHeader"));
     galleryHeaders.forEach(function(galleryHeader) {
+
       var title = (galleryHeader.getElementsByClassName("title").length ? galleryHeader.getElementsByClassName("title")[0].innerHTML : null);
       if (title === "My List")
         buttonParent = galleryHeader;
@@ -40,45 +38,52 @@ var addExportListButton = function() {
 
 var getListOldMyList = function() {
   var exportData = [];
-  [].slice.call($("#queue .qtbl tr")).forEach(function(entry) {
+  [].slice.call($(".rowListItem")).forEach(function(entry) {
     var obj = {};
 
-    var titleElems = $(".mdpLink", $(entry));
+    var titleElems = $(".title", $(entry));
     if (titleElems.length === 0)
       return;
 
-    obj.netflixid = fplib.getMovieIdFromField(titleElems[0].id);
+    obj.netflixid = fplib.getMovieIdFromReactId(titleElems[0].getAttribute("data-reactid"));
     obj.title = titleElems[0].innerText;
-    obj.yourRating = "";
-    obj.suggestedRating = "";
+    obj.genre = ""; // no longer available
+    obj.year = $(".year", $(entry))[0].innerHTML;
+    obj.maturity = $(".maturity-number", $(entry))[0].innerHTML;
+    obj.duration = $(".duration span", $(entry))[0].innerHTML;
 
-    if ($(".fp_notes").length > 0)
-      obj.customNote = $(".fp_notes", $(entry))[0].innerText.trim();
-      if (obj.customNote === "add note")
-        obj.customNote = "";
-    else
-      obj.customNote = "";
+    obj.customNote = "";
+    if ($(".fp_notes", $(entry)).length > 0) {
+      var temp = $(".fp_notes", $(entry))[0].innerText.trim();
+      if (temp !== "add note")
+        obj.customNote = temp;
+    }
 
-    obj.genre = $(".gn a", ($("tr")[10]))[0].text.trim();
-
-    var ratingElems = $(".stbrMaskFg", $(entry));
-    if (ratingElems.length === 0)
-      return;
-
-    var rating = null;
-    var classNames = ratingElems[0].classList;
-    classNames.forEach(function(className) {
-      try {
-        if (className.indexOf("sbmf-") === 0)
-          rating = parseInt(className.substring(className.indexOf("-") + 1)) / 10;
-      } catch (ex) {
-        console.error(ex);
-      }
-    });
-    if ((classNames.contains("sbmfpr")) && (rating !== null))
-      obj.suggestedRating = rating.toString();
-    else if (classNames.contains("sbmfrt"))
-      obj.yourRating = rating.toString();
+    var rating = "";
+    var ratings = $("span.default, span.personal", $(entry));
+    var halfStars = $(".icon-star-50-percent", $(entry)[0]);
+    var quarterStars = $(".icon-star-25-percent", $(entry)[0]);
+    var threeQuarterStars = $(".icon-star-75-percent", $(entry)[0]);
+    var ratingIsPersonal = false;
+    if (halfStars.length) {
+      rating = parseInt(halfStars[0].getAttribute("data-rating")) - 1 + 0.5;
+      ratingIsPersonal = halfStars[0].classList.contains("personal");
+    } else if (quarterStars.length) {
+      rating = parseInt(quarterStars[0].getAttribute("data-rating")) - 1 + 0.25;
+      ratingIsPersonal = quarterStars[0].classList.contains("personal");
+    } else if (threeQuarterStars.length) {
+      rating = parseInt(threeQuarterStars[0].getAttribute("data-rating")) - 1 + 0.75;
+      ratingIsPersonal = threeQuarterStars[0].classList.contains("personal");
+    } else {
+      rating = 0;
+      [].slice.apply(ratings).forEach(function(ratingElem) {
+        var temp = parseInt(ratingElem.getAttribute("data-rating"));
+        rating = Math.max(rating, temp);
+        ratingIsPersonal = ratingElem.classList.contains("personal");
+      });
+    }
+    obj.yourRating = ratingIsPersonal ? rating.toString() : "";
+    obj.suggestedRating = !ratingIsPersonal ? rating.toString() : "";
 
     exportData.push(obj);
   });
@@ -97,7 +102,10 @@ var getListNewMyList = function() {
       yourRating: "",
       suggestedRating: "",
       customNote: "",
-      genre: ""
+      genre: "",
+      maturity: "",
+      duration: "",
+      year: ""
     });
   });
 
@@ -112,9 +120,4 @@ fplib.addMutationAndNow("add Export List button", {"element": ".galleryHeader" }
     addExportListButton();
   }
 });
-
-if (fplib.isOldMyList()) {
-  console.log("addexportlistbutton");
-  addExportListButton();
-}
 

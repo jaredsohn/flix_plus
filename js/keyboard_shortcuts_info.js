@@ -14,8 +14,8 @@ var keyboardShortcutsInfo_ = function() {
                       "next_season", "prev_season", "next_episode", "prev_episode",
                       "show_prev_set_posters", "show_next_set_posters"];
 
-  var obsoleteKeyIdsDict_ = { "jump_whos_watching" : true, "open_link": true, "toggle_scrollbars": true };
-
+  var obsoleteKeyIdsDict_ = { "jump_whos_watching" : true, "open_link": true, "toggle_scrollbars": true,
+                              "rate_1_5": true, "rate_2_5": true, "rate_3_5": true, "rate_4_5": true };
   var keyboardShortcutsDefs_ = {
     show_prev_set_posters: {
       defaultKey: 'PgUp',
@@ -152,11 +152,12 @@ var keyboardShortcutsInfo_ = function() {
       description: 'Zoom into details',
       category: 'Posters',
       order: 70 },
+/*
     rate_4_5: {
       defaultKey: '9',
       description: 'Rate 4.5',
       category: 'Posters',
-      order: 180 },
+      order: 180 },*/
     jump_new_arrivals: {
       defaultKey: 'v',
       description: 'New arrivals',
@@ -207,11 +208,11 @@ var keyboardShortcutsInfo_ = function() {
       description: 'Toggle hiding',
       category: 'Sections',
       order: 6 },
-    rate_3_5: {
+/*    rate_3_5: {
       defaultKey: '8',
       description: 'Rate 3.5',
       category: 'Posters',
-      order: 170 },
+      order: 170 }, */
     jump_your_ratings: {
       defaultKey: 't',
       description: 'Your Ratings',
@@ -227,16 +228,16 @@ var keyboardShortcutsInfo_ = function() {
       description: 'Open link',
       category: 'Posters',
       order: 190 },*/
-    rate_2_5: {
+/*  rate_2_5: {
       defaultKey: '7',
       description: 'Rate 2.5',
       category: 'Posters',
-      order: 160 },
-    rate_1_5: {
+      order: 160 }, */
+/*    rate_1_5: {
       defaultKey: '6',
       description: 'Rate 1.5',
       category: 'Posters',
-      order: 150 },
+      order: 150 }, */
     next_section: {
       defaultKey: 'Down',
       description: 'Next section',
@@ -538,7 +539,7 @@ var keyboardShortcutsInfo_ = function() {
         text += "<br>&nbsp;&nbsp;&nbsp;Play: " + s["play"];
         text += "<br>&nbsp;&nbsp;&nbsp;Zoom into details: " + s["zoom_into_details"];
         text += "<br>&nbsp;&nbsp;&nbsp;To My List: " + s["to_my_list"] + "<BR>&nbsp;&nbsp;&nbsp;Remove from My List: " + s["remove_from_my_list"];
-        text += "<br>&nbsp;&nbsp;&nbsp;Rate: " + s["rate_clear"] + " to clear, 0-5: " + s["rate_0"] + ", " + s["rate_1"] + ", " + s["rate_2"] + ", " + s["rate_3"] + ", " + s["rate_4"] + ", " + s["rate_5"] + "; half stars: " + s["rate_1_5"] + ", " + s["rate_2_5"] + ", " + s["rate_3_5"] + ", " + s["rate_4_5"];
+        text += "<br>&nbsp;&nbsp;&nbsp;Rate: " + s["rate_clear"] + " to clear, 0-5: " + s["rate_0"] + ", " + s["rate_1"] + ", " + s["rate_2"] + ", " + s["rate_3"] + ", " + s["rate_4"] + ", " + s["rate_5"];
         text += "<br>&nbsp;&nbsp;&nbsp;Random show/episode: " + s["section_show_random"];
         text += "<br>&nbsp;&nbsp;&nbsp;Next tab: " + s["next_tab"] + ", prev tab: " + s["prev_tab"];
         text += "<br>&nbsp;&nbsp;&nbsp;Next season: " + s["next_season"] + ", prev season: " + s["prev_season"];

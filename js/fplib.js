@@ -73,6 +73,8 @@ var fplib_ = function() {
     var startIndex = reactId.indexOf("title_") + "title_".length;
     var lastPart = reactId.substr(startIndex);
     var endIndex = lastPart.indexOf(":$") + 1;
+    if (lastPart.indexOf(":$") === -1)
+      endIndex = lastPart.length - 1;
     var titleStr = lastPart.substr(0, endIndex - 1);
     return this.getMovieIdFromField(titleStr);
   };
@@ -184,8 +186,8 @@ var fplib_ = function() {
     selectors["bobPopup"] = ".bobMovieContent";
 
     if ((pathname.indexOf("/browse") === 0) || (pathname.indexOf("/title") === 0) || // Almost all of UI uses this instead of below logic
-        (pathname.indexOf("/my-list") === 0) || (pathname.indexOf("/person") === 0) ||
-        (pathname.indexOf("/search") === 0) || (pathname.indexOf("/watch") === 0))
+        (pathname.indexOf("/person") === 0) || (pathname.indexOf("/search") === 0) ||
+        (pathname.indexOf("/watch") === 0))
     {
       selectors["id_info"] = {"selector": ".smallTitleCard", "attrib": "id", "prefix": "title-card-"};
 
@@ -447,18 +449,18 @@ var fplib_ = function() {
   this.isOldMyList = function() {
     var val = false;
     try {
-      val = ((window.location.pathname.indexOf("/MyList") === 0) && ($("#queue-page-content").length > 0));
+      val = ((window.location.pathname.indexOf("/browse/my-list") === 0) && ($(".rowList").length))
     } catch (ex) {
       consolelog(ex);
     }
     return val;
   };
 
-  // 'new mylist' uses Netflix June 2015 design
+  // Netflix Suggests
   this.isNewMyList = function() {
     var val = false;
     try {
-      val = ((window.location.pathname.indexOf("/my-list") === 0) && ($("#queue-page-content").length === 0));
+      val = ((window.location.pathname.indexOf("/browse/my-list") === 0) && (!$(".rowList").length))
     } catch (ex) {
       consolelog(ex);
     }

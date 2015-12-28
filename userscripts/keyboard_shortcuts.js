@@ -12,7 +12,6 @@
 
 
 if ((window.location.pathname.indexOf("/Kids") === 0) || // Also covers KidsMovie
-    (window.location.pathname.indexOf("/MyList") === 0) ||
     (window.location.pathname.indexOf("/WiViewingActivity") === 0) ||
     (window.location.pathname.indexOf("/MoviesYouveSeen") === 0)) {
   console.log("using old keyboard code!");
@@ -25,6 +24,7 @@ if (window.location.pathname.indexOf("/KidsCharacter") === 0)
   return;
 
 var smallTitleCard_ = null;
+var prevSmallTitleCard_ = null;
 
 var keyboardCommandsShown_ = false;
 var alreadyHasShiftChars_ = ["~", "!", "@", "#", "$", "%", "^", "&", "*",
@@ -39,7 +39,7 @@ var profilesMode_ = false;
 var selectedProfiles_ = [];
 
 var rowOrBillboardSelector_ = ".lolomoRow, .billboard-row, .billboard-motion";
-var rowOrBillboardOrTitleSelector_ = ".lolomoRow, .billboard-row, .billboard-motion, .jawBoneContainer";
+var rowOrBillboardOrTitleSelector_ = ".lolomoRow, .billboard-row, .billboard-motion, .jawBoneContainer, .rowListItem";
 
 var statusClearer_ = null;
 
@@ -50,6 +50,10 @@ var statusClearer_ = null;
 var getElemContainer = function() {
   if (isBillboard(smallTitleCard_))
     return smallTitleCard_; // billboard rows are their own container
+
+  if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.classList.contains("rowListItem"))) {
+    return smallTitleCard_;
+  }
 
   var containers = nextInDOM(".jawBone, .billboard-row, .billboard-motion", $(smallTitleCard_));
   return (containers.length) ? containers[0] : null;
@@ -67,9 +71,9 @@ var isBillboard = function(elem) {
 /////////////////////////////////////////////////////////////////////////////
 
 var getMovieIdFromSelection = function(element) {
-  if (element === null)
+  if (element === null) {
     return "0";
-  else if (isBillboard(element)) {
+  } else if (isBillboard(element)) {
     var $ptrackContent = $(".info .ptrack-content", $(element));
     if ($ptrackContent.length === 0)
       return "0";
@@ -83,6 +87,8 @@ var getMovieIdFromSelection = function(element) {
       }
     });
     return id;
+  } else if (element.classList.contains("rowListItem")) {
+    return element.getAttribute("data-id");
   } else {
     var jawBoneContainer = null;
     if (element.classList.contains("jawBoneContainer"))
@@ -145,9 +151,18 @@ var openSectionLink = function() {
 /////////////////////////////////////////////////////////////////////////////
 
 var removeFromQueue = function() {
-  var elemContainer = getElemContainer();
-  if (elemContainer) {
-    var buttons = elemContainer.getElementsByClassName("icon-button-mylist-added");
+  if (!fplib.isOldMyList()) {
+    var elemContainer = getElemContainer();
+    if (elemContainer) {
+      var buttons = elemContainer.getElementsByClassName("icon-button-mylist-added");
+      if (buttons.length)
+        buttons[0].click();
+    }
+  } else {
+    var elemContainer = smallTitleCard_;
+    buttons = elemContainer.getElementsByClassName("remove");
+    if (buttons.length)
+      buttons = buttons[0].getElementsByTagName("a"); // used in manual view my list
     if (buttons.length)
       buttons[0].click();
   }
@@ -164,9 +179,11 @@ var addToQueue = function() {
 
 var rateMovie = function(rating) {
   var elemContainer = getElemContainer();
+  console.log("ratemovie1");
   if (elemContainer) {
+  console.log("ratemovie2");
     var actualRating = rating.substring(5);
-
+    console.log("actualrating is " + actualRating);
     var elems = $("[data-rating=\"" + actualRating + "\"]", $(elemContainer));
     if (elems.length)
       elems[0].click();
@@ -258,7 +275,7 @@ var nextPreviousEpisode = function(direction) {
     var $episodeNumbers = $(".episodeNumber", $($curEpisodes)[0]);
     if ($episodeNumbers.length) {
       var episodeNumber = $episodeNumbers[0].innerHTML;
-      var iterSelector = (direction == 1) ? ".handleRight" : ".handleLeft";
+      var iterSelector = (direction == 1) ? ".handleNext" : ".handlePrev";
       var iterSelectorElems = container.querySelectorAll(iterSelector);
 
       if (iterSelectorElems.length) {
@@ -430,6 +447,8 @@ var selectPosterOfIndex = function(desiredIndex, callback) {
           var posterElems = $lolomoRows[0].querySelectorAll("#" + id);
           if (posterElems.length) {
             fplib.removeMutation("keyboard_shortcuts scrollPosters - selectPosterOfIndex");
+            if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
+              prevSmallTitleCard_ = smallTitleCard_;
             smallTitleCard_ = posterElems[0];
             updateKeyboardSelection(smallTitleCard_, true);
           }
@@ -443,12 +462,10 @@ var selectPosterOfIndex = function(desiredIndex, callback) {
       }
     }
 
-    // TODO - determine if we wrap around to get there faster
-    //if (startIndex - desiredIndex)
     var count = getApproxPosterCount();
     var deltaRight = (desiredIndex - startIndex + count) % count;
     var deltaLeft = (startIndex - desiredIndex + count) % count;
-    var $leftButton = $(".handleLeft", $($lolomoRows[0]));
+    var $leftButton = $(".handlePrev", $($lolomoRows[0]));
 
     if ((desiredIndex >= startIndex) && (desiredIndex <= endIndex)) {
       console.log("desiredIndex = " + desiredIndex.toString());
@@ -466,7 +483,7 @@ var selectPosterOfIndex = function(desiredIndex, callback) {
       var $targetPoster = $(visiblePosters[endIndex - startIndex]);
       $targetPoster = nextInDOM(".smallTitleCard", $targetPoster);
 
-      var $button = $(".handleRight", $($lolomoRows[0]));
+      var $button = $(".handleNext", $($lolomoRows[0]));
       scrollPosters($targetPoster, $button);
     }
   } else {
@@ -475,8 +492,14 @@ var selectPosterOfIndex = function(desiredIndex, callback) {
 };
 
 function selectFirstPosterInRow() {
-  if ($(".gallery").length) {
-    $(".smallTitleCard").first().click();
+  if (fplib.isOldMyList()) {
+    updateKeyboardSelection(smallTitleCard_, false);
+    if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
+      prevSmallTitleCard_ = smallTitleCard_;
+    smallTitleCard_ = $(".smallTitleCard,.rowListItem").first()[0];
+    updateKeyboardSelection(smallTitleCard_, true);
+  } else if ($(".gallery").length) {
+    $(".smallTitleCard,.rowListItem").first().click();
   } else {
     console.log("selectFirstPosterInRow");
     console.log(smallTitleCard_);
@@ -485,8 +508,14 @@ function selectFirstPosterInRow() {
 }
 
 function selectLastPosterInRow() {
-  if ($(".gallery").length) {
-    var $smallTitleCards = $(".smallTitleCard");
+  if (fplib.isOldMyList()) {
+    updateKeyboardSelection(smallTitleCard_, false);
+    if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
+      prevSmallTitleCard_ = smallTitleCard_;
+    smallTitleCard_ = $(".smallTitleCard,.rowListItem").last()[0];
+    updateKeyboardSelection(smallTitleCard_, true);
+  } else if ($(".gallery").length) {
+    var $smallTitleCards = $(".smallTitleCard,.rowListItem");
     if ($smallTitleCards.length)
       $smallTitleCards[$smallTitleCards.length - 1].click();
   } else {
@@ -496,7 +525,7 @@ function selectLastPosterInRow() {
       if (!indexExists) {
         var $lolomoRows = $(smallTitleCard_).closest(rowOrBillboardSelector_);
         if ($lolomoRows.length) {
-          var $smallTitleCardsInRow = $(".smallTitleCard", $($lolomoRows[0]));
+          var $smallTitleCardsInRow = $(".smallTitleCard,.rowListItem", $($lolomoRows[0]));
           if ($smallTitleCardsInRow.length)
             $smallTitleCardsInRow[$smallTitleCardsInRow.length - 1].click();
         }
@@ -510,7 +539,7 @@ function selectLastPosterInRow() {
 // screens so that it can loop around without a gap.
 var selectRandomPosterInRow = function() {
   if ($(".gallery").length) {
-    var $smallTitleCards = $(".smallTitleCard");
+    var $smallTitleCards = $(".smallTitleCard,.rowListItem");
     var randomIdx = Math.floor(Math.random() * $smallTitleCards.length);
     $smallTitleCards[randomIdx].click();
   } else {
@@ -537,6 +566,8 @@ var updateKeyboardSelection = function(elem, selected) {
     return;
   if (selected) {
     updateKeyboardSelection(smallTitleCard_, false); // First, unselect what was selected
+    if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
+      prevSmallTitleCard_ = smallTitleCard_;
     smallTitleCard_ = elem;
   }
 
@@ -552,11 +583,16 @@ var updateKeyboardSelection = function(elem, selected) {
       elem.classList.add("fp_keyboard_selected");
     else
       elem.classList.remove("fp_keyboard_selected");
+  } else if (elem.classList.contains("rowListItem")) {
+    if (selected)
+      elem.classList.add("fp_keyboard_mylist_selected");
+    else
+      elem.classList.remove("fp_keyboard_mylist_selected");
   } else {
     shouldScroll = false;
-    var ptrackContentElem = elem.getElementsByClassName("ptrack-content")[0];
-    if (selected) {
-      ptrackContentElem.click();
+    var $ptrackContentElems = elem.getElementsByClassName("ptrack-content");
+    if ((selected) && ($ptrackContentElems.length)) {
+      $ptrackContentElems[0].click();
     }
   }
   if (shouldScroll)
@@ -641,6 +677,8 @@ function nextPreviousListContainer(direction) {
 //    scrollMiddle($titleCardsInRow[0]); // scroll it vertically
 
   var visiblePosters = findVisiblePosters($(".smallTitleCard", $(newLolomoRow)));
+  if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
+    prevSmallTitleCard_ = smallTitleCard_;
   smallTitleCard_ = (visiblePosters.length) ? visiblePosters[0] : newLolomoRow;
   console.log("visible posters is");
   console.log(visiblePosters);
@@ -653,10 +691,21 @@ function nextPreviousListContainer(direction) {
 }
 
 function nextPreviousListItem(direction) {
+  if (smallTitleCard_.parentNode === null)
+    smallTitleCard_ = prevSmallTitleCard_;
+  if (((smallTitleCard_ || null) === null) || (smallTitleCard_.parentNode === null))
+    smallTitleCard_ = null;
+  console.log("nextPreviousListItem");
+  console.log(smallTitleCard_);
   if ((direction !== -1) && (direction !== 1))
     return;
-  if ((!profilesMode_) && (smallTitleCard_ === null))
-    return;
+  if ((!profilesMode_) && (smallTitleCard_ === null)) {
+    selectFirstPosterInRow();
+    console.log("selected first");
+    console.log(smallTitleCard_);
+    if ((!profilesMode_) && (smallTitleCard_ === null))
+      return;
+  }
 
   var elemContainer = getElemContainer();
 
@@ -686,9 +735,9 @@ function nextPreviousListItem(direction) {
     console.log(smallTitleCard_[0]);
 
     var iteratorFunc = (direction == 1) ? nextInDOM : prevInDOM;
-    var iterSelector = (direction == 1) ? ".handleRight" : ".handleLeft";
+    var iterSelector = (direction == 1) ? ".handleNext" : ".handlePrev";
 
-    updateKeyboardSelection(iteratorFunc(".smallTitleCard", $(smallTitleCard_))[0], true);
+    updateKeyboardSelection(iteratorFunc(".smallTitleCard,.rowListItem", $(smallTitleCard_))[0], true);
 
     var $lolomoRows = $(smallTitleCard_).closest(rowOrBillboardSelector_);
     if ($lolomoRows.length === 0)
@@ -708,6 +757,8 @@ function nextPreviousListItem(direction) {
               fplib.removeMutation("keyboard_shortcuts scrollPosters");
 
               updateKeyboardSelection(smallTitleCard_, false);
+              if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
+                prevSmallTitleCard_ = smallTitleCard_;
               smallTitleCard_ = posterElems[0];
               updateKeyboardSelection(smallTitleCard_, true);
             }
@@ -956,10 +1007,6 @@ var runCommand = function(command) {
       case "rate_3":
       case "rate_4":
       case "rate_5":
-      case "rate_1_5":
-      case "rate_2_5":
-      case "rate_3_5":
-      case "rate_4_5":
       case "rate_clear":
         rateMovie(command); break;
       case "move_right": nextPreviousListItem(1); break;
@@ -979,8 +1026,8 @@ var runCommand = function(command) {
       case "prev_episode": nextPreviousEpisode(-1); break;
       case "next_tab": nextTab(); break;
       case "prev_tab": prevTab(); break;
-      case "section_home": var $smallTitleCards = $(".smallTitleCard"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[0], true); selectFirstPosterInRow(); } break;
-      case "section_end": var $smallTitleCards = $(".smallTitleCard"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[$smallTitleCards.length - 1], true); selectLastPosterInRow();  } break;
+      case "section_home": var $smallTitleCards = $(".smallTitleCard,.rowListItem"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[0], true); selectFirstPosterInRow(); } break;
+      case "section_end": var $smallTitleCards = $(".smallTitleCard,.rowListItem"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[$smallTitleCards.length - 1], true); selectLastPosterInRow();  } break;
       case "section_show_random":
         // This key works differently in three different modes
         var $fpRandomSeasonButton = $(".fp_random_sameseason_button", $(getElemContainer()));
@@ -996,7 +1043,7 @@ var runCommand = function(command) {
       case "toggle_scrollbars": clickSelectorForLolomorow(".fp_scrollbuster_toggle"); break;
       case "toggle_hiding": clickSelectorForLolomorow(".fp_section_toggle"); break;
       case "jump_instant_home": window.location = window.location.protocol + "//www.netflix.com/browse"; break;
-      case "jump_my_list": window.location = window.location.protocol + "//www.netflix.com/MyList"; break;
+      case "jump_my_list": window.location = window.location.protocol + "//www.netflix.com/browse/my-list"; break;
       case "jump_new_arrivals": window.location = window.location.protocol + "//www.netflix.com/browse/new-arrivals"; break;
       case "jump_kids": window.location = window.location.protocol + "//www.netflix.com/Kids"; break;
       case "jump_viewing_activity": window.location = window.location.protocol + "//www.netflix.com/WiViewingActivity"; break;
@@ -1134,8 +1181,7 @@ fplib.addMutation("keyboard shortcuts - player loaded/unloaded", {element: "#pla
 
 fplib.addMutationAndNow("keyboard shortcuts - who's watching", {"element": ".profilesGateContainer, .profiles-gate-container"}, function(summary) {
   if ((window.location.pathname.indexOf("/WiViewingActivity") === 0) ||
-      (window.location.pathname.indexOf("/MoviesYouveSeen") === 0) || 
-      fplib.isOldMyList()) {
+      (window.location.pathname.indexOf("/MoviesYouveSeen") === 0)) {
     return;
   }
 
@@ -1160,6 +1206,8 @@ fplib.addMutation("keyboard shortcuts - jawbone", {element: ".jawBone" }, functi
   if (summary.added.length) {
     updateKeyboardSelection(smallTitleCard_, false);
     var $highlighted = $(".highlighted.smallTitleCard");
+    if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
+      prevSmallTitleCard_ = smallTitleCard_;
     smallTitleCard_ = $highlighted[$highlighted.length - 1];
     updateKeyboardSelection(smallTitleCard_, true);
   }
@@ -1180,12 +1228,12 @@ keyboardShortcutsInfo.loadShortcutKeys("flix_plus " + fplib.getProfileName() + "
   }
 
   // Highlight the first title
-  fplib.addMutationAndNow("keyboard shortcuts - lolomo or galleryLockups loaded", {element: ".lolomo, .galleryLockups" }, function(summary) {
+  fplib.addMutationAndNow("keyboard shortcuts - lolomo, galleryLockups, or rowList loaded", {element: ".lolomo, .galleryLockups, .rowList" }, function(summary) {
     if (summary.added.length) {
-      console.log("lolomo or gallerylockups loaded");
+      console.log("lolomo, galleryLockups, or rowList loaded");
       updateKeyboardSelection(smallTitleCard_, false);
 
-      var $smallTitleCards = $(".smallTitleCard, .billboard-row, .billboard-motion, .jawBoneContainer");
+      var $smallTitleCards = $(".smallTitleCard, .rowListItem, .billboard-row, .billboard-motion, .jawBoneContainer");
       var firstSmallTitleCard = null;
       for (var i = 0; i < $smallTitleCards.length; i++) {
         if ($smallTitleCards[i].style.display !== "none") {
@@ -1193,8 +1241,11 @@ keyboardShortcutsInfo.loadShortcutKeys("flix_plus " + fplib.getProfileName() + "
           break;
         }
       }
-      if (firstSmallTitleCard !== null)
+      if (firstSmallTitleCard !== null) {
+        console.log("setting as first title card:");
+        console.log(firstSmallTitleCard);
         updateKeyboardSelection(firstSmallTitleCard, true);
+      }
     }
   });
 
@@ -2057,7 +2108,7 @@ var runCommand = function(command)
             case "open_section_link": openSectionLink(); break;
             case "toggle_hiding": elem = document.getElementById(elemsInfo_.elemsListContainers[elemsInfo_.currListContainer].id + "_showhide"); if (elem !== null) { elem.click(); } break;
             case "jump_instant_home": window.location = "http://www.netflix.com/WiHome"; break;
-            case "jump_my_list": window.location = "http://www.netflix.com/MyList"; break;
+            case "jump_my_list": window.location = "http://www.netflix.com/browse/my-list"; break;
             case "jump_new_arrivals": window.location = "http://www.netflix.com/WiRecentAdditions"; break;
             case "jump_kids": window.location = "http://www.netflix.com/Kids"; break;
             case "jump_viewing_activity": window.location = "http://www.netflix.com/WiViewingActivity"; break;
