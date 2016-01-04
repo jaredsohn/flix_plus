@@ -63,6 +63,7 @@ function setAlert(container) {
 function showError(container) {
   setAlert(container);
   var message = document.createElement('div');
+  message.id = "fp_expiring";
   message.innerHTML = 'Error in "Netflix Expiring". <a style="color: #FFF" href="https://github.com/SamStephens/netflix-expiring/issues">Report issue</a>.';
   container.appendChild(message);
 }
@@ -70,6 +71,7 @@ function showError(container) {
 function showNoneExpiring(container) {
   setAlert(container);
   var message = document.createElement('div');
+  message.id = "fp_expiring";
   message.textContent = 'None expiring';
   container.appendChild(message);
 }
@@ -81,6 +83,7 @@ function showExpiring(container, expiring) {
   container.appendChild(heading);
 
   var list = document.createElement('ul');
+  list.id = "fp_expiring";
   for (var i = 0; i < expiring.length; i++) {
     var el = document.createElement('li');
     el.textContent = expiring[i];
@@ -89,7 +92,7 @@ function showExpiring(container, expiring) {
   container.appendChild(list);
 }
 
-fplib.addMutationAndNow("add expiring", {"element": ".rowList" }, function(summary) {
+fplib.addMutationAndNow("add expiring", {"element": ".rowListItem" }, function(summary) {
   if (summary.removed.length) {
     console.log("remove!");
     $fpExpiring = $(".fp_expiring");
@@ -98,12 +101,14 @@ fplib.addMutationAndNow("add expiring", {"element": ".rowList" }, function(summa
     }
   }
   if (summary.added.length) {
-    console.log("rowlist found!");
+    console.log("rowListItem found!");
     try {
       rowList_ = document.getElementsByClassName('rowList');
       rowListContainer_ = document.getElementsByClassName('rowListContainer');
       console.log(rowList_);
       console.log(rowListContainer_);
+      console.log("rowlistitem count");
+      console.log($(".rowListItem").length);
 
       if ((!rowListContainer_.length) || (!rowList_.length))
         return;
@@ -112,6 +117,12 @@ fplib.addMutationAndNow("add expiring", {"element": ".rowList" }, function(summa
         rowList_ = rowList_[rowList_.length - 1];
       if (rowListContainer_.length)
         rowListContainer_ = rowListContainer_[rowListContainer_.length - 1];
+
+      // Clear out expiring info if something was already shown
+      $fpExpiring = $(".fp_expiring");
+      for (var i = 0; i < $fpExpiring.length; i++) {
+        $fpExpiring[i].parentNode.removeChild($fpExpiring[i]);
+      }
 
       var expiring = getExpiring();
       console.log(expiring);

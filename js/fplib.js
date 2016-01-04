@@ -99,7 +99,7 @@ var fplib_ = function() {
   };
   this.addMutationAndNow = function(mutationName, query, callback) {
     try {
-      $(query.element).each(function(index) { callback({"added": [this]})});
+      $(query.element).each(function(index) { callback({"added": [this], "removed": []})});
     } catch (ex) {
       console.error(ex);
     }
