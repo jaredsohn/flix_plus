@@ -1059,6 +1059,10 @@ var runCommand = function(command) {
           var $inputs = $("input");
           if ($inputs.length)
             $inputs[0].value = "";
+        } else {
+          var $searchBox = $(".searchBox");
+          if ($searchBox.length)
+            $searchBox[0].focus();
         }
         break;
       case "your_account": window.location = window.location.protocol + "/www.netflix.com/YourAccount"; break;
@@ -1069,6 +1073,7 @@ var runCommand = function(command) {
         $.each($("#layerModalPanes .close"), function(index, value) { this.click() });
         $.each($("#profiles-gate .close"), function(index, value) { this.click(); });
         $.each($(".profiles-gate-container .nfdclose"), function(index, value) { this.click(); }); // saw this on /search
+        $.each($(".icon-close"), function(index, value) { this.click() });
         if (($(".continue-playing span").length > 0) && ($(".continue-playing span")[0].innerText.indexOf("Continue Playing") !== -1))
          $(".continue-playing span")[0].click();
         break;
@@ -1201,15 +1206,24 @@ fplib.addMutationAndNow("keyboard shortcuts - who's watching", {"element": ".pro
   }
 });
 
-// Select a poster if its jawBone gets shown; does not handle if a user just zooms in on the rotating image
+// Select a poster if its jawBone gets shown (and search doesn't have focus); does not handle if a user just zooms in on the rotating image
 fplib.addMutation("keyboard shortcuts - jawbone", {element: ".jawBone" }, function(summary) {
   if (summary.added.length) {
+
+    var searchWasFocused = ($(".search-focused").length > 0);
+
     updateKeyboardSelection(smallTitleCard_, false);
     var $highlighted = $(".highlighted.smallTitleCard");
     if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
       prevSmallTitleCard_ = smallTitleCard_;
     smallTitleCard_ = $highlighted[$highlighted.length - 1];
     updateKeyboardSelection(smallTitleCard_, true);
+
+    if (searchWasFocused) {
+      var $searchBox = $(".searchBox");
+      if ($searchBox.length)
+        $searchBox[0].focus();
+    }
   }
 });
 
@@ -1230,6 +1244,10 @@ keyboardShortcutsInfo.loadShortcutKeys("flix_plus " + fplib.getProfileName() + "
   // Highlight the first title
   fplib.addMutationAndNow("keyboard shortcuts - lolomo, galleryLockups, or rowList loaded", {element: ".lolomo, .galleryLockups, .rowList" }, function(summary) {
     if (summary.added.length) {
+      var searchWasFocused = ($(".search-focused").length > 0);
+      if (searchWasFocused)
+        return;
+
       console.log("lolomo, galleryLockups, or rowList loaded");
       updateKeyboardSelection(smallTitleCard_, false);
 
@@ -1245,6 +1263,12 @@ keyboardShortcutsInfo.loadShortcutKeys("flix_plus " + fplib.getProfileName() + "
         console.log("setting as first title card:");
         console.log(firstSmallTitleCard);
         updateKeyboardSelection(firstSmallTitleCard, true);
+      }
+
+      if (searchWasFocused) {
+        var $searchBox = $(".searchBox");
+        if ($searchBox.length)
+          $searchBox[0].focus();
       }
     }
   });
