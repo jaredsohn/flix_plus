@@ -119,11 +119,11 @@ extlib.checkForNewData([keyName, keyName + "_notinterested"],
         url: window.location.protocol + "//www.netflix.com/WiViewingActivity",
         cache: false,
         success: function(html) {
-          var netflixApiBase = "https://www.netflix.com/api" + fplib.parseEmbeddedJson(html, "API_BASE_URL") + "/" + fplib.parseEmbeddedJson(html, "BUILD_IDENTIFIER");
+          var netflixApiBase = "https://www.netflix.com/api" + fplib.parseEmbeddedJson(html, "API_BASE_URL");
           console.log("netflixApiBase = " + netflixApiBase);
           getHistory({ startTime: historyLastChecked,
                        netflixApiBase: netflixApiBase,
-                       apiMethod: "ratinghistory",
+                       apiMethod: "ratinghistory" + '/' + fplib.parseEmbeddedJson(html, "/ratinghistory"),
                        authUrl: fplib.getAuthUrl()
                      }, function(results) {
                         console.log("concatenated results:");

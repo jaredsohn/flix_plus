@@ -2,7 +2,7 @@
 	"name_text": "Flix Plus by Lifehacker",
 	"name_short": "Flix Plus",
 	"name_html": "Flix Plus by <a target='_blank' style='border-style: none; position:relative; top:3px' href='http://www.lifehacker.com/'><img src='/src/img/lifehacker.png' width=80 style='display:inline-block'></a>",
-	"version": "3.15",
+	"version": "3.16",
 	"description": "Filter recommendations, remove spoilers, show IMDB and Rotten Tomatoes ratings, and more in Netflix.",
 	"activation_patterns": "[\"http://*.netflix.com/*\",\"https://*.netflix.com/*\"]",
 	"webstore_url": "https://chrome.google.com/webstore/detail/flix-plus/fcjjgdnadfneaamhipplgpfkdnbfagla",

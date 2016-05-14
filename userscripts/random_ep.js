@@ -95,13 +95,12 @@ $(elem).on('click', function() {
 // from stackoverflow
 var insertAfter = function(newNode, referenceNode) {
   referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
-}
+};
 
 var getSeasonList = function(showId, callback) {
   var html = document.documentElement.outerHTML;
-  var netflixApiBase = "https://www.netflix.com/api" + fplib.parseEmbeddedJson(html, "API_BASE_URL") + "/" + fplib.parseEmbeddedJson(html, "BUILD_IDENTIFIER");
-  console.log("netflixapibase = " + netflixApiBase);
-  var url = netflixApiBase + '/pathEvaluator?withSize=true&materialize=true&model=bale&esn=www';
+  var netflixApiBase = "https://www.netflix.com/api" + fplib.parseEmbeddedJson(html, "API_BASE_URL") + '/pathEvaluator/' + fplib.parseEmbeddedJson(html, "/pathEvaluator")
+  var url = netflixApiBase + '?withSize=true&materialize=true&model=' + fplib.parseEmbeddedJson(html, "gpsModel") + '&esn=www';
   var postDataJson = {"paths":[],"authURL":fplib.getAuthUrl()};
   postDataJson.paths.push(["videos",showId,"seasonList",{"from":0,"to":20},"summary"])
   postData = JSON.stringify(postDataJson);
@@ -114,7 +113,7 @@ var getSeasonList = function(showId, callback) {
     var seasons = Object.keys(json.value.seasons).filter(function(season) {
       return ((json.value.seasons[season].summary || null) !== null);
     });
-    console.log("seasons is");
+    console.log("seasons are");
     console.log(seasons);
     callback(seasons);
   },"json");
@@ -123,11 +122,11 @@ var getSeasonList = function(showId, callback) {
 // Here, seasonFilter is a method that takes the ajax query output and a season id returns true if the season's
 // episodes should be included
 var getEpisodeList = function(seasons, seasonFilter, callback) {
-  // Construct request
   var html = document.documentElement.outerHTML;
-  var netflixApiBase = "https://www.netflix.com/api" + fplib.parseEmbeddedJson(html, "API_BASE_URL") + "/" + fplib.parseEmbeddedJson(html, "BUILD_IDENTIFIER");
-  console.log("netflixapibase = " + netflixApiBase);
-  var url = netflixApiBase + '/pathEvaluator?withSize=true&materialize=true&model=bale&esn=www';
+  var netflixApiBase = "https://www.netflix.com/api" + fplib.parseEmbeddedJson(html, "API_BASE_URL") + '/pathEvaluator/' + fplib.parseEmbeddedJson(html, "/pathEvaluator")
+  var url = netflixApiBase + '?withSize=true&materialize=true&model=' + fplib.parseEmbeddedJson(html, "gpsModel") + '&esn=www';
+  console.log("url = ");
+  console.log(url);
   var postDataJson = {"paths":[],"authURL":fplib.getAuthUrl()};
   seasons.forEach(function(season) {
     var elem = (["seasons", season, "episodes",[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,"-1"], ["title","bookmarkPosition"]]);

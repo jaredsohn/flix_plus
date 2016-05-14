@@ -92,11 +92,10 @@ fplib.addMutationAndNow("remove_dupes lolomoRow", {element: ".lolomoRow"}, funct
       var sliderContents = lolomoRow.getElementsByClassName("sliderContent");
       if (sliderContents.length) {
         var sliderContentObserver = new MutationObserver(function(mutationRecords) {
-          //console.log("raw observer mutation");
           [].slice.call(mutationRecords).forEach(function(mutationRecord) {
             if (mutationRecord.addedNodes !== null) {
               [].slice.call(mutationRecord.addedNodes).forEach(function(node) {
-                if (node.className === "slider-item") {
+                if (node.classList.contains("slider-item")) {
                   var smallTitleCards = node.getElementsByClassName("smallTitleCard");
                   if (smallTitleCards.length) {
                     uniquesForRow_[rowTitleSaved] = uniquesForRow_[rowTitleSaved] || {};
