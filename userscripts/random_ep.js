@@ -103,9 +103,7 @@ var getNetflixApiUrl = function() {
   var pathEvaluator = fplib.parseEmbeddedJson(html, "pathEvaluator")
   var gpsModel = fplib.parseEmbeddedJson(html, "gpsModel");
 
-  console.log("going to replace");
   apiBaseUrl = apiBaseUrl.replace("\\x2F", "/");
-  console.log(apiBaseUrl);
 
   var netflixApiBase = "https://www.netflix.com/api" + apiBaseUrl + '/pathEvaluator/' + pathEvaluator;
   var url = netflixApiBase + '?withSize=true&materialize=true&model=' + gpsModel + '&esn=www';
