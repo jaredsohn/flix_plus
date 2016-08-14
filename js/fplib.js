@@ -69,14 +69,17 @@ var fplib_ = function() {
     self.restartMutationSummary();
   };
 
-  this.getMovieIdFromReactId = function(reactId) {
-    var startIndex = reactId.indexOf("title_") + "title_".length;
-    var lastPart = reactId.substr(startIndex);
-    var endIndex = lastPart.indexOf(":$") + 1;
-    if (lastPart.indexOf(":$") === -1)
-      endIndex = lastPart.length - 1;
-    var titleStr = lastPart.substr(0, endIndex - 1);
-    return this.getMovieIdFromField(titleStr);
+  this.getMovieIdForElem = function(elem) {
+    var id = null;
+    try {
+      var ptrackContent = elem.querySelector(".ptrack-content");
+      if (ptrackContent !== null) {
+        id = JSON.parse(decodeURI(ptrackContent.getAttribute("data-ui-tracking-context"))).video_id;
+      }
+    } catch (ex) {
+
+    }
+    return id;
   };
 
   // Returns zero if not able to get id
@@ -405,7 +408,7 @@ var fplib_ = function() {
       }
       summary.added.forEach(function(elem) {
         //consolelog("arrive (applyClassnameToPostersOnArrive)");
-        var movieId = self.getMovieIdFromReactId(elem.getAttribute("data-reactid"));
+        var movieId = self.getMovieIdForElem(elem);
         if (dataDict.hasOwnProperty(movieId)) {
           elem.parentNode.classList.add(className + "_p");
           elem.classList.add(className);
