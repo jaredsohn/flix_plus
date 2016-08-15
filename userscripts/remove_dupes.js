@@ -31,7 +31,7 @@ fplib.syncGet(keysDict, function(items) {
 });
 
 var updateCard = function(smallTitleCard, uniquesForRow, alwaysShowRow) {
-  var movieId = fplib.getMovieIdFromReactId(smallTitleCard.getAttribute("data-reactid"));
+  var movieId = fplib.getMovieIdForElem(smallTitleCard);
 
   if (alwaysShowRow || (uniquesForRow.hasOwnProperty(movieId)) || (!alreadyShown_.hasOwnProperty(movieId))) {
     uniquesForRow[movieId] = true;
@@ -69,8 +69,7 @@ fplib.addMutationAndNow("remove_dupes lolomoRow", {element: ".lolomoRow"}, funct
     var rowTitleElems = lolomoRow.getElementsByClassName("rowTitle");
     if (rowTitleElems.length) {
       var attrType = rowTitleElems[0].getAttribute("type") || "";
-      var rowTitleSpans = rowTitleElems[0].getElementsByTagName("span");
-      rowTitle = (rowTitleSpans.length) ? rowTitleSpans[0].innerHTML : "";
+      rowTitle = rowTitleElems[0].innerText;
       if (rowTitle !== "") {
         alwaysShowRow = ((attrType === "queue") || (attrType === "continueWatching"));
         var smallTitleCards = lolomoRow.getElementsByClassName("smallTitleCard");
