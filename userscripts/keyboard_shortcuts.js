@@ -11,6 +11,8 @@
 // * Updating for Netflix June 2015 redesign
 
 
+const titleCardSelector_ = ".smallTitleCard,.title_card,.rowListItem";
+
 if ((window.location.pathname.indexOf("/Kids") === 0) || // Also covers KidsMovie
     (window.location.pathname.indexOf("/WiViewingActivity") === 0) ||
     (window.location.pathname.indexOf("/MoviesYouveSeen") === 0)) {
@@ -496,10 +498,10 @@ function selectFirstPosterInRow() {
     updateKeyboardSelection(smallTitleCard_, false);
     if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
       prevSmallTitleCard_ = smallTitleCard_;
-    smallTitleCard_ = $(".smallTitleCard,.rowListItem").first()[0];
+    smallTitleCard_ = $(titleCardSelector_).first()[0];
     updateKeyboardSelection(smallTitleCard_, true);
   } else if ($(".gallery").length) {
-    $(".smallTitleCard,.rowListItem").first().click();
+    $(titleCardSelector_).first().click();
   } else {
     console.log("selectFirstPosterInRow");
     console.log(smallTitleCard_);
@@ -512,10 +514,10 @@ function selectLastPosterInRow() {
     updateKeyboardSelection(smallTitleCard_, false);
     if (((smallTitleCard_ || null) !== null) && (smallTitleCard_.parentNode !== null))
       prevSmallTitleCard_ = smallTitleCard_;
-    smallTitleCard_ = $(".smallTitleCard,.rowListItem").last()[0];
+    smallTitleCard_ = $(titleCardSelector_).last()[0];
     updateKeyboardSelection(smallTitleCard_, true);
   } else if ($(".gallery").length) {
-    var $smallTitleCards = $(".smallTitleCard,.rowListItem");
+    var $smallTitleCards = $(titleCardSelector_);
     if ($smallTitleCards.length)
       $smallTitleCards[$smallTitleCards.length - 1].click();
   } else {
@@ -525,7 +527,7 @@ function selectLastPosterInRow() {
       if (!indexExists) {
         var $lolomoRows = $(smallTitleCard_).closest(rowOrBillboardSelector_);
         if ($lolomoRows.length) {
-          var $smallTitleCardsInRow = $(".smallTitleCard,.rowListItem", $($lolomoRows[0]));
+          var $smallTitleCardsInRow = $(titleCardSelector_, $($lolomoRows[0]));
           if ($smallTitleCardsInRow.length)
             $smallTitleCardsInRow[$smallTitleCardsInRow.length - 1].click();
         }
@@ -539,7 +541,7 @@ function selectLastPosterInRow() {
 // screens so that it can loop around without a gap.
 var selectRandomPosterInRow = function() {
   if ($(".gallery").length) {
-    var $smallTitleCards = $(".smallTitleCard,.rowListItem");
+    var $smallTitleCards = $(titleCardSelector_);
     var randomIdx = Math.floor(Math.random() * $smallTitleCards.length);
     $smallTitleCards[randomIdx].click();
   } else {
@@ -737,7 +739,7 @@ function nextPreviousListItem(direction) {
     var iteratorFunc = (direction == 1) ? nextInDOM : prevInDOM;
     var iterSelector = (direction == 1) ? ".handleNext" : ".handlePrev";
 
-    updateKeyboardSelection(iteratorFunc(".smallTitleCard,.rowListItem", $(smallTitleCard_))[0], true);
+    updateKeyboardSelection(iteratorFunc(titleCardSelector_, $(smallTitleCard_))[0], true);
 
     var $lolomoRows = $(smallTitleCard_).closest(rowOrBillboardSelector_);
     if ($lolomoRows.length === 0)
@@ -1026,8 +1028,8 @@ var runCommand = function(command) {
       case "prev_episode": nextPreviousEpisode(-1); break;
       case "next_tab": nextTab(); break;
       case "prev_tab": prevTab(); break;
-      case "section_home": var $smallTitleCards = $(".smallTitleCard,.rowListItem"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[0], true); selectFirstPosterInRow(); } break;
-      case "section_end": var $smallTitleCards = $(".smallTitleCard,.rowListItem"); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[$smallTitleCards.length - 1], true); selectLastPosterInRow();  } break;
+      case "section_home": var $smallTitleCards = $(titleCardSelector); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[0], true); selectFirstPosterInRow(); } break;
+      case "section_end": var $smallTitleCards = $(titleCardSelector_); if ($smallTitleCards.length) { updateKeyboardSelection($smallTitleCards[$smallTitleCards.length - 1], true); selectLastPosterInRow();  } break;
       case "section_show_random":
         // This key works differently in three different modes
         var $fpRandomSeasonButton = $(".fp_random_sameseason_button", $(getElemContainer()));
@@ -1251,7 +1253,7 @@ keyboardShortcutsInfo.loadShortcutKeys("flix_plus " + fplib.getProfileName() + "
       console.log("lolomo, galleryLockups, or rowList loaded");
       updateKeyboardSelection(smallTitleCard_, false);
 
-      var $smallTitleCards = $(".smallTitleCard, .rowListItem, .billboard-row, .billboard-motion, .jawBoneContainer");
+      var $smallTitleCards = $(".smallTitleCard, .title_card, .rowListItem, .billboard-row, .billboard-motion, .jawBoneContainer");
       var firstSmallTitleCard = null;
       for (var i = 0; i < $smallTitleCards.length; i++) {
         if ($smallTitleCards[i].style.display !== "none") {
@@ -1976,7 +1978,6 @@ var determineKeydown = function(e)
 
     return keyCombo;
 };
-
 
 // While this code supports ctrl, alt, and shift modifiers, most use is restricted by the shortcuts editor. (But a user could maybe get such support by modifying their shortcuts JSON in localstorage.)
 var handleKeydown = function(e)
