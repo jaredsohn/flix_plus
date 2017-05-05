@@ -1624,6 +1624,9 @@ var rateMovie = function(rating)
 
 var updateKeyboardSelection = function(elem, selected)
 {
+  console.log("updateKeyboardSelection");
+  console.log(elem);
+  console.log(selected);
     if ((profilesMode_ === false) && (((location.pathname.indexOf("/WiMovie") === 0) || (location.pathname.indexOf("/KidsMovie") === 0))))
         return;
 

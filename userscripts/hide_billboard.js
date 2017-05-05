@@ -3,11 +3,17 @@
 // http://www.github.com/jaredsohn/flixplus
 // Depends on: jquery, arrive.js
 
+var recentObserver_ = false;
+
 var lolomoObserver_ = null;
 
 var hideBillboardAndFixBleed = function() {
 	var $lolomos = $(".lolomo");
+	console.log("lolomos");
+	console.log($lolomos);
 	if ($lolomos.length) {
+		console.log("lolomo 0 classlist");
+		console.log($lolomos[0].classList);
 		$lolomos[0].classList.remove("is-fullbleed");
 
 		var billboardRows = $lolomos[0].getElementsByClassName(".billboard-row");
@@ -31,7 +37,16 @@ var createLolomoObserver = function() {
 		lolomoObserver_.disconnect();
 
 	lolomoObserver_ = new MutationObserver(function(mutations) {
+		if (recentObserver_) {
+			console.log("ignoring observer since one was recently called")
+			return;
+		}
 		console.log("lolomoobserver called!");
+		console.log(mutations);
+		recentObserver_ = true;
+		setTimeout(function() {
+			recentObserver_ = false;
+		}, 1000);
 		hideBillboardAndFixBleed();
 	});
 	lolomoObserver_.observe($(".lolomo")[0], {
@@ -44,6 +59,7 @@ var createLolomoObserver = function() {
 };
 
 document.body.arrive(".billboard-row", function() {
+	console.log("billboard-row arrive");
 	this.style.display = "none";
 	$.each($(".is-fullbleed"), function() { this.classList.remove("is-fullbleed"); });
 });
@@ -51,6 +67,7 @@ document.body.arrive(".billboard-row", function() {
 // We do an arrive for .lolomo and then use raw observers to check for
 // when the attribute changes on just that element
 document.body.arrive(".lolomo", null, function() {
+	console.log('lolomo arrive');
 	hideBillboardAndFixBleed();
 	createLolomoObserver();
 });
