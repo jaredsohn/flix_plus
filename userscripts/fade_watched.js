@@ -25,8 +25,11 @@ var getHistory = function(settings, callback) {
   if ((settings === null) ||
       ((settings.apiMethod || null) === null) ||
       ((settings.netflixApiBase || null) === null) ||
+      ((settings.buildIdentifier || null) === null) ||
       ((settings.authUrl || null) === null)) {
 
+    console.log('some settings are null');
+    console.log(settings);
     callback(null);
     return;
   }
@@ -37,7 +40,7 @@ var getHistory = function(settings, callback) {
   if ((settings.startTime || null) === null)
     settings.startTime = 0;
 
-  var url = settings.netflixApiBase + "/" + settings.apiMethod + "?pg=" + settings.pageNo + "&authURL=" + settings.authUrl + "&_retry=0";
+  var url = settings.netflixApiBase + "/" + settings.buildIdentifier + "/" + settings.apiMethod + "?pg=" + settings.pageNo + "&authURL=" + settings.authUrl + "&pgSize=100&_retry=0";
   console.log(url);
 
   $.ajax({
@@ -142,14 +145,16 @@ chrome.storage.sync.get(obj, function(items) {
           url: window.location.protocol + "//www.netflix.com/WiViewingActivity",
           cache: false,
           success: function(html) {
-            var apiBaseUrl = fplib.parseEmbeddedJson(html, "API_BASE_URL");
-            apiBaseUrl = apiBaseUrl.replace("\\x2F", "/");
+            var apiBaseUrl = fplib.parseEmbeddedJson(html, "API_BASE_URL").replace("\\x2F", "/");
+            var buildIdentifier = fplib.parseEmbeddedJson(html, "BUILD_IDENTIFIER");
 
             var netflixApiBase = "https://www.netflix.com/api" + apiBaseUrl;
             console.log("netflixApiBase = " + netflixApiBase);
+            console.log("buildIdentifier = " + buildIdentifier);
             getHistory({ startTime: historyLastChecked,
                          netflixApiBase: netflixApiBase,
-                         apiMethod: "viewingactivity" + '/' + fplib.parseEmbeddedJson(html, "viewingactivity"),
+                         buildIdentifier: buildIdentifier,
+                         apiMethod: "viewingactivity/",
                          authUrl: fplib.getAuthUrl()
                        }, function(results) {
                           console.log("concatenated results:");
