@@ -99,17 +99,15 @@ var insertAfter = function(newNode, referenceNode) {
 
 var getNetflixApiUrl = function() {
   var html = document.documentElement.outerHTML;
-  var apiBaseUrl = fplib.parseEmbeddedJson(html, "API_BASE_URL");
-  var pathEvaluator = fplib.parseEmbeddedJson(html, "pathEvaluator")
+  var apiBaseUrl = fplib.parseEmbeddedJson(html, "API_BASE_URL").replace("\\x2F", "/");
   var gpsModel = fplib.parseEmbeddedJson(html, "gpsModel");
+  var buildIdentifier = fplib.parseEmbeddedJson(html, "BUILD_IDENTIFIER");
 
-  apiBaseUrl = apiBaseUrl.replace("\\x2F", "/");
-
-  var netflixApiBase = "https://www.netflix.com/api" + apiBaseUrl + '/pathEvaluator/' + pathEvaluator;
-  var url = netflixApiBase + '?withSize=true&materialize=true&model=' + gpsModel + '&esn=www';
+  var netflixApiBase = "https://www.netflix.com/api" + apiBaseUrl + "/" + buildIdentifier + '/pathEvaluator';
+  var url = netflixApiBase + '?withSize=true&materialize=true&model=' + gpsModel;
 
   console.log("apiBaseUrl " + apiBaseUrl);
-  console.log("pathEvaluator " + pathEvaluator);
+  console.log("buildIdentifier " + buildIdentifier);
   console.log("gpsModel " + gpsModel);
   console.log("netflixapibase " + netflixApiBase);
   console.log("url " + url);
@@ -121,19 +119,30 @@ var getSeasonList = function(showId, callback) {
   var url = getNetflixApiUrl();
 
   var postDataJson = {"paths":[],"authURL":fplib.getAuthUrl()};
-  postDataJson.paths.push(["videos",showId,"seasonList",{"from":0,"to":20},"summary"])
+  postDataJson.paths.push(["videos", parseInt(showId), "seasonList", {"from":0,"to":20}, "summary"])
+
   postData = JSON.stringify(postDataJson);
 
-  jQuery.post(url, postData, function(json) {
-    console.log("getseasonlist results = ");
-    console.log(json);
-    var seasons = Object.keys(json.value.seasons).filter(function(season) {
-      return ((json.value.seasons[season].summary || null) !== null);
-    });
-    console.log("seasons are");
-    console.log(seasons);
-    callback(seasons);
-  },"json");
+  console.log("postData");
+  console.log(postData);
+
+  $.ajax({
+    url: url,
+    type: 'post',
+    data: postData,
+    headers: {'Content-Type': 'application/json'},
+    dataType: 'json',
+    success: function(json) {
+      console.log("getseasonlist results2 = ");
+      console.log(json);
+      var seasons = Object.keys(json.value.seasons).filter(function(season) {
+        return ((json.value.seasons[season].summary || null) !== null);
+      });
+      console.log("seasons are");
+      console.log(seasons);
+      callback(seasons);
+    }
+  });
 };
 
 // Here, seasonFilter is a method that takes the ajax query output and a season id returns true if the season's
@@ -143,36 +152,43 @@ var getEpisodeList = function(seasons, seasonFilter, callback) {
 
   var postDataJson = {"paths":[],"authURL":fplib.getAuthUrl()};
   seasons.forEach(function(season) {
-    var elem = (["seasons", season, "episodes",[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,"-1"], ["title","bookmarkPosition"]]);
-    postDataJson.paths.push(elem);
+    postDataJson.paths.push(["seasons", season, "episodes",[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,"-1"], ["title","bookmarkPosition"]]);
   });
   console.log(postDataJson);
   postData = JSON.stringify(postDataJson);
 
 
   // Make request and collect episodes
-  jQuery.post(url, postData, function(json) {
-    var allEpisodes = [];
-    seasons.forEach(function(season) {
-      if ((seasonFilter === null) || (seasonFilter(json, season))) {
-        var episodes = json.value.seasons[season].episodes;
-        episodeKeys = Object.keys(episodes).filter(function(episodeIndex) {
-          return Array.isArray(episodes[episodeIndex]);
-        });
-        console.log("episodekeys length = " + episodeKeys.length);
-        console.log("all episodes length = " + allEpisodes.length);
-        episodeKeys.forEach(function(episodeKey) {
-          console.log(".");
-          allEpisodes.push(episodes[episodeKey]);
-        });
-        console.log("all episodes length (updated) = " + allEpisodes.length);
-      }
-    });
-    console.log("all episodes length (final?) = " + allEpisodes.length);
-    console.log(allEpisodes);
+  $.ajax({
+    url: url,
+    type: 'post',
+    data: postData,
+    headers: {'Content-Type': 'application/json'},
+    dataType: 'json',
+    success: function(json) {
+      var allEpisodes = [];
+      seasons.forEach(function(season) {
+        if ((seasonFilter === null) || (seasonFilter(json, season))) {
+          console.log('seasonfilter passed or not existent!');
+          var episodes = json.value.seasons[season].episodes;
+          episodeKeys = Object.keys(episodes).filter(function(episodeIndex) {
+            return Array.isArray(episodes[episodeIndex]);
+          });
+          console.log("episodekeys length = " + episodeKeys.length);
+          console.log("all episodes length = " + allEpisodes.length);
+          episodeKeys.forEach(function(episodeKey) {
+            console.log(".");
+            allEpisodes.push(episodes[episodeKey]);
+          });
+          console.log("all episodes length (updated) = " + allEpisodes.length);
+        }
+      });
+      console.log("all episodes length (final?) = " + allEpisodes.length);
+      console.log(allEpisodes);
 
-    callback(allEpisodes);
-  }, "json");
+      callback(json, allEpisodes);
+    }
+  });
 };
 
 // TODO: also support .billboard-pane-episodes
@@ -203,31 +219,34 @@ document.body.arrive(".jawBone .episodeWrapper", function() {
 
       var firstLoadedEpisodeId = self.getElementsByClassName("episodePlay")[0].href.split("?")[0].split("/").pop();
       console.log('first loaded episode id is ' + firstLoadedEpisodeId);
-      console.log("showid is " + showId);
 
       getSeasonList(showId, function(seasons) {
         console.log("seasons is");
         console.log(seasons);
         getEpisodeList(seasons, function(json, season) {
+          console.log("json is");
+          console.log(json);
+
           console.log("season is");
           console.log(season);
           // Match the seasonFilter only if the first visible episode is found within the query results
-          var matchFound = false;
           var episodes = json.value.seasons[season].episodes;
           console.log(episodes);
+          var matchFound = false;
           episodeKeys = Object.keys(episodes);
           episodeKeys.some(function(episodeKey) {
             if (Array.isArray(episodes[episodeKey])) {
               console.log(episodes[episodeKey][1])
               if (episodes[episodeKey][1] === firstLoadedEpisodeId) {
-                console.log("match found!!");
+                console.log("match found for season " + season);
                 matchFound = true;
                 return true;
               }
             }
           });
           return matchFound;
-        }, function(episodes) {
+        }, function(json, episodes) {
+          console.log(episodes);
           playRandomEpisode(episodes, null);
         });
       });
@@ -238,13 +257,15 @@ document.body.arrive(".jawBone .episodeWrapper", function() {
       e.stopPropagation();
 
       getSeasonList(showId, function(seasons) {
-        getEpisodeList(seasons, null, function(episodes) {
+        getEpisodeList(seasons, null, function(json, episodes) {
           playRandomEpisode(episodes, null);
         });
       });
     });
 
     var playRandomEpisode = function(episodes, callback) {
+      console.log('playRandomEpisode');
+      console.log(episodes);
       console.log("episode count is " + episodes.length);
       if (episodes.length !== 0) {
         var randomIndex = Math.floor(Math.random() * episodes.length);
@@ -260,7 +281,7 @@ document.body.arrive(".jawBone .episodeWrapper", function() {
 
     divElem.appendChild(sameSeasonButton);
     divElem.appendChild(allSeasonsButton);
-    insertAfter(divElem, this.parentNode.getElementsByClassName("nfDropDown")[0]);
+    episodeWrappers[0].parentNode.insertBefore(divElem, episodeWrappers[0]);
   }
 });
 
