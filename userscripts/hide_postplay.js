@@ -8,36 +8,38 @@
 var restorePostPlay_ = 0;
 
 // Reset when player is loaded or removed
-fplib.addMutation("hide_synopsis player - player loaded/unloaded", {element: "#playerWrapper"}, function(summary) {
+fplib.addMutation("hide_synopsis player - player loaded/unloaded", {element: ".nf-player-container"}, function(summary) {
   clearInterval(restorePostPlay_);
   restorePostPlay_ = 0;
 });
 
-fplib.addMutation("hide_synopsis player - postplay episode info", {element: ".player-postplay"}, function(summary) {
+fplib.addMutation("hide_synopsis player - postplay episode info", {element: ".WatchNext"}, function(summary) {
   if (summary.added.length) {
     console.log("hiding post play...");
-    console.log($(".player-postplay-background-gradient"));
-    if (!$("#netflix-player")[0].classList.contains("video-ended")) {
-      $("#netflix-player").removeClass("player-postplay");
-
-      $(".player-postplay-background-gradient").hide();
-      $(".player-postplay-background-image").remove();
-      $(".player-postplay-footer").hide();
-      $(".player-postplay-recommendations").hide();
-      $(".player-postplay-recommend-text").hide();
+    console.log($(".WatchNext-background-gradient"));
+    if (!$(".nf-player-container")[0].classList.contains("ended")) {
+      console.log("doesn't contain ended");
+      $(".nf-player-container")[0].classList.remove("postplay");
+      console.log("removed postplay class");
+      console.log($(".nf-player-container")[0].classList);
+      $(".WatchNext-background-gradient").remove();
+      $(".WatchNext-background").remove();
+      $(".WatchNext-footer").hide();
+      $(".WatchNext-recommendations").hide();
+      $(".WatchNext-recommend-text").hide();
     }
 
     if (restorePostPlay_ === 0) {
-      console.log("waiting for video-ended...");
+      console.log("waiting for ended...");
       restorePostPlay_ = setInterval(function() {
-        if ($("#netflix-player")[0].classList.contains("video-ended")) {
-          $("#netflix-player").addClass("player-postplay");
-          $(".player-postplay-footer").show();
-          $(".player-postplay-recommendations").show();
-          $(".player-postplay-recommend-text").show();
+        if ($(".nf-player-container")[0].classList.contains("ended")) {
+          $(".nf-player-container").addClass("WatchNext");
+          $(".WatchNext-footer").show();
+          $(".WatchNext-recommendations").show();
+          $(".WatchNext-recommend-text").show();
           clearInterval(restorePostPlay_);
           restorePostPlay_ = 0;
-          console.log("video-ended");
+          console.log("ended");
         }
       }, 1000);
     }

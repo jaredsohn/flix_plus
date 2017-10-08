@@ -17,6 +17,10 @@ var playRandomFromPlayer = function() {
     return;
   }
 
+  // Need to load UI first
+  $(".button-nfplayerEpisodes").click();
+  $(".nfp-episode-selector").hide();
+
   console.log("playing random...");
 
   var restrictToSeason = false;
@@ -25,13 +29,13 @@ var playRandomFromPlayer = function() {
 
   var episodeCount = 0;
   var seasonEpisodeCounts = [];
-  var seasonElems = Array.prototype.slice.call($(".season"));
+  var seasonElems = Array.prototype.slice.call($(".nfp-season-preview"));
   console.log("seasons are:");
   console.log(seasonElems);
   seasonElems.forEach(function(seasonElem) {
     seasonElem.click();
-    var count = $(".episode-list-item-header").length;
-    var seasonName = seasonElem.getElementsByTagName("span")[0].innerHTML;
+    var count = $(".episode-row").length;
+    var seasonName = seasonElem.getElementsByClassName("title")[0].innerHTML;
     console.log("looking at season '" + seasonName + "'");
     if ((restrictToSeason === false) || (seasonName === restrictToSeason)) {
       episodeCount += count;
@@ -46,7 +50,7 @@ var playRandomFromPlayer = function() {
   var rnd = Math.floor(Math.random() * episodeCount);
   var seasonElemsLength = seasonElems.length;
   for (var i = 0; i < seasonElemsLength; i++) {
-    var seasonName = seasonElems[i].getElementsByTagName("span")[0].innerHTML;
+    var seasonName = seasonElems[i].getElementsByClassName("title")[0].innerHTML;
     if ((restrictToSeason === false) || (seasonName === restrictToSeason)) {
       if (rnd >= seasonEpisodeCounts[i]) {
         rnd = rnd - seasonEpisodeCounts[i];
@@ -56,8 +60,8 @@ var playRandomFromPlayer = function() {
         seasonElems[i].click();
         setTimeout(function() { // we wait until we can assume the episode list has loaded
           try {
-            ($(".episode-list-title")[rnd]).click();
-            ($(".episode-list-title")[rnd]).click(); // requires clicking twice for some reason
+            ($(".episode-row")[rnd]).click(); // Give focus to the episode
+            ($(".PlayIcon")).click();    // Click play button
 
             //TODO: needs to wait until it actually starts playing
             //if (randomSettings_["rewindBeforePlaying"] || false)
