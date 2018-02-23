@@ -35,9 +35,11 @@ Debugging
 ---------
 To get debugging information in the JavaScript console, enter the following commands:
 
-   localStorage["flix_plus debug_level"] = 4
-   localStorage["fplib debug"] = true
-   localStorage["extlib debug"] = true
+```javascript
+localStorage["flix_plus debug_level"] = 4;
+localStorage["fplib debug"] = true;
+localStorage["extlib debug"] = true;
+```
 
 Licensing
 --------
