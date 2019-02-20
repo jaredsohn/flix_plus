@@ -325,18 +325,16 @@ var fplib_ = function() {
   this.getProfileName = function() {
     var profileName = "_unknown";
 
-    if (self.profileName_ || "" !== "")
+    if (self.profileName_ || "" !== "") {
       return self.profileName_;
+    }
 
     var storedProfileName = localStorage["flix_plus profilename"];
-    var elems = $(".account-menu-item .profile-name, .accountMenuItem .profileName, .acct-menu-dropdown-trigger, #account-tools .current-profile .name, #profilesLauncher .profileImg");
-    if (elems.length) {
-      if ($("#profilesLauncher .profileImg").length === 1)
-        profileName = $(".profileImg")[0].title
-      else
-        profileName = elems[0].innerText;
-
+    try {
+      profileName = $(".account-dropdown-button a")[0].getAttribute("aria-label").split('-')[0].trim();
       self.profileName_ = profileName;
+    } catch(ex) {
+      console.error(ex);
     }
 
     if (profileName !== "_unknown") {
@@ -352,11 +350,13 @@ var fplib_ = function() {
                 //cause a restart to happen to properly set Darker Netflix, but Darker Netflix is gone now.
         }
       });
-    } else
+    } else {
       profileName = storedProfileName;
+    }
 
-    if ((profileName || null) === null)
+    if ((profileName || null) === null) {
       profileName = "_unknown";
+    }
 
     return profileName;
   };

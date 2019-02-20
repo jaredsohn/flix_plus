@@ -39,19 +39,20 @@ function getExpiring() {
   var expiring = [];
   var rows = rowList_.getElementsByClassName('rowListItem');
   for (var i = 0; i < rows.length; i++) {
-      var note = rows[i].getElementsByClassName('notes');
-      if (note.length == 1) note = note[0]; else return null;
-      var until = note.textContent;
-      if (!until) continue;
-      if (until.indexOf('until ') == -1) continue;
-      var title = rows[i].getElementsByClassName('title'); // was tt (Edited by jaredsohn-lifehacker to not conflict with netflixnotes)
-      if (title.length == 1) title = title[0]; else return null;
-      expiring.push(title.textContent + '- ' + until);
+    var note = rows[i].getElementsByClassName('notes');
+    if (note.length == 1) note = note[0]; else return null;
+    var until = note.textContent;
+    if (!until) continue;
+    if (until.indexOf('until ') == -1) continue;
+    var title = rows[i].getElementsByClassName('title'); // was tt (Edited by jaredsohn-lifehacker to not conflict with netflixnotes)
+    if (title.length == 1) title = title[0]; else return null;
+    expiring.push(title.textContent + '- ' + until);
   }
   return expiring;
 }
 
 function setAlert(container) {
+  container.style.marginTop = '20px';
   container.style.paddingTop = container.style.paddingBottom = '10px';
   container.style.paddingLeft = '20px';
   container.style.background = '#B9090B';
@@ -129,11 +130,11 @@ fplib.addMutationAndNow("add expiring", {"element": ".rowListItem" }, function(s
 
       var container = document.createElement('div');
       if (expiring == null) {
-          showError(container);
+        showError(container);
       } else if (expiring.length == 0) {
-          showNoneExpiring(container);
+        showNoneExpiring(container);
       } else {
-          showExpiring(container, expiring);
+        showExpiring(container, expiring);
       }
     } catch (ex) {
       console.error(ex);

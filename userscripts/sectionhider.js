@@ -43,11 +43,11 @@ var addSectionButton = function(mrow) {
     hideCssCode = hideTemplate_.replace(new RegExp("MROWID", 'g'), rowContainerId);
 
     var mrowName = "";
-    var $spans = $(".rowTitle span", $mrow);
+    var $spans = $(".rowTitle .row-header-title", $mrow);
     if ($spans)
       mrowName = $spans[0].innerHTML.trim();
     else {
-      console.log("rowTitle span not found");
+      console.log("rowTitle not found");
       return false;
     }
 

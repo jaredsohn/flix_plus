@@ -9,7 +9,8 @@
 
 var moveToTop = function(elem) {
 	try {
-		var attrType = elem.getAttribute("type") || "";
+		var attrType = elem.getAttribute("data-list-context") || "";
+		console.log("attrType = " + attrType);
 		if (attrType === "continueWatching") {
 			var $firstRow = $(".lolomoRow:first")
 			var $gp = $(elem).parent().parent();
@@ -21,7 +22,7 @@ var moveToTop = function(elem) {
 			}
 		} else if (attrType === "queue") {
 			var $firstRow = $(".lolomoRow:first")
-			var $continueWatchingRow = $(".lolomoRow span[type=continueWatching]");
+			var $continueWatchingRow = $("[data-list-context=continueWatching]");
 			var $targetRow = ($firstRow[0] === $continueWatchingRow.parent().parent()[0])
 		  	? $(".lolomoRow:nth-child(3)")
 		  	: $firstRow;
@@ -40,7 +41,7 @@ var moveToTop = function(elem) {
 };
 
 // Move Continue Watching and My List to top
-fplib.addMutationAndNow("detect rowTitle for My List to Top", {"element": ".rowTitle"}, function(summary) {
+fplib.addMutationAndNow("detect rowTitle for My List to Top", {"element": ".lolomoRow"}, function(summary) {
 	summary.added.forEach(function(elem) {
 	  moveToTop(elem);
 	});
