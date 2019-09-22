@@ -1,3 +1,5 @@
+Update: This project does not work any more; I no longer have time to maintain it as Chrome and Netflix make changes which break functionality. --Jared
+
 flixplus
 =======
 
